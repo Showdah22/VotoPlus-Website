@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voto+ · Conferma cancellazione</title>
+<style>
+  :root { --bg:#0a0a0f; --card:#15171c; --border:#2a2d33; --text:#fff; --muted:#aaa; --red:#ef4444; --green:#22c55e; --purple:#a855f7; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .card { background:var(--card); border:1px solid var(--border); padding:32px; border-radius:22px; max-width:480px; width:100%; text-align:center; }
+  .icon { font-size:48px; margin-bottom:14px; }
+  h1 { font-size:24px; margin:0 0 12px 0; }
+  p { color:#d4d4d8; line-height:1.6; font-size:15px; }
+  button { background:var(--red); color:#fff; border:none; padding:14px 24px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer; width:100%; margin-top:18px; }
+  button.secondary { background:transparent; border:1px solid var(--border); color:#bbb; margin-top:8px; }
+  button:disabled { opacity:0.5; }
+  .ok { color:var(--green); }
+  .err { color:#fca5a5; }
+  .footer { margin-top:24px; color:var(--muted); font-size:12px; }
+  .footer a { color:var(--purple); }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="icon">⚠️</div>
+  <h1>Confermi la cancellazione?</h1>
+  <p id="desc">Sei a un passo dalla cancellazione definitiva del tuo account Voto+. Tutti i tuoi dati (riassunti, voti, interrogazioni, eventi calendario, piano premium) verranno eliminati per sempre.</p>
+  <button id="confirmBtn">Sì, cancella definitivamente</button>
+  <button class="secondary" onclick="window.location.href='./'">Annulla</button>
+  <div class="footer">© 2026 Voto+ · <a href="./privacy.html">Privacy</a></div>
+</div>
+
+<script>
+(function(){
+  const card = document.getElementById('card');
+  const btn = document.getElementById('confirmBtn');
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const API_BASE = window.VOTOPLUS_API_BASE || 'https://api.votoplus.it/api';
+
+  if (!token) {
+    card.innerHTML = '<div class="icon">❌</div><h1>Link non valido</h1><p>Manca il token di conferma. Richiedine uno nuovo da <a href="./delete-account.html" style="color:#a855f7;">delete-account</a>.</p>';
+    return;
+  }
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    btn.textContent = 'Cancellazione in corso…';
+    try {
+      const r = await fetch(API_BASE + '/auth/confirm-deletion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        card.innerHTML = '<div class="icon">✅</div><h1 class="ok">Account eliminato</h1><p>Il tuo account <b>' + (data.email || '') + '</b> e tutti i dati associati sono stati cancellati definitivamente.</p><p style="color:#999;font-size:13px;">Grazie per aver usato Voto+. Se cambi idea, puoi sempre creare un nuovo account.</p><div class="footer"><a href="./">← Torna al sito</a></div>';
+      } else {
+        const data = await r.json().catch(() => ({}));
+        card.innerHTML = '<div class="icon">❌</div><h1 class="err">Errore</h1><p>' + (data.detail || 'Token non valido o scaduto.') + '</p><button onclick="window.location.href=\'./delete-account.html\'" style="background:#a855f7;color:#fff;border:none;padding:12px 20px;border-radius:10px;font-weight:700;margin-top:14px;cursor:pointer;">Richiedi nuovo link</button>';
+      }
+    } catch (err) {
+      card.innerHTML = '<div class="icon">⚡</div><h1 class="err">Errore di rete</h1><p>Impossibile contattare il server. Riprova fra qualche istante.</p>';
+    }
+  });
+})();
+</script>
+</body>
+</html>
