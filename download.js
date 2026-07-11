@@ -107,14 +107,53 @@
     }
   }
 
-  fetch(API_URL, { headers: { Accept: "application/vnd.github+json" } })
+  // Bloccante finché non abbiamo il vero URL: se l'utente clicca prima che
+  // download.js abbia risposto (Safari ITP, adblock, connessione lenta),
+  // NON deve finire su una pagina GitHub 404 — meglio bloccarlo e mostrare
+  // un messaggio di "attendere qualche istante".
+  function guardClick(btn) {
+    if (!btn) return;
+    btn.addEventListener("click", function (e) {
+      var href = btn.getAttribute("href") || "";
+      if (!href || href === "#" || href.length < 5) {
+        e.preventDefault();
+        alert("Attendi qualche istante mentre carichiamo il link ufficiale, poi riprova. Se il problema persiste ricarica la pagina.");
+      }
+    });
+  }
+  guardClick(winBtn);
+  guardClick(macBtn);
+
+  // Imposta lo stato iniziale "Sto controllando…" per feedback visivo
+  if (winBtn && winBtn.getAttribute("href") === "#") {
+    winBtn.textContent = "Controllo aggiornamenti…";
+  }
+  if (macBtn && macBtn.getAttribute("href") === "#") {
+    macBtn.textContent = "Controllo aggiornamenti…";
+  }
+
+  function restoreLabels() {
+    if (winBtn) winBtn.textContent = "Scarica per Windows";
+    if (macBtn) macBtn.textContent = "Scarica per Mac";
+  }
+
+  fetch(API_URL, {
+    headers: { Accept: "application/vnd.github+json" },
+    // Cache buster: forza sempre refresh, così se una release è appena stata
+    // pubblicata l'utente non vede quella vecchia dalla cache HTTP.
+    cache: "no-store",
+  })
     .then(function (res) {
       if (!res.ok) throw new Error("HTTP " + res.status);
       return res.json();
     })
-    .then(updateButtons)
+    .then(function (releases) {
+      updateButtons(releases);
+      restoreLabels();
+    })
     .catch(function (err) {
       console.warn("[voto+] Releases fetch failed, using fallback:", err);
       setFallback();
+      restoreLabels();
     });
 })();

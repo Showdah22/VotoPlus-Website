@@ -212,12 +212,16 @@ function SvgMindmap({ root }: { root: MapNode }) {
   const { positions, width, height } = computeLayout(root);
   const rootColor = COLOR_MAP[root.color || ""] || colors.purple;
   return (
-    <div style={{ overflowX: "auto", padding: "4px 0" }}>
+    <div style={{ width: "100%", overflow: "hidden", padding: "4px 0" }}>
       <svg
-        width={width}
-        height={height}
         viewBox={`0 0 ${width} ${height}`}
-        style={{ display: "block", minWidth: "100%" }}
+        preserveAspectRatio="xMidYMid meet"
+        style={{
+          display: "block",
+          width: "100%",
+          height: "auto",
+          maxHeight: "70vh",
+        }}
       >
         <defs>
           <marker
