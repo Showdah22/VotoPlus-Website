@@ -175,21 +175,18 @@ export class OralRealtimeClient {
     this.dc = this.pc.createDataChannel("oai-events");
     this.dc.addEventListener("open", () => {
       this.cbs.onConnected?.();
-      // Il PROF apre la conversazione: senza questo evento il modello
-      // resta muto ad aspettare l'utente. Con `response.create` lo
-      // forziamo a produrre subito il primo turno (saluto + prima domanda).
-      // Nota: il turn_detection lato server continua a gestire i turni
-      // successivi automaticamente.
+      // Il PROF apre la conversazione: senza un response.create esplicito
+      // il modello resta muto ad aspettare l'utente. Con `response.create`
+      // (SENZA override di instructions) lo forziamo a produrre subito il
+      // primo turno usando LE INSTRUCTIONS DELLA SESSIONE (nome studente,
+      // materia, argomento, severità). Il turn_detection lato server
+      // continua a gestire i turni successivi automaticamente.
+      //
+      // ⚠️ NON passare `instructions` qui dentro: sostituirebbe (per questa
+      // response) tutto il context della sessione → il modello inventerebbe
+      // nome e argomento (bug 0.6.3-0.6.5).
       try {
-        this.dc?.send(
-          JSON.stringify({
-            type: "response.create",
-            response: {
-              instructions:
-                "Apri tu la conversazione ORA. Saluta brevemente lo studente per nome (una frase, tono coerente con la severità impostata) e poi fai SUBITO la prima domanda sull'argomento assegnato. Non aspettare che parli l'utente: sei tu che apri.",
-            },
-          }),
-        );
+        this.dc?.send(JSON.stringify({ type: "response.create" }));
       } catch (e) {
         console.warn("[realtime] failed to send initial response.create", e);
       }

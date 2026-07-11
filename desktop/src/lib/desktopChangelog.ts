@@ -16,6 +16,15 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.6.6",
+    date: "2026-07-11",
+    title: "Bug fix critico: il prof usa argomento e nome corretti",
+    emoji: "🎯",
+    highlights: [
+      { icon: "target", title: "Il prof rispetta materia, argomento e tuo nome", body: "Bug della 0.6.3-0.6.5: quando il prof apriva la conversazione, chiamava lo studente con nome inventato (es. 'Luca' invece del tuo) e faceva domande di tutt'altra materia. Root cause: l'evento response.create iniziale passava override delle instructions che sostituivano il context della sessione. Fix: response.create senza instructions → usa quelle della sessione (nome, materia, argomento, severità)." },
+    ],
+  },
+  {
     version: "0.6.5",
     date: "2026-07-11",
     title: "Fix aggiornamenti in-app su macOS",
