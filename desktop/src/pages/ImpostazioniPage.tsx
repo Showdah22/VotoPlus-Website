@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, Download, RefreshCw, AlertCircle, ExternalLink, Headphones } from "lucide-react";
+import { CheckCircle2, Download, RefreshCw, AlertCircle, ExternalLink, Headphones, Crown } from "lucide-react";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { useUpdater } from "../store/updater";
 import { AudioSettings } from "../components/AudioSettings";
+import { PianiSection } from "../components/PianiSection";
 
 export function ImpostazioniPage() {
   const user = useAuth((s) => s.user);
@@ -77,6 +78,22 @@ export function ImpostazioniPage() {
           }}>Audio</h2>
         </div>
         <AudioSettings />
+      </section>
+
+      {/* Piani &amp; utilizzo — parity mobile */}
+      <section style={sectionStyle}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+          <Crown size={16} color={colors.purple} />
+          <h2 style={{
+            margin: 0,
+            fontSize: 15,
+            fontWeight: 800,
+            textTransform: "uppercase",
+            letterSpacing: 0.8,
+            color: colors.textMuted,
+          }}>Piani &amp; utilizzo</h2>
+        </div>
+        <PianiSection />
       </section>
 
       {/* Aggiornamenti — la pièce de résistance */}

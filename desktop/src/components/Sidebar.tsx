@@ -18,12 +18,12 @@ import {
   Trophy,
   Sparkles,
   GitBranch,
-  Command,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
+import { useModKey } from "../lib/platform";
 
 // La Sidebar del desktop replica l'esperienza iPad landscape:
 // profilo grande + streak + azioni rapide + navigazione + logout.
@@ -33,6 +33,7 @@ export function Sidebar() {
   const token = useAuth((s) => s.token);
   const logout = useAuth((s) => s.logout);
   const navigate = useNavigate();
+  const { modSymbol, isMac } = useModKey();
 
   const [streak, setStreak] = useState<number | null>(null);
 
@@ -173,7 +174,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Suggerimento ⌘K sopra il footer di logout */}
+      {/* Suggerimento ricerca rapida: ⌘K su mac, Ctrl+K altrove */}
       <div style={{
         padding: "8px 14px",
         display: "flex",
@@ -184,8 +185,20 @@ export function Sidebar() {
         color: colors.textMuted,
         fontWeight: 700,
       }}>
-        <Command size={10} />
-        <span>K</span>
+        <span style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 3,
+          padding: "2px 6px",
+          borderRadius: 4,
+          background: colors.bgGlass,
+          border: `1px solid ${colors.border}`,
+          fontFamily: isMac ? "inherit" : "inherit",
+          fontWeight: 900,
+          fontSize: 10,
+        }}>
+          {modSymbol}{!isMac && "+"}K
+        </span>
         <span style={{ marginLeft: 4 }}>ricerca rapida</span>
       </div>
 

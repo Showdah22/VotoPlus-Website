@@ -25,6 +25,9 @@ import {
   Calendar,
   Clock,
   Monitor,
+  Link as LinkIcon,
+  Video,
+  FileType2,
   type LucideIcon,
 } from "lucide-react";
 import { colors, radius } from "../theme";

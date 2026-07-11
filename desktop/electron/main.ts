@@ -194,13 +194,30 @@ ipcMain.handle("external:open", (_e, url: string) => {
 });
 
 // ===================== APP LIFECYCLE =====================
-app.whenReady().then(() => {
-  createWindow();
-
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+// Single-instance lock — impedisce di aprire più finestre di Voto+ Desktop
+// contemporaneamente. Se una seconda istanza viene lanciata (es. l'utente
+// clicca di nuovo sull'icona), quit immediato e focus alla finestra
+// esistente (portata in primo piano e de-minimizzata).
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
   });
-});
+
+  app.whenReady().then(() => {
+    createWindow();
+
+    app.on("activate", () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  });
+}
 
 app.on("window-all-closed", () => {
   stopPeriodicUpdateCheck();

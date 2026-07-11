@@ -174,7 +174,15 @@ function AddEventModal({
     setSaving(true);
     setErr(null);
     try {
-      await api.eventsAdd({ type, subject, title: title || undefined, date }, token);
+      // Backend accetta solo type in {"verifica","interrogazione","altro"} → mappiamo "esame" → "altro"
+      // (l'UI mostra comunque "Esame" grazie a labelForType e all'icona giusta).
+      const backendType = type === "esame" ? "altro" : type;
+      // `title` è OBBLIGATORIO sul backend → se l'utente lo lascia vuoto,
+      // auto-generiamo un titolo umano leggibile.
+      const autoTitle =
+        title.trim() ||
+        `${type === "verifica" ? "Verifica" : type === "interrogazione" ? "Interrogazione" : "Esame"} di ${subject}`;
+      await api.eventsAdd({ type: backendType, subject, title: autoTitle, date }, token);
       onAdded();
     } catch (e: any) {
       setErr(e?.message ?? "Errore nel salvataggio");

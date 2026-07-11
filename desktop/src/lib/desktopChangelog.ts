@@ -16,6 +16,22 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.5.0",
+    date: "2026-07-11",
+    title: "Single instance + Scanner multi-sorgente + Piani/utilizzi",
+    emoji: "🔒",
+    highlights: [
+      { icon: "layout", title: "Un'unica finestra alla volta", body: "Voto+ Desktop non può più essere aperto più volte contemporaneamente. Se provi a lanciarlo mentre è già in esecuzione, viene messo in primo piano quello esistente." },
+      { icon: "command", title: "Shortcut nativi per OS", body: "Il suggerimento della ricerca rapida ora mostra ⌘K su macOS e Ctrl+K su Windows/Linux, coerente con le convenzioni del sistema operativo." },
+      { icon: "trophy", title: "Utilizzi e Piani in Impostazioni", body: "Nuova sezione 'Piani & utilizzo': vedi le tue quote mensili con barre di progresso, i piani disponibili (Free, Premium, Family, Annuale, Maturità) e il tuo piano attivo evidenziato. Gli acquisti restano sul mobile finché non integriamo Stripe sul desktop." },
+      { icon: "calendar", title: "Fix salvataggio eventi calendario", body: "Correzione errore HTTP 422 quando creavi un nuovo evento: il tipo 'Esame' ora viene mappato correttamente e il titolo viene generato automaticamente se lo lasci vuoto. Messaggi di errore più leggibili in tutta l'app." },
+      { icon: "link", title: "Scanner da URL", body: "Nella pagina Scannerizza & Riassumi ora puoi incollare l'URL di una pagina web e generare il riassunto AI del suo contenuto (senza ads/menu/footer)." },
+      { icon: "video", title: "Scanner da YouTube", body: "Incolla l'URL di un video YouTube: l'app estrae la trascrizione automatica e ne genera il riassunto." },
+      { icon: "file-type-2", title: "Scanner da PDF", body: "Trascina un PDF (max 12 MB, 25 pagine) e ottieni il riassunto AI dell'intero documento." },
+      { icon: "layers", title: "Scanner riprogettato", body: "Nuove tab per scegliere la sorgente (Immagine · Testo · Sito web · YouTube · PDF), preview dinamiche del contenuto estratto." },
+    ],
+  },
+  {
     version: "0.4.0",
     date: "2026-07-11",
     title: "Splash Discord-style + audio settings + math parity mobile",

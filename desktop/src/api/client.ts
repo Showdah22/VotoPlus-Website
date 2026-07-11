@@ -42,9 +42,22 @@ async function request<T = unknown>(path: string, opts: RequestOpts = {}): Promi
   const data: unknown = text ? safeParse(text) : null;
 
   if (!res.ok) {
-    const msg =
-      (isRecord(data) && typeof data.detail === "string" && data.detail) ||
-      `HTTP ${res.status}`;
+    // FastAPI 422 (ValidationError) mette i dettagli in data.detail come array
+    // di oggetti { loc, msg, type }. Estraiamo il primo msg per un errore
+    // parlante ("field required: title") invece di un opaco "HTTP 422".
+    let msg = `HTTP ${res.status}`;
+    if (isRecord(data)) {
+      if (typeof data.detail === "string") {
+        msg = data.detail;
+      } else if (Array.isArray(data.detail) && data.detail.length > 0) {
+        const first = data.detail[0] as any;
+        const field = Array.isArray(first?.loc) ? first.loc.slice(-1)[0] : null;
+        const em = first?.msg || "campo non valido";
+        msg = field ? `${em} (${field})` : em;
+      } else if (typeof data.message === "string") {
+        msg = data.message;
+      }
+    }
     throw new ApiError(res.status, msg, typeof data === "string" ? data : undefined);
   }
   return data as T;
@@ -199,6 +212,24 @@ export const api = {
   mindmapsList: (token: string) => request<any[]>("/api/mindmaps", { token }),
   mindmapGet: (id: string, token: string) =>
     request<any>(`/api/mindmap/${encodeURIComponent(id)}`, { token }),
+
+  // Study extract (URL / YouTube / PDF text)
+  extractUrl: (body: { url: string }, token: string) =>
+    request<{ text: string; source: string; title: string; truncated: boolean }>(
+      "/api/study/extract/url", { method: "POST", body, token },
+    ),
+  extractYoutube: (body: { url: string; language?: string }, token: string) =>
+    request<{ text: string; source: string; title: string; truncated: boolean }>(
+      "/api/study/extract/youtube", { method: "POST", body, token },
+    ),
+  extractPdf: (body: { pdf_base64: string; max_pages?: number }, token: string) =>
+    request<{ text: string; pages: number; truncated: boolean }>(
+      "/api/study/pdf-extract", { method: "POST", body, token },
+    ),
+
+  // Quota & billing (readonly su desktop, checkout gestito su mobile finché Stripe non è wired)
+  meQuota: (token: string) => request<any>("/api/me/quota", { token }),
+  billingProducts: (token: string) => request<any>("/api/billing/products", { token }),
 };
 
 export const backendUrl = BASE_URL;

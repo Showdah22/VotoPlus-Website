@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Command, ArrowRight } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { colors, radius } from "../theme";
+import { useModKey } from "../lib/platform";
 
 type CmdItem = {
   id: string;
@@ -36,6 +37,7 @@ export function CommandPalette() {
   const [idx, setIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { modSymbol, isMac } = useModKey();
 
   // Shortcut globale: Cmd/Ctrl + K
   useEffect(() => {
@@ -143,7 +145,7 @@ export function CommandPalette() {
             background: colors.bg, border: `1px solid ${colors.border}`,
             fontSize: 10, fontWeight: 800, color: colors.textMuted,
           }}>
-            <Command size={10} /> K
+            {modSymbol}{!isMac && "+"}K
           </span>
         </div>
 
