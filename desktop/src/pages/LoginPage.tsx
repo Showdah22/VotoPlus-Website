@@ -141,7 +141,7 @@ export function LoginPage() {
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              window.voto?.openExternal("https://voto-plus.app");
+              window.voto?.openExternal("https://votoplus.it");
             }}
             style={{ color: colors.purple, fontWeight: 700 }}
           >

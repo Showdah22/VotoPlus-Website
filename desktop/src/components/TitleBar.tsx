@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Minus, Square, X, Copy } from "lucide-react";
 import { colors } from "../theme";
+// Import diretto dell'icona: Vite la hash-a e la referenzia con path relativo
+// che funziona sia in dev che in produzione (file:// protocol di Electron).
+import votoIcon from "../assets/voto-icon.png";
 
 // TitleBar custom — solo su Windows (frameless completo). Su macOS mostriamo
 // solo il logo/titolo perché i traffic lights sono nativi (titleBarStyle: hiddenInset).
@@ -32,13 +35,13 @@ export function TitleBar() {
       {/* Brand */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <img
-          src="/voto-icon.png"
+          src={votoIcon}
           alt="Voto+"
           style={{
             width: 22,
             height: 22,
             borderRadius: 6,
-            objectFit: "cover",
+            objectFit: "contain",
           }}
         />
         <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: 0.3 }}>

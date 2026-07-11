@@ -6,6 +6,11 @@ import path from "node:path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // base: "./" è FONDAMENTALE per Electron in produzione: senza questo Vite
+  // genera path assoluti (es. "/assets/xxx.js") che Electron interpreta come
+  // root del filesystem invece che root del bundle → schermata bianca / asset
+  // non caricati / icone rotte.
+  base: "./",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

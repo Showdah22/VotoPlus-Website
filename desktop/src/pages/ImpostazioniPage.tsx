@@ -125,7 +125,7 @@ export function ImpostazioniPage() {
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              window.voto?.openExternal("https://voto-plus.app/desktop");
+              window.voto?.openExternal("https://votoplus.it/desktop.html");
             }}
             style={btnGhost}
           >
@@ -141,10 +141,11 @@ export function ImpostazioniPage() {
       {/* Info */}
       <section style={sectionStyle}>
         <SectionHeader title="Informazioni" />
-        <LinkRow label="Sito web Voto+" href="https://voto-plus.app" />
-        <LinkRow label="Privacy Policy" href="https://voto-plus.app/privacy" />
-        <LinkRow label="Termini di servizio" href="https://voto-plus.app/terms" />
-        <LinkRow label="Supporto" href="mailto:support@voto-plus.app" />
+        <LinkRow label="Sito web Voto+" href="https://votoplus.it" />
+        <LinkRow label="Privacy Policy" href="https://votoplus.it/privacy.html" />
+        <LinkRow label="Termini di servizio" href="https://votoplus.it/terms.html" />
+        <LinkRow label="Supporto & FAQ" href="https://votoplus.it/support.html" />
+        <LinkRow label="Contatti" href="mailto:info@votoplus.it" />
       </section>
     </div>
   );
