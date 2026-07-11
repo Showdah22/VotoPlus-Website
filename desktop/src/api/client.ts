@@ -139,6 +139,66 @@ export const api = {
     if (installed) params.set("installed", installed);
     return request<{ releases: any[] }>(`/api/app/changelog?${params.toString()}`);
   },
+
+  // ===== Sprint 3 =====
+
+  // Interrogazione orale (versione testuale desktop)
+  oralStart: (
+    body: {
+      subject: string;
+      severity?: "facile" | "medio" | "severo" | "spietato";
+      topic?: string;
+      mode?: "standard" | "lampo";
+    },
+    token: string,
+  ) => request<any>("/api/oral/start", { method: "POST", body, token }),
+  oralEvaluate: (
+    body: {
+      attempt_id: string;
+      subject: string;
+      severity: string;
+      question: string;
+      answer: string;
+      difficulty?: string;
+    },
+    token: string,
+  ) => request<any>("/api/oral/evaluate", { method: "POST", body, token }),
+  oralHistory: (token: string) => request<any[]>("/api/oral/history", { token }),
+  oralStats: (token: string) => request<any>("/api/oral/stats", { token }),
+
+  // Tema (essay)
+  essayPrompt: (
+    body: { topic: string; type?: string; length?: string },
+    token: string,
+  ) => request<any>("/api/italian/essay-prompt", { method: "POST", body, token }),
+  essayHistory: (token: string) => request<any[]>("/api/italian/essays", { token }),
+
+  // Compito in classe (classwork)
+  classworkStart: (
+    body: {
+      subject: string;
+      n_items?: number;
+      difficulty?: "base" | "standard" | "avanzato" | "maturita";
+      duration_min?: number;
+    },
+    token: string,
+  ) => request<any>("/api/classwork/start", { method: "POST", body, token }),
+  classworkSubmit: (
+    body: { classwork_id: string; answers: Array<{ index: number; answer: string }> },
+    token: string,
+  ) => request<any>("/api/classwork/submit", { method: "POST", body, token }),
+  classworkHistory: (token: string) => request<any[]>("/api/classwork/history", { token }),
+  classworkGet: (id: string, token: string) =>
+    request<any>(`/api/classwork/${encodeURIComponent(id)}`, { token }),
+
+  // Mindmap
+  mindmapCreate: (
+    body: { title?: string; subject?: string; text?: string; depth?: "small" | "medium" | "big"; source_material_id?: string },
+    token: string,
+  ) => request<any>("/api/study/mindmap", { method: "POST", body, token }),
+  mindmapsList: (token: string) => request<any[]>("/api/mindmaps", { token }),
+  mindmapGet: (id: string, token: string) =>
+    request<any>(`/api/mindmap/${encodeURIComponent(id)}`, { token }),
 };
 
 export const backendUrl = BASE_URL;

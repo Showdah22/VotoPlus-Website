@@ -17,6 +17,8 @@ import {
   BarChart3,
   Trophy,
   Sparkles,
+  GitBranch,
+  Command,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { colors, radius } from "../theme";
@@ -166,8 +168,25 @@ export function Sidebar() {
             <QuickAction icon={Timer} label="Compito" hint="Esercizi cronometrati" color={colors.orange} to="/compito" />
             <QuickAction icon={Book} label="Vocabolario AI" hint="Significato ed esempi" color={colors.purple} to="/vocabolario" />
             <QuickAction icon={Layers} label="Flashcard" hint="Ripasso rapido" color={colors.pink} to="/flashcards" />
+            <QuickAction icon={GitBranch} label="Mappa concettuale" hint="Genera mappa gerarchica" color={colors.blue} to="/mindmap" />
           </div>
         </div>
+      </div>
+
+      {/* Suggerimento ⌘K sopra il footer di logout */}
+      <div style={{
+        padding: "8px 14px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        fontSize: 10.5,
+        color: colors.textMuted,
+        fontWeight: 700,
+      }}>
+        <Command size={10} />
+        <span>K</span>
+        <span style={{ marginLeft: 4 }}>ricerca rapida</span>
       </div>
 
       {/* Logout footer */}

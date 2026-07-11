@@ -1,8 +1,56 @@
 import { useEffect, useState } from "react";
-import { Trophy, Lock, CheckCircle2 } from "lucide-react";
+import {
+  Trophy,
+  Lock,
+  CheckCircle2,
+  FileText,
+  Library,
+  Book,
+  Calculator,
+  BarChart3,
+  Rocket,
+  Mic,
+  Music,
+  Skull,
+  Star,
+  Award,
+  Flame,
+  Compass,
+  PenLine,
+  Calendar,
+  AlarmClock,
+  type LucideIcon,
+} from "lucide-react";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
+
+// Mappa nome Ionicon (backend) → componente Lucide (desktop).
+// Il backend usa Ionicons perché il mobile è nativo. Su desktop convertiamo
+// a Lucide per coerenza visiva con il resto della UI.
+const ICON_MAP: Record<string, LucideIcon> = {
+  "document-text": FileText,
+  library: Library,
+  book: Book,
+  calculator: Calculator,
+  "stats-chart": BarChart3,
+  rocket: Rocket,
+  mic: Mic,
+  "musical-notes": Music,
+  skull: Skull,
+  trophy: Trophy,
+  star: Star,
+  ribbon: Award,
+  flame: Flame,
+  compass: Compass,
+  create: PenLine,
+  calendar: Calendar,
+  alarm: AlarmClock,
+};
+
+function iconFor(name: string): LucideIcon {
+  return ICON_MAP[name] || Trophy;
+}
 
 type Achievement = {
   id: string;
@@ -110,6 +158,7 @@ export function AchievementsPage() {
 
 function AchievementCard({ a }: { a: Achievement }) {
   const tint = a.unlocked ? a.color : colors.textMuted;
+  const IconComp = iconFor(a.icon);
   return (
     <div
       style={{
@@ -129,9 +178,8 @@ function AchievementCard({ a }: { a: Achievement }) {
           width: 40, height: 40, borderRadius: 12,
           background: `${tint}1f`, border: `1px solid ${tint}55`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 18,
         }}>
-          {a.icon || "🏆"}
+          <IconComp size={20} color={tint} />
         </div>
         {a.unlocked ? (
           <CheckCircle2 size={16} color={a.color} />

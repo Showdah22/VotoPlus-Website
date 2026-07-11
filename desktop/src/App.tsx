@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { TitleBar } from "./components/TitleBar";
 import { AppShell } from "./components/AppShell";
 import { UpdateToast } from "./components/UpdateToast";
+import { CommandPalette } from "./components/CommandPalette";
 import { LoginPage } from "./pages/LoginPage";
 import { HomePage } from "./pages/HomePage";
 import { ScannerPage } from "./pages/ScannerPage";
@@ -16,7 +17,10 @@ import { FlashcardsPage } from "./pages/FlashcardsPage";
 import { VocabolarioPage } from "./pages/VocabolarioPage";
 import { AchievementsPage } from "./pages/AchievementsPage";
 import { NovitaPage } from "./pages/NovitaPage";
-import { ComingSoonPage } from "./pages/ComingSoonPage";
+import { OralePage } from "./pages/OralePage";
+import { TemaPage } from "./pages/TemaPage";
+import { CompitoPage } from "./pages/CompitoPage";
+import { MindmapPage } from "./pages/MindmapPage";
 import { useAuth } from "./store/auth";
 import { subscribeUpdaterEvents } from "./store/updater";
 import { colors } from "./theme";
@@ -53,6 +57,7 @@ export default function App() {
       <TitleBar />
       <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
         <HashRouter>
+          <CommandPalette />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route
@@ -75,39 +80,10 @@ export default function App() {
               <Route path="vocabolario" element={<VocabolarioPage />} />
               <Route path="traguardi" element={<AchievementsPage />} />
               <Route path="novita" element={<NovitaPage />} />
-              <Route
-                path="orale"
-                element={
-                  <ComingSoonPage
-                    title="Interrogazione orale"
-                    subtitle="Allenati all'orale con Dante"
-                    body="La modalità Interrogazione con AI (microfono + risposta vocale) sarà disponibile prossimamente sull'app desktop. Per ora la trovi già completa su mobile."
-                    tint="green"
-                  />
-                }
-              />
-              <Route
-                path="tema"
-                element={
-                  <ComingSoonPage
-                    title="Tema"
-                    subtitle="Traccia e revisione tema/saggio"
-                    body="Il generatore di tracce e la revisione AI dei temi arriveranno con la prossima release desktop. Su mobile è già utilizzabile."
-                    tint="cyan"
-                  />
-                }
-              />
-              <Route
-                path="compito"
-                element={
-                  <ComingSoonPage
-                    title="Compito cronometrato"
-                    subtitle="Esercizi a tempo per allenare la resa sotto pressione"
-                    body="I compiti cronometrati arriveranno prossimamente sul desktop. Nel frattempo puoi usare la stessa funzione dall'app mobile."
-                    tint="orange"
-                  />
-                }
-              />
+              <Route path="orale" element={<OralePage />} />
+              <Route path="tema" element={<TemaPage />} />
+              <Route path="compito" element={<CompitoPage />} />
+              <Route path="mindmap" element={<MindmapPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
