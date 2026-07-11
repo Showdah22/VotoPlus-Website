@@ -16,6 +16,16 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.6.4",
+    date: "2026-07-11",
+    title: "Fix permesso microfono macOS",
+    emoji: "🍎",
+    highlights: [
+      { icon: "mic", title: "Niente più popup ripetuti del microfono su macOS", body: "Aggiunti NSMicrophoneUsageDescription nell'Info.plist, entitlement com.apple.security.device.audio-input e setPermissionCheckHandler nel main process. Ora macOS chiede il permesso UNA sola volta all'avvio e lo ricorda per sempre." },
+      { icon: "shield", title: "Hardened Runtime + entitlements", body: "Nuovo file entitlements.mac.plist per l'esecuzione in Hardened Runtime, con permessi di rete, audio input e file utente. Necessario per notarizzazione futura." },
+    ],
+  },
+  {
     version: "0.6.3",
     date: "2026-07-11",
     title: "Il prof apre la conversazione",

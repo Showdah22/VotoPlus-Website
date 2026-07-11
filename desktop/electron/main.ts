@@ -4,7 +4,7 @@
 // - Auto-update via electron-updater (GitHub Releases feed)
 // - Discord-style: check silenzioso all'avvio + notifica toast quando pronto
 
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell, systemPreferences } from "electron";
 import path from "node:path";
 import { autoUpdater } from "electron-updater";
 
@@ -146,13 +146,43 @@ function createWindow() {
   // Permessi Chromium: auto-grant microfono per l'interrogazione vocale.
   // Electron di default nega tutte le permission requests da renderer;
   // qui autorizziamo esplicitamente solo mic/audioCapture.
+  //
+  // ⚠️ MACOS: setPermissionRequestHandler NON basta. Chromium chiede il
+  // permesso a Chromium (che noi diciamo "ok"), ma poi il *sistema* macOS
+  // deve dare il consenso via TCC. Servono TUTTI questi elementi combinati:
+  //  1. NSMicrophoneUsageDescription in Info.plist (package.json extendInfo) ✓
+  //  2. Entitlement com.apple.security.device.audio-input (entitlements.mac.plist) ✓
+  //  3. setPermissionCheckHandler (sotto) — Chromium controlla il permesso
+  //     ad ogni chiamata getUserMedia; se non risponde, il browser mostra
+  //     ripetutamente il popup di conferma.
+  //  4. askForMediaAccess (all'avvio in whenReady) — chiede UNA volta il
+  //     permesso a macOS e lo memorizza in TCC.db.
   mainWindow.webContents.session.setPermissionRequestHandler((_wc, permission, callback) => {
-    if (permission === "media" || (permission as string) === "audioCapture") {
+    if (
+      permission === "media" ||
+      (permission as string) === "audioCapture" ||
+      (permission as string) === "videoCapture"
+    ) {
       callback(true);
     } else {
       callback(false);
     }
   });
+  // FIX macOS: senza il check handler Chromium chiede il permesso ad OGNI
+  // getUserMedia. Con questo, una volta autorizzato è auto-approvato per
+  // tutta la sessione.
+  mainWindow.webContents.session.setPermissionCheckHandler(
+    (_wc, permission /*, _requestingOrigin, _details */) => {
+      if (
+        permission === "media" ||
+        (permission as string) === "audioCapture" ||
+        (permission as string) === "microphone"
+      ) {
+        return true;
+      }
+      return false;
+    },
+  );
 
   // 3 secondi dopo l'avvio, silent check + avvia il polling periodico
   // (ogni 30 min) così il badge di aggiornamento appare automaticamente
@@ -221,7 +251,24 @@ if (!gotTheLock) {
     }
   });
 
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
+    // MACOS: Chiediamo il permesso microfono al sistema UNA volta all'avvio.
+    // Il consenso viene memorizzato in TCC.db così le successive
+    // getUserMedia non triggerano nuove richieste. `askForMediaAccess`
+    // è no-op su Windows/Linux (ritorna Promise<true>).
+    if (process.platform === "darwin") {
+      try {
+        const currentStatus = systemPreferences.getMediaAccessStatus("microphone");
+        if (currentStatus !== "granted") {
+          // Mostra il popup di sistema; se già negato, questa chiamata è no-op
+          // e l'utente dovrà abilitare manualmente da Impostazioni Sistema.
+          await systemPreferences.askForMediaAccess("microphone");
+        }
+      } catch (e) {
+        console.warn("[main] askForMediaAccess failed", e);
+      }
+    }
+
     createWindow();
 
     app.on("activate", () => {
