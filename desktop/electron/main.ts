@@ -77,6 +77,29 @@ async function silentStartupCheck() {
   }
 }
 
+// Periodic auto-check: ogni 30 minuti l'app cerca aggiornamenti in background.
+// Se ne trova uno, il badge nella titlebar appare automaticamente senza
+// bisogno che l'utente vada in Impostazioni.
+const AUTO_CHECK_INTERVAL_MS = 30 * 60 * 1000;
+let periodicTimer: NodeJS.Timeout | null = null;
+function startPeriodicUpdateCheck() {
+  if (VITE_DEV_SERVER_URL) return; // skip in dev
+  if (periodicTimer) return;
+  periodicTimer = setInterval(async () => {
+    try {
+      await autoUpdater.checkForUpdates();
+    } catch (err) {
+      console.warn("[updater] periodic check failed:", err);
+    }
+  }, AUTO_CHECK_INTERVAL_MS);
+}
+function stopPeriodicUpdateCheck() {
+  if (periodicTimer) {
+    clearInterval(periodicTimer);
+    periodicTimer = null;
+  }
+}
+
 // ===================== WINDOW =====================
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -120,8 +143,11 @@ function createWindow() {
 
   wireUpdaterEvents(mainWindow);
 
-  // 3 secondi dopo l'avvio, silent check.
+  // 3 secondi dopo l'avvio, silent check + avvia il polling periodico
+  // (ogni 30 min) così il badge di aggiornamento appare automaticamente
+  // anche durante l'uso, non solo all'avvio.
   setTimeout(silentStartupCheck, 3000);
+  startPeriodicUpdateCheck();
 }
 
 // ===================== IPC HANDLERS =====================
@@ -177,5 +203,6 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
+  stopPeriodicUpdateCheck();
   if (process.platform !== "darwin") app.quit();
 });

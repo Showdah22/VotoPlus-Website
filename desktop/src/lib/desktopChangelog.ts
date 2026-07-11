@@ -1,0 +1,110 @@
+/**
+ * Cronologia release DESKTOP di Voto+.
+ * NB: intenzionalmente separata dal changelog mobile (backend `/api/app/changelog`)
+ * perché il desktop ha ciclo di rilascio, feature set e installazione autonomi.
+ * Ogni volta che shippi una nuova versione desktop, aggiungi un blocco qui in
+ * cima (versione più recente per prima).
+ */
+export type DesktopHighlight = { icon: string; title: string; body: string };
+export type DesktopRelease = {
+  version: string;
+  date: string;
+  title: string;
+  emoji: string;
+  highlights: DesktopHighlight[];
+};
+
+export const DESKTOP_CHANGELOG: DesktopRelease[] = [
+  {
+    version: "0.4.0",
+    date: "2026-07-11",
+    title: "Splash Discord-style + audio settings + math parity mobile",
+    emoji: "🎧",
+    highlights: [
+      { icon: "sparkles", title: "Splash iniziale", body: "Schermata di avvio Discord-style che controlla gli aggiornamenti prima ancora di aprire l'app. Se ne trova uno, ti chiede se aggiornare subito o continuare." },
+      { icon: "refresh-cw", title: "Auto-check ogni 30 minuti", body: "L'app cerca aggiornamenti in background ogni 30 minuti. Il badge nella titlebar appare automaticamente non appena una nuova versione è disponibile." },
+      { icon: "headphones", title: "Impostazioni audio dedicate", body: "Nuova sezione Audio in Impostazioni: scegli microfono ed uscita audio, prova il mic con la barra di livello in tempo reale stile Discord, testa gli altoparlanti selezionati." },
+      { icon: "calculator", title: "Matematica in parity col mobile", body: "Aggiunta upload immagine (drag-drop + file picker), tastiera formule rapide, suggerimenti quick-start, contatore caratteri, difficoltà Maturità." },
+      { icon: "book-open", title: "Novità desktop-only", body: "Questa pagina ora mostra solo le release desktop, non più quelle mobile: contenuti coerenti con l'app che stai usando." },
+    ],
+  },
+  {
+    version: "0.3.0",
+    date: "2026-07-11",
+    title: "Sprint 3 completo — parity mobile 100% + ⌘K",
+    emoji: "🎓",
+    highlights: [
+      { icon: "mic", title: "Interrogazione", body: "Simula un'interrogazione col professore AI con severità configurabile e valutazione per risposta (voto, punti forti, punti deboli, risposta ideale)." },
+      { icon: "pen-line", title: "Tema", body: "Genera tracce di tema/saggio con struttura, criteri di valutazione e argomenti chiave. Tipologie A/B/C + narrativo/descrittivo." },
+      { icon: "timer", title: "Compito in classe", body: "Compiti cronometrati Premium/Maturità con esercizi math/aperti/scelta multipla e correzione AI dettagliata per singolo esercizio." },
+      { icon: "git-branch", title: "Mappa concettuale", body: "Genera mappe gerarchiche ad albero fino a 3 livelli, con colori dinamici e connettori per organizzare visivamente lo studio." },
+      { icon: "command", title: "Command Palette ⌘K", body: "Premi Cmd/Ctrl+K ovunque per aprire una ricerca rapida tra tutti i comandi e le pagine dell'app." },
+      { icon: "trophy", title: "Fix icone Traguardi", body: "Le icone degli achievement ora si vedono correttamente (in precedenza appariva il testo del nome invece dell'icona)." },
+    ],
+  },
+  {
+    version: "0.2.2",
+    date: "2026-07-11",
+    title: "Dropdown dark ovunque",
+    emoji: "🎨",
+    highlights: [
+      { icon: "chevron-down", title: "Select custom", body: "I menu a tendina (materia, tipologia, ecc.) ora rispettano il dark theme anche su Windows, dove il native <select> mostrava una lista bianca." },
+    ],
+  },
+  {
+    version: "0.2.1",
+    date: "2026-07-11",
+    title: "Home in primo piano + badge aggiornamento in titlebar",
+    emoji: "🏠",
+    highlights: [
+      { icon: "home", title: "Home visibile subito", body: "La sezione Navigazione (con Home in primo piano) ora è sopra le Azioni rapide — nessuno scroll per raggiungere il tasto Home." },
+      { icon: "download", title: "Badge aggiornamento automatico", body: "Un badge cliccabile nella titlebar compare automaticamente quando c'è un update: clicca per scaricare, poi per riavviare e installare." },
+    ],
+  },
+  {
+    version: "0.2.0",
+    date: "2026-07-11",
+    title: "Sprint 2 — Flashcards, Vocabolario AI, Traguardi, Novità",
+    emoji: "🎴",
+    highlights: [
+      { icon: "layers", title: "Flashcards", body: "Crea, filtra per materia e ripassa le tue flashcard con la modalità review a card flip." },
+      { icon: "book", title: "Vocabolario AI", body: "Cerca il significato di parole in 7 lingue (IT/EN/LA/GR/FR/ES/DE) con esempi, sinonimi, contrari, etimologia." },
+      { icon: "trophy", title: "Traguardi", body: "Griglia gamification con progress ring, filtro sbloccati/da sbloccare, gruppi tematici." },
+      { icon: "sparkles", title: "Novità", body: "Cronologia release direttamente in app." },
+      { icon: "layout", title: "Titlebar macOS-style", body: "Titlebar più sottile con logo e titolo centrati, senza più la linea bianca in alto." },
+    ],
+  },
+  {
+    version: "0.1.5",
+    date: "2026-07-11",
+    title: "UI parity mobile + logo trasparente",
+    emoji: "🖼️",
+    highlights: [
+      { icon: "image", title: "Logo Voto+ trasparente", body: "Il logo dell'app usa ora la versione con sfondo trasparente, coerente con il mobile." },
+      { icon: "maximize", title: "Fullscreen elegante", body: "Su monitor ultrawide sidebar + main + right panel restano visivamente connessi senza gap." },
+      { icon: "calculator", title: "Icone materie specifiche", body: "Le materie nella dashboard usano icone dedicate (Matematica=Calculator, Italiano=Languages, ecc.) come sul mobile." },
+    ],
+  },
+  {
+    version: "0.1.4",
+    date: "2026-07-11",
+    title: "Sprint 1 — Scanner, Math, Voti, Calendario",
+    emoji: "🚀",
+    highlights: [
+      { icon: "scan-line", title: "Scannerizza & Riassumi", body: "Foto/PDF/testo → riassunto AI passo passo, integrato col backend Voto+." },
+      { icon: "calculator", title: "Matematica", body: "Esercizi con soluzione step-by-step generata dall'AI." },
+      { icon: "bar-chart-3", title: "Voti", body: "Voti reali + statistiche per materia." },
+      { icon: "calendar", title: "Calendario", body: "Verifiche, interrogazioni ed esami sincronizzati col mobile." },
+      { icon: "clock", title: "Cronologia", body: "Tutti i materiali passati riorganizzati per data." },
+    ],
+  },
+  {
+    version: "0.1.0",
+    date: "2026-07-11",
+    title: "Voto+ Desktop nasce",
+    emoji: "🎉",
+    highlights: [
+      { icon: "monitor", title: "Prima release desktop", body: "Voto+ ora ha un'app dedicata per Windows e macOS. Auto-update via GitHub Releases, dark theme, login JWT che si sincronizza col mobile." },
+    ],
+  },
+];

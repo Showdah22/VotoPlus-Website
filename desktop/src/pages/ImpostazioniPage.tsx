@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, Download, RefreshCw, AlertCircle, ExternalLink } from "lucide-react";
+import { CheckCircle2, Download, RefreshCw, AlertCircle, ExternalLink, Headphones } from "lucide-react";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { useUpdater } from "../store/updater";
+import { AudioSettings } from "../components/AudioSettings";
 
 export function ImpostazioniPage() {
   const user = useAuth((s) => s.user);
@@ -62,10 +63,25 @@ export function ImpostazioniPage() {
         </button>
       </section>
 
+      {/* Audio — entrata/uscita + test microfono */}
+      <section style={sectionStyle}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <Headphones size={16} color={colors.purple} />
+          <h2 style={{
+            margin: 0,
+            fontSize: 15,
+            fontWeight: 800,
+            textTransform: "uppercase",
+            letterSpacing: 0.8,
+            color: colors.textMuted,
+          }}>Audio</h2>
+        </div>
+        <AudioSettings />
+      </section>
+
       {/* Aggiornamenti — la pièce de résistance */}
       <section style={sectionStyle}>
-        <SectionHeader title="Aggiornamenti" />
-        <Row label="Versione installata" value={`v${appVersion}`} />
+        <SectionHeader title="Aggiornamenti" />        <Row label="Versione installata" value={`v${appVersion}`} />
         <Row label="Piattaforma" value={platform || "—"} />
 
         {/* Update status widget */}

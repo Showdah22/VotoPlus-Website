@@ -153,3 +153,24 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     transform: rotate(360deg);
   }
 }
+
+/* Splash screen animations */
+@keyframes voto-splash-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes voto-splash-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.55));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 60px rgba(168, 85, 247, 0.75));
+  }
+}

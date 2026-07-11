@@ -1,9 +1,10 @@
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { TitleBar } from "./components/TitleBar";
 import { AppShell } from "./components/AppShell";
 import { UpdateToast } from "./components/UpdateToast";
 import { CommandPalette } from "./components/CommandPalette";
+import { SplashScreen } from "./components/SplashScreen";
 import { LoginPage } from "./pages/LoginPage";
 import { HomePage } from "./pages/HomePage";
 import { ScannerPage } from "./pages/ScannerPage";
@@ -34,6 +35,7 @@ function Protected({ children }: { children: JSX.Element }) {
 export default function App() {
   const token = useAuth((s) => s.token);
   const refreshUser = useAuth((s) => s.refreshUser);
+  const [splashVisible, setSplashVisible] = useState(true);
 
   useEffect(() => {
     subscribeUpdaterEvents();
@@ -90,6 +92,7 @@ export default function App() {
         </HashRouter>
         <UpdateToast />
       </div>
+      {splashVisible && <SplashScreen onDismiss={() => setSplashVisible(false)} />}
     </div>
   );
 }

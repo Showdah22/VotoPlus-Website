@@ -1,161 +1,209 @@
 import { useEffect, useState } from "react";
-import { Sparkles, ChevronRight } from "lucide-react";
+import {
+  Sparkles,
+  ChevronRight,
+  RefreshCw,
+  Headphones,
+  Calculator,
+  BookOpen,
+  Mic,
+  PenLine,
+  Timer,
+  GitBranch,
+  Command,
+  Trophy,
+  ChevronDown,
+  Home,
+  Download,
+  Layers,
+  Book,
+  Layout,
+  Image as ImageIcon,
+  Maximize,
+  ScanLine,
+  BarChart3,
+  Calendar,
+  Clock,
+  Monitor,
+  type LucideIcon,
+} from "lucide-react";
 import { colors, radius } from "../theme";
-import { api } from "../api/client";
+import { DESKTOP_CHANGELOG, type DesktopRelease, type DesktopHighlight } from "../lib/desktopChangelog";
 
-type Release = {
-  version: string;
-  date?: string;
-  title?: string;
-  highlights?: Array<string | { text?: string; title?: string; body?: string; icon?: string }>;
-  body?: string;
-  emoji?: string;
+// Mappa icon-string → componente Lucide. Le stringhe le decidiamo noi nel
+// file desktopChangelog.ts quindi \u00e8 controllato al 100%.
+const ICON_MAP: Record<string, LucideIcon> = {
+  sparkles: Sparkles,
+  "refresh-cw": RefreshCw,
+  headphones: Headphones,
+  calculator: Calculator,
+  "book-open": BookOpen,
+  mic: Mic,
+  "pen-line": PenLine,
+  timer: Timer,
+  "git-branch": GitBranch,
+  command: Command,
+  trophy: Trophy,
+  "chevron-down": ChevronDown,
+  home: Home,
+  download: Download,
+  layers: Layers,
+  book: Book,
+  layout: Layout,
+  image: ImageIcon,
+  maximize: Maximize,
+  "scan-line": ScanLine,
+  "bar-chart-3": BarChart3,
+  calendar: Calendar,
+  clock: Clock,
+  monitor: Monitor,
 };
 
+function iconFor(name: string): LucideIcon {
+  return ICON_MAP[name] || Sparkles;
+}
+
 export function NovitaPage() {
-  const [releases, setReleases] = useState<Release[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [installed, setInstalled] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    api
-      .appChangelog(undefined, "web")
-      .then((r) => setReleases(r.releases || []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    window.voto?.app?.getVersion().then(setInstalled).catch(() => {});
   }, []);
+
+  const releases = DESKTOP_CHANGELOG;
 
   return (
     <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 24 }}>
       <div>
-        <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.4 }}>Novità</div>
-        <div style={{ fontSize: 13, color: colors.textSub, marginTop: 4 }}>
-          La cronologia completa delle release Voto+ — quello che è stato aggiunto in ogni versione.
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.4 }}>Novit\u00e0</div>
+          <span style={{
+            fontSize: 10,
+            fontWeight: 900,
+            letterSpacing: 0.8,
+            color: colors.purple,
+            background: `${colors.purple}22`,
+            border: `1px solid ${colors.purple}55`,
+            padding: "3px 10px",
+            borderRadius: 999,
+            textTransform: "uppercase",
+          }}>Desktop</span>
+        </div>
+        <div style={{ fontSize: 13, color: colors.textSub }}>
+          Cronologia release dell'app desktop \u2014 quello che \u00e8 stato aggiunto in ogni versione.
+          {installed && (
+            <> Stai usando <strong>v{installed}</strong>.</>
+          )}
         </div>
       </div>
 
-      {loading ? (
-        <Placeholder label="Caricamento changelog…" />
-      ) : releases.length === 0 ? (
-        <Placeholder label="Nessuna release disponibile." />
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {releases.map((r, idx) => (
-            <ReleaseCard key={r.version || idx} release={r} latest={idx === 0} />
-          ))}
-        </div>
-      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {releases.map((r, idx) => (
+          <ReleaseCard
+            key={r.version}
+            release={r}
+            latest={idx === 0}
+            current={installed === r.version}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-function ReleaseCard({ release, latest }: { release: Release; latest: boolean }) {
-  const highlights = (release.highlights || []).map((h) => {
-    if (typeof h === "string") return { text: h, icon: "✨" };
-    return {
-      text: h.text || h.title || h.body || "",
-      icon: h.icon || "•",
-      title: h.title,
-      body: h.body,
-    };
-  });
-
+function ReleaseCard({ release, latest, current }: { release: DesktopRelease; latest: boolean; current: boolean }) {
+  const highlight = latest || current;
   return (
     <article
       style={{
         padding: 20,
         borderRadius: radius.lg,
-        background: latest
+        background: highlight
           ? `linear-gradient(135deg, ${colors.purple}12 0%, ${colors.blue}08 100%)`
           : colors.bgGlass,
-        border: `1px solid ${latest ? `${colors.purple}55` : colors.border}`,
+        border: `1px solid ${highlight ? `${colors.purple}55` : colors.border}`,
       }}
     >
-      <header style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+      <header style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
         <div
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            background: latest ? `${colors.purple}22` : `${colors.textMuted}22`,
-            border: `1px solid ${latest ? colors.purple : colors.textMuted}55`,
+            width: 44,
+            height: 44,
+            borderRadius: 14,
+            background: highlight ? `${colors.purple}22` : `${colors.textMuted}22`,
+            border: `1px solid ${highlight ? colors.purple : colors.textMuted}55`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 18,
+            fontSize: 22,
           }}
         >
-          {release.emoji || "🚀"}
+          {release.emoji}
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ fontSize: 18, fontWeight: 900 }}>v{release.version}</span>
-            {latest && (
-              <span style={{
-                fontSize: 10,
-                fontWeight: 900,
-                letterSpacing: 0.8,
-                color: colors.purple,
-                background: `${colors.purple}22`,
-                border: `1px solid ${colors.purple}55`,
-                padding: "2px 8px",
-                borderRadius: 999,
-                textTransform: "uppercase",
-              }}>ULTIMA</span>
-            )}
+            {latest && <Badge label="ULTIMA" color={colors.purple} />}
+            {current && <Badge label="INSTALLATA" color={colors.green} />}
           </div>
-          {(release.title || release.date) && (
-            <div style={{ fontSize: 12, color: colors.textSub, marginTop: 2 }}>
-              {release.title}
-              {release.title && release.date && " · "}
-              {release.date}
-            </div>
-          )}
+          <div style={{ fontSize: 12, color: colors.textSub, marginTop: 2 }}>
+            {release.title} \u00b7 {release.date}
+          </div>
         </div>
       </header>
 
-      {release.body && (
-        <p style={{ margin: "0 0 12px 0", fontSize: 13, color: colors.textSub, lineHeight: 1.6 }}>{release.body}</p>
-      )}
-
-      {highlights.length > 0 && (
-        <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
-          {highlights.map((h, i) => (
-            <li key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-              <span style={{ fontSize: 16, flexShrink: 0, marginTop: -1 }}>{h.icon}</span>
-              <div style={{ fontSize: 13, color: colors.textPrimary, lineHeight: 1.5 }}>
-                {h.title && <strong style={{ fontWeight: 800 }}>{h.title}</strong>}
-                {h.title && (h.body || h.text) && " — "}
-                <span style={{ color: colors.textSub }}>{h.body || h.text}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
+        {release.highlights.map((h, i) => (
+          <HighlightRow key={i} h={h} />
+        ))}
+      </ul>
     </article>
   );
 }
 
-function Placeholder({ label }: { label: string }) {
+function HighlightRow({ h }: { h: DesktopHighlight }) {
+  const Icon = iconFor(h.icon);
   return (
-    <div style={{
-      padding: 30,
-      borderRadius: radius.md,
-      background: colors.bgGlass,
-      border: `1px dashed ${colors.border}`,
-      color: colors.textSub,
-      fontSize: 13,
-      textAlign: "center",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 10,
-    }}>
-      <Sparkles size={22} color={colors.textMuted} />
-      {label}
-    </div>
+    <li style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+      <div
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 10,
+          background: `${colors.cyan}15`,
+          border: `1px solid ${colors.cyan}44`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          marginTop: 1,
+        }}
+      >
+        <Icon size={14} color={colors.cyan} />
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 800, color: colors.textPrimary, marginBottom: 2 }}>{h.title}</div>
+        <div style={{ fontSize: 12.5, color: colors.textSub, lineHeight: 1.55 }}>{h.body}</div>
+      </div>
+    </li>
   );
 }
 
-// Silenzia lint per icona non usata in questo file (mantenuta per futura riga clicabile).
+function Badge({ label, color }: { label: string; color: string }) {
+  return (
+    <span style={{
+      fontSize: 10,
+      fontWeight: 900,
+      letterSpacing: 0.8,
+      color,
+      background: `${color}22`,
+      border: `1px solid ${color}55`,
+      padding: "2px 8px",
+      borderRadius: 999,
+      textTransform: "uppercase",
+    }}>{label}</span>
+  );
+}
+
+// Suppress lint warning for icon not used elsewhere
 void ChevronRight;
