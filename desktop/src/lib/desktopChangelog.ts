@@ -16,6 +16,25 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.6.9",
+    date: "2026-07-11",
+    title: "Icona Windows trasparente",
+    emoji: "🪟",
+    highlights: [
+      { icon: "image", title: "Nuova icona Windows senza sfondo nero", body: "Su Windows la vecchia icona aveva angoli neri opachi nella taskbar. Ora usa il logo V+ colorato con sfondo trasparente (basato sull'adaptive-icon dell'app mobile) — si integra perfettamente con qualsiasi tema Windows." },
+    ],
+  },
+  {
+    version: "0.6.8",
+    date: "2026-07-11",
+    title: "App firmata Apple + auto-update in-app",
+    emoji: "🔏",
+    highlights: [
+      { icon: "shield-check", title: "Firma Developer ID + notarizzazione Apple", body: "L'app macOS è firmata con 'Developer ID Application: TOMMASO CORRAO' e notarizzata da Apple. Niente più warning 'App non verificata'." },
+      { icon: "download", title: "Auto-update in-app funzionante su macOS", body: "Da questa release in poi gli aggiornamenti si applicano direttamente dall'app senza scaricare manualmente il DMG." },
+    ],
+  },
+  {
     version: "0.6.7",
     date: "2026-07-11",
     title: "App firmata Apple + auto-update in-app funzionante",
