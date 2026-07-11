@@ -72,7 +72,14 @@ jobs:
         working-directory: desktop
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NOTE: senza Apple Developer ID il DMG è unsigned e Mac Auto-Update NON funziona.
-          # Gli utenti dovranno riscaricare manualmente il DMG dal sito.
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          # ── Apple Developer ID signing + notarizzazione ──
+          # electron-builder scarica il .p12 dal base64 in CSC_LINK, lo
+          # scioglie con CSC_KEY_PASSWORD, firma tutti i binari con
+          # "Developer ID Application: TOMMASO CORRAO (KG3PL923Z5)" e
+          # infine invia il DMG a notarytool con le credenziali sotto.
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: yarn electron-builder --mac --publish always

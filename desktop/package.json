@@ -1,7 +1,7 @@
 {
   "name": "voto-plus-desktop",
   "private": true,
-  "version": "0.6.6",
+  "version": "0.6.7",
   "description": "Voto+ Desktop — app companion per Windows e macOS. Studia con Voto+ dal computer.",
   "author": "Voto+ Team",
   "license": "UNLICENSED",
@@ -89,6 +89,10 @@
       "artifactName": "VotoPlus-${version}.${ext}",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
+      "identity": "Developer ID Application: TOMMASO CORRAO (KG3PL923Z5)",
+      "notarize": {
+        "teamId": "KG3PL923Z5"
+      },
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "extendInfo": {

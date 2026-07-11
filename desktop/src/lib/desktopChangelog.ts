@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.6.7",
+    date: "2026-07-11",
+    title: "App firmata Apple + auto-update in-app funzionante",
+    emoji: "🔏",
+    highlights: [
+      { icon: "shield-check", title: "App firmata con Developer ID Apple", body: "Voto+ Desktop è ora firmato con il certificato Developer ID di Tommaso Corrao (Team KG3PL923Z5). Niente più warning 'App non verificata' all'apertura del DMG. Gatekeeper approva l'app senza chiedere conferma." },
+      { icon: "check-check", title: "Notarizzazione Apple", body: "Ogni build viene ora notarizzata da Apple tramite notarytool: viene verificata l'assenza di malware e stapled un ticket direttamente nell'app. Massima fiducia utente." },
+      { icon: "download", title: "Auto-update in-app finalmente funziona su macOS", body: "L'errore 'ZIP file not provided / code signature did not pass validation' è risolto: da questa release in poi, quando esce un aggiornamento, si aggiorna direttamente dall'app senza scaricare manualmente il DMG." },
+    ],
+  },
+  {
     version: "0.6.6",
     date: "2026-07-11",
     title: "Bug fix critico: il prof usa argomento e nome corretti",
