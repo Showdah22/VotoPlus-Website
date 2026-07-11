@@ -31,22 +31,16 @@ export function TitleBar() {
     >
       {/* Brand */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div
+        <img
+          src="/voto-icon.png"
+          alt="Voto+"
           style={{
             width: 22,
             height: 22,
             borderRadius: 6,
-            background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 12,
-            fontWeight: 900,
-            color: "#fff",
+            objectFit: "cover",
           }}
-        >
-          V+
-        </div>
+        />
         <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: 0.3 }}>
           Voto+ Desktop
         </span>

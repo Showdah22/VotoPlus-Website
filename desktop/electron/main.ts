@@ -84,11 +84,11 @@ function createWindow() {
     height: 820,
     minWidth: 1024,
     minHeight: 640,
-    backgroundColor: "#0b0714", // colors.bg — evita flash bianco
+    backgroundColor: "#0a0a0f", // colors.bg — allineato al mobile
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "hidden",
     titleBarOverlay:
       process.platform === "win32"
-        ? { color: "#0b0714", symbolColor: "#ffffff", height: 40 }
+        ? { color: "#0a0a0f", symbolColor: "#ffffff", height: 40 }
         : undefined,
     frame: process.platform === "darwin", // macOS: frame nativo con hiddenInset (traffic lights); Windows/Linux: frameless con overlay
     show: false, // mostro dopo ready-to-show per evitare flicker
