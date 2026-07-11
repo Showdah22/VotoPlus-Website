@@ -79,7 +79,7 @@ export function NovitaPage() {
     <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 24 }}>
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-          <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.4 }}>Novit\u00e0</div>
+          <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.4 }}>Novità</div>
           <span style={{
             fontSize: 10,
             fontWeight: 900,
@@ -93,7 +93,7 @@ export function NovitaPage() {
           }}>Desktop</span>
         </div>
         <div style={{ fontSize: 13, color: colors.textSub }}>
-          Cronologia release dell'app desktop \u2014 quello che \u00e8 stato aggiunto in ogni versione.
+          Cronologia release dell'app desktop — quello che è stato aggiunto in ogni versione.
           {installed && (
             <> Stai usando <strong>v{installed}</strong>.</>
           )}
@@ -150,7 +150,7 @@ function ReleaseCard({ release, latest, current }: { release: DesktopRelease; la
             {current && <Badge label="INSTALLATA" color={colors.green} />}
           </div>
           <div style={{ fontSize: 12, color: colors.textSub, marginTop: 2 }}>
-            {release.title} \u00b7 {release.date}
+            {release.title} · {release.date}
           </div>
         </div>
       </header>
