@@ -46,6 +46,14 @@ jobs:
         working-directory: desktop
         run: yarn install --frozen-lockfile
 
+      - name: TypeScript check
+        working-directory: desktop
+        run: yarn tsc --noEmit
+
+      - name: Build renderer (Vite)
+        working-directory: desktop
+        run: yarn vite build
+
       - name: Build & publish (Windows)
         if: matrix.os == 'windows-latest'
         working-directory: desktop

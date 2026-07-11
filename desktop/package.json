@@ -4,6 +4,11 @@
   "version": "0.1.0",
   "description": "Voto+ Desktop — app companion per Windows e macOS. Studia con Voto+ dal computer.",
   "author": "Voto+ Team",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Showdah22/VotoPlus-Website.git"
+  },
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
