@@ -4,6 +4,7 @@ import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
 import { Modal, labelStyle, inputStyle, primaryBtn } from "../components/Modal";
+import { Select } from "../components/Select";
 
 type SubjectStat = {
   subject: string;
@@ -168,10 +169,12 @@ function AddGradeModal({
     <Modal open={open} onClose={onClose} title="Nuovo voto">
       <label style={labelStyle}>
         Materia
-        <select value={subject} onChange={(e) => setSubject(e.target.value)} style={inputStyle}>
-          {subjects.length === 0 && <option value="">— Nessuna materia —</option>}
-          {subjects.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
+        <Select
+          value={subject}
+          onChange={setSubject}
+          options={subjects.map((s) => ({ value: s, label: s }))}
+          placeholder={subjects.length === 0 ? "— Nessuna materia —" : "— Seleziona —"}
+        />
       </label>
       <label style={labelStyle}>
         Voto (0-10)

@@ -3,6 +3,7 @@ import { ScanLine, Upload, Loader2, FileText, Sparkles } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
+import { Select } from "../components/Select";
 
 export function ScannerPage() {
   const token = useAuth((s) => s.token);
@@ -90,12 +91,12 @@ export function ScannerPage() {
             </label>
             <label style={labelStyle}>
               Materia
-              <select value={subject} onChange={(e) => setSubject(e.target.value)} style={inputStyle}>
-                <option value="">— Seleziona —</option>
-                {subjects.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
+              <Select
+                value={subject}
+                onChange={setSubject}
+                options={subjects.map((s) => ({ value: s, label: s }))}
+                placeholder="— Seleziona —"
+              />
             </label>
           </div>
 
