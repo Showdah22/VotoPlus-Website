@@ -16,6 +16,15 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.6.5",
+    date: "2026-07-11",
+    title: "Fix aggiornamenti in-app su macOS",
+    emoji: "🔄",
+    highlights: [
+      { icon: "download", title: "Auto-update ora funziona su macOS", body: "Aggiunto il target 'zip' alla build macOS. electron-updater richiede il file .zip (oltre al .dmg) per gli aggiornamenti in-app. L'errore 'ZIP file not provided' è risolto: dalla prossima release potrai aggiornare Voto+ direttamente dall'app." },
+    ],
+  },
+  {
     version: "0.6.4",
     date: "2026-07-11",
     title: "Fix permesso microfono macOS",
