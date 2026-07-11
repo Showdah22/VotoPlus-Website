@@ -297,9 +297,40 @@ function statusSubtitle(status: any): string {
     case "available": return "Scarica per installarla senza dover riscaricare dal sito.";
     case "downloading": return `${humanBytes(status.transferred)} / ${humanBytes(status.total)}`;
     case "downloaded": return "Riavvia l'app per completare l'installazione.";
-    case "error": return status.message;
+    case "error": return friendlyError(status.message);
     default: return "";
   }
+}
+
+/**
+ * Sanitizza il messaggio raw di electron-updater (stack trace lunghissimi con
+ * URL/HTTP headers) in un testo pulito e utile per l'utente. Casi tipici:
+ *  - 404 su latest.yml → build non ancora completata / release parzialmente
+ *    pubblicata → suggerisci di riprovare fra poco.
+ *  - ENOTFOUND / offline → nessuna connessione.
+ *  - Timeout / socket → server non raggiungibile.
+ *  - Altrimenti mostriamo solo la prima riga (di solito la più informativa)
+ *    senza URL né stack.
+ */
+function friendlyError(msg: string | undefined): string {
+  const raw = (msg || "").toLowerCase();
+  if (!raw) return "Errore sconosciuto. Riprova più tardi.";
+
+  if (raw.includes("404") || raw.includes("cannot find latest.yml")) {
+    return "La release più recente non è ancora completamente pubblicata. Riprova tra qualche minuto — l'app riproverà comunque da sola.";
+  }
+  if (raw.includes("enotfound") || raw.includes("network") || raw.includes("offline")) {
+    return "Nessuna connessione a internet. Verifica la rete e riprova.";
+  }
+  if (raw.includes("timeout") || raw.includes("etimedout") || raw.includes("econnreset")) {
+    return "Il server degli aggiornamenti non risponde. Riprova più tardi.";
+  }
+  if (raw.includes("403") || raw.includes("401")) {
+    return "Accesso al server aggiornamenti negato. Riprova più tardi.";
+  }
+  // Fallback: prima riga significativa (senza URL né headers/stack)
+  const firstLine = (msg || "").split(/\n|\r/)[0].split("http")[0].trim();
+  return firstLine.length > 180 ? firstLine.slice(0, 180) + "…" : (firstLine || "Errore sconosciuto. Riprova più tardi.");
 }
 function statusBg(state: string): string {
   switch (state) {

@@ -18,13 +18,15 @@ export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
     version: "0.6.0",
     date: "2026-07-11",
-    title: "Fullscreen + Mappa SVG + Loading spinner + Matematica rendered",
-    emoji: "🗺️",
+    title: "Interrogazione vocale + Mindmap SVG + Fullscreen + Loading spinners + Math parsed",
+    emoji: "🎙️",
     highlights: [
-      { icon: "maximize", title: "UI fullscreen davvero fullscreen", body: "Rimosso il tetto di 1600px: sidebar + main + right panel ora si espandono per riempire tutta la finestra su monitor ultrawide. La griglia interna (materie, cronologia) aggiunge automaticamente colonne per usare lo spazio senza stirare le card." },
-      { icon: "git-branch", title: "Mappa concettuale ridisegnata in SVG", body: "Nuovo rendering ad albero orizzontale con nodi arrotondati (root al centro, figli distribuiti proporzionalmente al numero di sottonodi) e connettori curvi Bezier con freccia. Ogni ramo eredita il colore del nodo, come in una mappa concettuale vera." },
+      { icon: "mic", title: "Interrogazione VOCALE (Premium)", body: "Nuova modalità Voce nella pagina Interrogazione: parli al microfono, l'AI trascrive con Whisper, il professore risponde a voce con TTS OpenAI. 9 voci selezionabili (Alloy, Coral, Nova, Onyx, ...), severità configurabile, supporto lingue straniere con modalità immersione/misto/italiano. Usa mic + speaker configurati in Impostazioni → Audio." },
+      { icon: "maximize", title: "UI fullscreen davvero fullscreen", body: "Rimosso il tetto di 1600px: sidebar + main + right panel ora si espandono per riempire tutta la finestra su monitor ultrawide senza black bar." },
+      { icon: "git-branch", title: "Mappa concettuale ridisegnata in SVG", body: "Nuovo rendering ad albero orizzontale con nodi arrotondati (root al centro, figli distribuiti proporzionalmente ai sottonodi) e connettori curvi Bezier con freccia. Ogni ramo eredita il colore." },
       { icon: "refresh-cw", title: "Loading spinner + UI bloccata durante le chiamate AI", body: "Ora quando premi 'Genera' su Tema, Compito, Interrogazione, Vocabolario o Mappa vedi la rotellina che gira dentro il bottone e il form diventa non-interattivo finché l'AI risponde. Niente più doppi click accidentali." },
       { icon: "calculator", title: "Matematica: risposta AI renderizzata bene", body: "Prima mostrava il JSON grezzo. Ora vedi il risultato in evidenza, gli step numerati con formula in mono-font, la spiegazione facile in card viola e gli esercizi simili suggeriti." },
+      { icon: "download", title: "Errori update-check più leggibili", body: "Quando la ricerca aggiornamenti fallisce (release non ancora pubblicata, offline, timeout) mostriamo un messaggio pulito e utile invece dello stack trace tecnico." },
     ],
   },
   {

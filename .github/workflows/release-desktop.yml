@@ -26,8 +26,14 @@ jobs:
   release:
     strategy:
       fail-fast: false
+      # max-parallel: 1 → i due job (macos + windows) girano in SERIE,
+      # non in parallelo. Questo evita la race condition per cui entrambi i
+      # runner provano a creare la GitHub Release contemporaneamente e uno
+      # ottiene HTTP 422 "tag already_exists". Il primo crea la release,
+      # il secondo carica solo gli asset.
+      max-parallel: 1
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 

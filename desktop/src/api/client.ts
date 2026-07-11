@@ -230,6 +230,47 @@ export const api = {
   // Quota & billing (readonly su desktop, checkout gestito su mobile finché Stripe non è wired)
   meQuota: (token: string) => request<any>("/api/me/quota", { token }),
   billingProducts: (token: string) => request<any>("/api/billing/products", { token }),
+
+  // Oral VOCE (STT+TTS OpenAI)
+  oralVoiceStart: (
+    body: {
+      subject: string;
+      severity?: "facile" | "medio" | "severo" | "spietato";
+      topic?: string;
+      voice?: "alloy" | "ash" | "coral" | "echo" | "fable" | "nova" | "onyx" | "sage" | "shimmer";
+      mode?: "domande" | "esposizione";
+      language_mode?: "immersione" | "misto" | "italiano";
+    },
+    token: string,
+  ) => request<any>("/api/oral/voice/start", { method: "POST", body, token }),
+
+  // /oral/voice/turn è multipart (audio file). Facciamo la fetch manualmente
+  // perché request() serializza in JSON.
+  oralVoiceTurn: async (attempt_id: string, audioBlob: Blob, token: string) => {
+    const fd = new FormData();
+    fd.append("attempt_id", attempt_id);
+    fd.append("audio", audioBlob, `answer.${blobExt(audioBlob)}`);
+    const res = await fetch(`${BASE_URL}/api/oral/voice/turn`, {
+      method: "POST",
+      body: fd,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      throw new ApiError(res.status, (data as any)?.detail || `HTTP ${res.status}`);
+    }
+    return data as any;
+  },
 };
+
+function blobExt(b: Blob): string {
+  const t = (b.type || "").toLowerCase();
+  if (t.includes("webm")) return "webm";
+  if (t.includes("ogg")) return "ogg";
+  if (t.includes("wav")) return "wav";
+  if (t.includes("mp4") || t.includes("m4a")) return "m4a";
+  if (t.includes("mp3")) return "mp3";
+  return "webm";
+}
 
 export const backendUrl = BASE_URL;

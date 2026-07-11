@@ -174,3 +174,14 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     filter: drop-shadow(0 0 60px rgba(168, 85, 247, 0.75));
   }
 }
+
+/* Recording indicator pulse (rosso) — usato dal cerchio mic in OraleVoiceMode */
+@keyframes voto-pulse-red {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(239, 68, 68, 0.85);
+  }
+}

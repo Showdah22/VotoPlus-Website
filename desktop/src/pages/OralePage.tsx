@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Mic, Play, ChevronRight, GraduationCap, Sparkles, Star, RefreshCw, Loader2 } from "lucide-react";
+import { Mic, Play, ChevronRight, GraduationCap, Sparkles, Star, RefreshCw, Loader2, MessageSquare, Volume2 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
 import { Select } from "../components/Select";
+import { OraleVoiceMode } from "../components/OraleVoiceMode";
 
 type OralAttempt = {
   id: string;
@@ -36,6 +37,7 @@ export function OralePage() {
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
   const subjects: string[] = (user as any)?.subjects || [];
+  const [inputMode, setInputMode] = useState<"text" | "voice">("text");
 
   const [subject, setSubject] = useState<string>(subjects[0] || "");
   const [severity, setSeverity] = useState<string>("medio");
@@ -138,7 +140,39 @@ export function OralePage() {
         )}
       </header>
 
-      {!attempt && (
+      {/* Mode toggle: Testo vs Voce */}
+      <div style={{ display: "flex", gap: 6, padding: 4, borderRadius: radius.md, background: colors.bgGlass, border: `1px solid ${colors.border}` }}>
+        <button
+          onClick={() => setInputMode("text")}
+          style={{
+            flex: 1, padding: "10px 14px", borderRadius: radius.sm,
+            background: inputMode === "text" ? `${colors.cyan}22` : "transparent",
+            border: `1px solid ${inputMode === "text" ? colors.cyan : "transparent"}`,
+            color: inputMode === "text" ? colors.cyan : colors.textSub,
+            fontWeight: 800, fontSize: 13, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          }}
+        >
+          <MessageSquare size={14} /> Testo
+        </button>
+        <button
+          onClick={() => setInputMode("voice")}
+          style={{
+            flex: 1, padding: "10px 14px", borderRadius: radius.sm,
+            background: inputMode === "voice" ? `${colors.green}22` : "transparent",
+            border: `1px solid ${inputMode === "voice" ? colors.green : "transparent"}`,
+            color: inputMode === "voice" ? colors.green : colors.textSub,
+            fontWeight: 800, fontSize: 13, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          }}
+        >
+          <Volume2 size={14} /> Voce
+          <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 0.6, color: colors.pink, background: `${colors.pink}22`, padding: "2px 6px", borderRadius: 999, textTransform: "uppercase" }}>Premium</span>
+        </button>
+      </div>
+
+      {inputMode === "voice" && <OraleVoiceMode />}
+      {inputMode === "text" && !attempt && (
         <section style={{ ...cardStyle(), opacity: starting ? 0.55 : 1, pointerEvents: starting ? "none" : "auto", transition: "opacity 150ms" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <FieldLabel label="Materia">
@@ -202,7 +236,7 @@ export function OralePage() {
         </section>
       )}
 
-      {attempt && !isFinished && (
+      {inputMode === "text" && attempt && !isFinished && (
         <section style={{ ...cardStyle(), opacity: evaluating ? 0.55 : 1, pointerEvents: evaluating ? "none" : "auto", transition: "opacity 150ms" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ fontSize: 11, letterSpacing: 1.2, fontWeight: 900, color: colors.textMuted, textTransform: "uppercase" }}>
@@ -249,7 +283,7 @@ export function OralePage() {
         </section>
       )}
 
-      {attempt && isFinished && (
+      {inputMode === "text" && attempt && isFinished && (
         <section style={cardStyle({
           background: `linear-gradient(135deg, ${colors.green}18 0%, ${colors.cyan}10 100%)`,
           border: `1.5px solid ${colors.green}55`,
@@ -273,7 +307,7 @@ export function OralePage() {
         </section>
       )}
 
-      {!attempt && stats?.by_subject?.length > 0 && (
+      {inputMode === "text" && !attempt && stats?.by_subject?.length > 0 && (
         <section>
           <h2 style={{ margin: "0 0 10px 0", fontSize: 16, fontWeight: 800 }}>Le tue medie per materia</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>

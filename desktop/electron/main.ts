@@ -143,6 +143,17 @@ function createWindow() {
 
   wireUpdaterEvents(mainWindow);
 
+  // Permessi Chromium: auto-grant microfono per l'interrogazione vocale.
+  // Electron di default nega tutte le permission requests da renderer;
+  // qui autorizziamo esplicitamente solo mic/audioCapture.
+  mainWindow.webContents.session.setPermissionRequestHandler((_wc, permission, callback) => {
+    if (permission === "media" || (permission as string) === "audioCapture") {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+
   // 3 secondi dopo l'avvio, silent check + avvia il polling periodico
   // (ogni 30 min) così il badge di aggiornamento appare automaticamente
   // anche durante l'uso, non solo all'avvio.
