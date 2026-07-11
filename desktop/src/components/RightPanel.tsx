@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, GraduationCap, Sparkles, TrendingUp } from "lucide-react";
+import { Calendar, GraduationCap, Sparkles, TrendingUp, Flame } from "lucide-react";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
@@ -26,6 +26,7 @@ export function RightPanel() {
   const token = useAuth((s) => s.token);
   const navigate = useNavigate();
   const [events, setEvents] = useState<any[]>([]);
+  const [nudge, setNudge] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,10 +34,14 @@ export function RightPanel() {
     (async () => {
       if (!token) return;
       try {
-        const data = await api.dashboard(token);
-        if (alive) setEvents((data?.upcoming_events || []).slice(0, 8));
-      } catch {
-        // silent — il main content mostra già errori di rete
+        const [d, n] = await Promise.allSettled([
+          api.dashboard(token),
+          api.coachNudge(token),
+        ]);
+        if (!alive) return;
+        if (d.status === "fulfilled")
+          setEvents((d.value?.upcoming_events || []).slice(0, 8));
+        if (n.status === "fulfilled") setNudge(n.value);
       } finally {
         if (alive) setLoading(false);
       }
@@ -221,6 +226,79 @@ export function RightPanel() {
             </button>
           );
         })
+      )}
+
+      {/* Coach nudge — replicato dall'iPad landscape */}
+      {nudge?.nudges?.[0] && (
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            marginTop: 6,
+            padding: 14,
+            borderRadius: radius.md,
+            background: colors.bgGlass,
+            border: `1.5px solid ${colors.purple}55`,
+            textAlign: "left",
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+          }}
+        >
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: `${colors.purple}1f`,
+              border: `1px solid ${colors.purple}66`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 2,
+            }}
+          >
+            <Flame size={18} color={colors.purple} />
+          </div>
+          <div
+            style={{
+              fontSize: 10.5,
+              fontWeight: 800,
+              letterSpacing: 1,
+              textTransform: "uppercase",
+              color: colors.textMuted,
+            }}
+          >
+            Suggerimento del giorno
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 900, color: colors.textPrimary }}>
+            {nudge.nudges[0].title}
+          </div>
+          <div style={{ fontSize: 12, color: colors.textSub, lineHeight: 1.5, marginTop: 2 }}>
+            {nudge.nudges[0].body}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: 6,
+            }}
+          >
+            <span style={{ color: colors.purple, fontWeight: 800, fontSize: 12 }}>
+              {nudge.nudges[0].cta_label || "Studia ora"} →
+            </span>
+            <span
+              style={{
+                color: colors.textMuted,
+                fontSize: 10.5,
+                fontStyle: "italic",
+                fontWeight: 700,
+              }}
+            >
+              — {nudge.nudges[0].signature || "Voto+"}
+            </span>
+          </div>
+        </button>
       )}
     </aside>
   );

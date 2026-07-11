@@ -72,6 +72,25 @@ export const api = {
   gradesStats: (token: string) => request<any>("/api/grades/stats", { token }),
 
   coachNudge: (token: string) => request<any>("/api/coach/nudge", { token }),
+
+  studyAnalyze: (
+    body: {
+      title?: string;
+      subject?: string;
+      text?: string;
+      image_base64?: string;
+      difficulty?: string;
+    },
+    token: string,
+  ) => request<any>("/api/study/analyze", { method: "POST", body, token }),
+
+  studyHistory: (token: string) =>
+    request<any[]>("/api/study/history", { token }),
+
+  mathSolve: (
+    body: { problem: string; image_base64?: string; difficulty?: string },
+    token: string,
+  ) => request<any>("/api/math/solve", { method: "POST", body, token }),
 };
 
 export const backendUrl = BASE_URL;
