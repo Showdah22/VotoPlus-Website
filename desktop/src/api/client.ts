@@ -91,6 +91,21 @@ export const api = {
     body: { problem: string; image_base64?: string; difficulty?: string },
     token: string,
   ) => request<any>("/api/math/solve", { method: "POST", body, token }),
+
+  gradesRealList: (token: string) =>
+    request<any[]>("/api/grades/real", { token }),
+
+  gradesRealAdd: (
+    body: { subject: string; value: number; date?: string; weight?: number; note?: string; kind?: string },
+    token: string,
+  ) => request<any>("/api/grades/real", { method: "POST", body, token }),
+
+  eventsList: (token: string) => request<any[]>("/api/events", { token }),
+
+  eventsAdd: (
+    body: { type: string; subject: string; title?: string; topic?: string; date: string; time?: string },
+    token: string,
+  ) => request<any>("/api/events", { method: "POST", body, token }),
 };
 
 export const backendUrl = BASE_URL;

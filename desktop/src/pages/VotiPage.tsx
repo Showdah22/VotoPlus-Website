@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { BarChart3, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { BarChart3, TrendingUp, TrendingDown, Minus, Plus } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
+import { Modal, labelStyle, inputStyle, primaryBtn } from "../components/Modal";
 
 type SubjectStat = {
   subject: string;
@@ -20,14 +21,20 @@ type StatsResp = {
 
 export function VotiPage() {
   const token = useAuth((s) => s.token);
+  const user = useAuth((s) => s.user);
   const [stats, setStats] = useState<StatsResp | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const subjects: string[] = (user as any)?.subjects || [];
 
   useEffect(() => {
     let alive = true;
     (async () => {
       if (!token) return;
+      setLoading(true);
       try {
         const data = await api.gradesStats(token);
         if (alive) setStats(data);
@@ -37,10 +44,8 @@ export function VotiPage() {
         if (alive) setLoading(false);
       }
     })();
-    return () => {
-      alive = false;
-    };
-  }, [token]);
+    return () => { alive = false; };
+  }, [token, refreshKey]);
 
   const realAvgs = stats?.real?.averages ?? [];
   const overall = stats?.real?.overall ?? stats?.simulation?.overall ?? null;
@@ -53,7 +58,7 @@ export function VotiPage() {
         <div style={iconWrapStyle(colors.green)}>
           <BarChart3 size={22} color={colors.green} />
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <h1 style={{ margin: 0, fontSize: 28, fontWeight: 900, letterSpacing: -0.5 }}>
             I tuoi voti
           </h1>
@@ -61,6 +66,17 @@ export function VotiPage() {
             Medie per materia · aggiornate in tempo reale dal backend
           </p>
         </div>
+        <button
+          onClick={() => setAddOpen(true)}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "10px 16px", borderRadius: 999,
+            background: `${colors.green}1a`, border: `1px solid ${colors.green}77`,
+            color: colors.green, fontWeight: 800, fontSize: 13,
+          }}
+        >
+          <Plus size={14} /> Aggiungi voto
+        </button>
       </div>
 
       {/* Overall media card */}
@@ -105,7 +121,75 @@ export function VotiPage() {
           </div>
         )}
       </section>
+
+      <AddGradeModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onAdded={() => { setAddOpen(false); setRefreshKey((k) => k + 1); }}
+        subjects={subjects}
+      />
     </div>
+  );
+}
+
+function AddGradeModal({
+  open, onClose, onAdded, subjects,
+}: { open: boolean; onClose: () => void; onAdded: () => void; subjects: string[] }) {
+  const token = useAuth((s) => s.token);
+  const [subject, setSubject] = useState(subjects[0] || "");
+  const [value, setValue] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [note, setNote] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => { if (open) { setSubject(subjects[0] || ""); setValue(""); setNote(""); setErr(null); } }, [open, subjects]);
+
+  const submit = async () => {
+    if (!token) return;
+    const v = parseFloat(value.replace(",", "."));
+    if (!subject || isNaN(v) || v < 0 || v > 10) {
+      setErr("Inserisci materia e voto valido (0-10)");
+      return;
+    }
+    setSaving(true);
+    setErr(null);
+    try {
+      await api.gradesRealAdd({ subject, value: v, date, note: note || undefined }, token);
+      onAdded();
+    } catch (e: any) {
+      setErr(e?.message ?? "Errore nel salvataggio");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title="Nuovo voto">
+      <label style={labelStyle}>
+        Materia
+        <select value={subject} onChange={(e) => setSubject(e.target.value)} style={inputStyle}>
+          {subjects.length === 0 && <option value="">— Nessuna materia —</option>}
+          {subjects.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </label>
+      <label style={labelStyle}>
+        Voto (0-10)
+        <input type="number" step="0.25" min="0" max="10" value={value} onChange={(e) => setValue(e.target.value)} placeholder="es. 7.5" style={inputStyle} autoFocus />
+      </label>
+      <label style={labelStyle}>
+        Data
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
+      </label>
+      <label style={labelStyle}>
+        Note (opzionale)
+        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="es. Verifica cap. 3" style={inputStyle} />
+      </label>
+      {err && <div style={{ padding: 10, borderRadius: 8, background: `${colors.red}1a`, border: `1px solid ${colors.red}55`, color: colors.red, fontSize: 12, fontWeight: 600 }}>{err}</div>}
+      <button onClick={submit} disabled={saving} style={{ ...primaryBtn, opacity: saving ? 0.6 : 1 }}>
+        {saving ? "Salvataggio…" : "Salva voto"}
+      </button>
+    </Modal>
   );
 }
 

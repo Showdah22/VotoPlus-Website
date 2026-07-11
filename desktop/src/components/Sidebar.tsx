@@ -161,6 +161,7 @@ export function Sidebar() {
             <NavItem to="/math" icon={Calculator} label="Matematica" />
             <NavItem to="/voti" icon={BarChart3} label="Voti" />
             <NavItem to="/calendario" icon={Calendar} label="Calendario" />
+            <NavItem to="/cronologia" icon={Clock} label="Cronologia" />
             <NavItem to="/impostazioni" icon={Settings} label="Impostazioni" />
           </div>
         </div>

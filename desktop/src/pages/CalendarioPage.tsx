@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Calendar, GraduationCap, Sparkles, TrendingUp, Bookmark } from "lucide-react";
+import { Calendar, GraduationCap, Sparkles, TrendingUp, Bookmark, Plus } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
+import { Modal, labelStyle, inputStyle, primaryBtn } from "../components/Modal";
 
 type EventItem = {
   id: string;
@@ -32,13 +33,19 @@ const daysUntil = (iso: string) => {
 
 export function CalendarioPage() {
   const token = useAuth((s) => s.token);
+  const user = useAuth((s) => s.user);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addOpen, setAddOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const subjects: string[] = (user as any)?.subjects || [];
 
   useEffect(() => {
     let alive = true;
     (async () => {
       if (!token) return;
+      setLoading(true);
       try {
         const d = await api.dashboard(token);
         if (alive) setEvents(d?.upcoming_events || []);
@@ -46,10 +53,8 @@ export function CalendarioPage() {
         if (alive) setLoading(false);
       }
     })();
-    return () => {
-      alive = false;
-    };
-  }, [token]);
+    return () => { alive = false; };
+  }, [token, refreshKey]);
 
   // Separo eventi imminenti (≤7gg) da futuri
   const imminent = events.filter((e) => daysUntil(e.date) <= 7 && daysUntil(e.date) >= 0);
@@ -73,6 +78,17 @@ export function CalendarioPage() {
         <div style={{ padding: "8px 14px", borderRadius: 999, background: colors.bgGlass, border: `1px solid ${colors.border}`, fontSize: 12, color: colors.textMuted, fontWeight: 700 }}>
           {events.length} evento{events.length !== 1 ? "i" : ""}
         </div>
+        <button
+          onClick={() => setAddOpen(true)}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "10px 16px", borderRadius: 999,
+            background: `${colors.orange}1a`, border: `1px solid ${colors.orange}77`,
+            color: colors.orange, fontWeight: 800, fontSize: 13,
+          }}
+        >
+          <Plus size={14} /> Aggiungi evento
+        </button>
       </div>
 
       {loading ? (
@@ -120,9 +136,92 @@ export function CalendarioPage() {
           textAlign: "center",
         }}
       >
-        💡 Aggiungi nuove verifiche o interrogazioni dall'app Voto+ mobile — verranno sincronizzate qui in tempo reale.
+        💡 Aggiungi nuove verifiche o interrogazioni dall'app Voto+ mobile o desktop — sincronizzate in tempo reale.
       </div>
+
+      <AddEventModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onAdded={() => { setAddOpen(false); setRefreshKey((k) => k + 1); }}
+        subjects={subjects}
+      />
     </div>
+  );
+}
+
+function AddEventModal({
+  open, onClose, onAdded, subjects,
+}: { open: boolean; onClose: () => void; onAdded: () => void; subjects: string[] }) {
+  const token = useAuth((s) => s.token);
+  const [type, setType] = useState<"verifica" | "interrogazione" | "esame">("verifica");
+  const [subject, setSubject] = useState(subjects[0] || "");
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setType("verifica"); setSubject(subjects[0] || "");
+      setTitle(""); setDate(new Date().toISOString().slice(0, 10)); setErr(null);
+    }
+  }, [open, subjects]);
+
+  const submit = async () => {
+    if (!token) return;
+    if (!subject || !date) { setErr("Compila materia e data"); return; }
+    setSaving(true);
+    setErr(null);
+    try {
+      await api.eventsAdd({ type, subject, title: title || undefined, date }, token);
+      onAdded();
+    } catch (e: any) {
+      setErr(e?.message ?? "Errore nel salvataggio");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title="Nuovo evento">
+      <div>
+        <div style={labelStyle}>Tipo</div>
+        <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+          {(["verifica", "interrogazione", "esame"] as const).map((t) => {
+            const active = type === t;
+            const c = t === "verifica" ? colors.cyan : t === "interrogazione" ? colors.pink : colors.orange;
+            return (
+              <button key={t} onClick={() => setType(t)} style={{
+                flex: 1, padding: "10px 8px", borderRadius: 10,
+                background: active ? `${c}22` : colors.bgGlass,
+                border: `1px solid ${active ? c : colors.border}`,
+                color: active ? c : colors.textSub,
+                fontSize: 12, fontWeight: 700, textTransform: "capitalize",
+              }}>{t}</button>
+            );
+          })}
+        </div>
+      </div>
+      <label style={labelStyle}>
+        Materia
+        <select value={subject} onChange={(e) => setSubject(e.target.value)} style={inputStyle}>
+          {subjects.length === 0 && <option value="">— Nessuna materia —</option>}
+          {subjects.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </label>
+      <label style={labelStyle}>
+        Titolo/argomento (opzionale)
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="es. Guerra Fredda cap. 4" style={inputStyle} />
+      </label>
+      <label style={labelStyle}>
+        Data
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
+      </label>
+      {err && <div style={{ padding: 10, borderRadius: 8, background: `${colors.red}1a`, border: `1px solid ${colors.red}55`, color: colors.red, fontSize: 12, fontWeight: 600 }}>{err}</div>}
+      <button onClick={submit} disabled={saving} style={{ ...primaryBtn, opacity: saving ? 0.6 : 1 }}>
+        {saving ? "Salvataggio…" : "Salva evento"}
+      </button>
+    </Modal>
   );
 }
 

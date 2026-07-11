@@ -9,6 +9,8 @@ import { ScannerPage } from "./pages/ScannerPage";
 import { MathPage } from "./pages/MathPage";
 import { VotiPage } from "./pages/VotiPage";
 import { CalendarioPage } from "./pages/CalendarioPage";
+import { CronologiaPage } from "./pages/CronologiaPage";
+import { MateriaDetailPage } from "./pages/MateriaDetailPage";
 import { ImpostazioniPage } from "./pages/ImpostazioniPage";
 import { useAuth } from "./store/auth";
 import { subscribeUpdaterEvents } from "./store/updater";
@@ -61,6 +63,8 @@ export default function App() {
               <Route path="math" element={<MathPage />} />
               <Route path="voti" element={<VotiPage />} />
               <Route path="calendario" element={<CalendarioPage />} />
+              <Route path="cronologia" element={<CronologiaPage />} />
+              <Route path="materia/:name" element={<MateriaDetailPage />} />
               <Route path="impostazioni" element={<ImpostazioniPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
