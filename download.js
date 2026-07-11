@@ -75,6 +75,9 @@
 
     if (winMatch && winBtn) {
       winBtn.setAttribute("href", winMatch.asset.browser_download_url);
+      // Safari: senza `download` attribute con nome file, il link cross-origin
+      // viene "navigato" invece che scaricato quando l'utente clicca.
+      winBtn.setAttribute("download", winMatch.asset.name || "");
       if (winInfo)
         winInfo.textContent =
           "Installer .exe · x64 · " + formatBytes(winMatch.asset.size);
@@ -92,6 +95,7 @@
 
     if (macMatch && macBtn) {
       macBtn.setAttribute("href", macMatch.asset.browser_download_url);
+      macBtn.setAttribute("download", macMatch.asset.name || "");
       if (macInfo)
         macInfo.textContent = "DMG · universal · " + formatBytes(macMatch.asset.size);
       if (macVer)
