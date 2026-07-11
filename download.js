@@ -2,18 +2,22 @@
 // Fetches the latest release from GitHub API and updates the download links
 // so the site always points to the newest installer without manual edits.
 //
-// Repo: Showdah22/VotoPlus-Desktop
-// Endpoint: https://api.github.com/repos/{owner}/{repo}/releases/latest
+// Repo: Showdah22/VotoPlus-Website (single-repo setup: sito + app desktop)
+// Endpoint: https://api.github.com/repos/{owner}/{repo}/releases
 //
-// Fallback: if API is rate-limited or offline, we fall back to /releases/latest
-// which GitHub auto-redirects to the highest tag.
+// Robustness:
+//  - Iteriamo la lista di release (non solo /latest) così se la release più
+//    recente è ancora "in corso" di upload (durante un GitHub Actions workflow)
+//    ripieghiamo automaticamente sull'ultima con asset validi per la piattaforma.
+//  - Se GitHub API è irraggiungibile (rate-limit / offline) fallback a /releases.
 
 (function () {
   "use strict";
 
   var OWNER = "Showdah22";
   var REPO = "VotoPlus-Website";
-  var API_URL = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/releases/latest";
+  var API_URL =
+    "https://api.github.com/repos/" + OWNER + "/" + REPO + "/releases?per_page=10";
   var RELEASES_URL = "https://github.com/" + OWNER + "/" + REPO + "/releases";
 
   var winBtn = document.getElementById("dl-win");
@@ -40,51 +44,69 @@
     if (macBtn) macBtn.setAttribute("href", RELEASES_URL);
   }
 
-  function updateButtons(release) {
-    if (!release || !release.assets) {
-      setFallback();
-      return;
-    }
-
-    var version = release.tag_name || release.name || "";
-    var winAsset = null;
-    var macAsset = null;
-
-    for (var i = 0; i < release.assets.length; i++) {
-      var a = release.assets[i];
-      var n = (a.name || "").toLowerCase();
-      if (!winAsset && (n.endsWith(".exe") || n.indexOf("setup") !== -1)) {
-        winAsset = a;
-      }
-      if (!macAsset && n.endsWith(".dmg")) {
-        macAsset = a;
+  // Trova l'ultima release che ha un asset che soddisfa `predicate`.
+  // Salta bozze e pre-release. Ritorna { release, asset } o null.
+  function findFirstReleaseWithAsset(releases, predicate) {
+    if (!Array.isArray(releases)) return null;
+    for (var i = 0; i < releases.length; i++) {
+      var r = releases[i];
+      if (r.draft || r.prerelease) continue;
+      var assets = r.assets || [];
+      for (var j = 0; j < assets.length; j++) {
+        if (predicate(assets[j])) {
+          return { release: r, asset: assets[j] };
+        }
       }
     }
+    return null;
+  }
 
-    if (winAsset && winBtn) {
-      winBtn.setAttribute("href", winAsset.browser_download_url);
-      if (winInfo) winInfo.textContent = "Installer .exe · x64 · " + formatBytes(winAsset.size);
-      if (winVer && version) winVer.textContent = "Versione " + version;
+  function isWinAsset(a) {
+    var n = (a.name || "").toLowerCase();
+    return n.endsWith(".exe") || n.indexOf("setup") !== -1;
+  }
+  function isMacAsset(a) {
+    return (a.name || "").toLowerCase().endsWith(".dmg");
+  }
+
+  function updateButtons(releases) {
+    var winMatch = findFirstReleaseWithAsset(releases, isWinAsset);
+    var macMatch = findFirstReleaseWithAsset(releases, isMacAsset);
+
+    if (winMatch && winBtn) {
+      winBtn.setAttribute("href", winMatch.asset.browser_download_url);
+      if (winInfo)
+        winInfo.textContent =
+          "Installer .exe · x64 · " + formatBytes(winMatch.asset.size);
+      if (winVer)
+        winVer.textContent =
+          "Versione " + (winMatch.release.tag_name || winMatch.release.name || "");
     } else if (winBtn) {
       winBtn.classList.add("disabled");
-      winBtn.textContent = "Non ancora disponibile";
+      winBtn.textContent = "In arrivo";
       winBtn.setAttribute("href", "#");
-      winBtn.addEventListener("click", function (e) { e.preventDefault(); });
+      winBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+      });
     }
 
-    if (macAsset && macBtn) {
-      macBtn.setAttribute("href", macAsset.browser_download_url);
-      if (macInfo) macInfo.textContent = "DMG · universal · " + formatBytes(macAsset.size);
-      if (macVer && version) macVer.textContent = "Versione " + version;
+    if (macMatch && macBtn) {
+      macBtn.setAttribute("href", macMatch.asset.browser_download_url);
+      if (macInfo)
+        macInfo.textContent = "DMG · universal · " + formatBytes(macMatch.asset.size);
+      if (macVer)
+        macVer.textContent =
+          "Versione " + (macMatch.release.tag_name || macMatch.release.name || "");
     } else if (macBtn) {
       macBtn.classList.add("disabled");
       macBtn.textContent = "In arrivo";
       macBtn.setAttribute("href", "#");
-      macBtn.addEventListener("click", function (e) { e.preventDefault(); });
+      macBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+      });
     }
   }
 
-  // Fetch latest release
   fetch(API_URL, { headers: { Accept: "application/vnd.github+json" } })
     .then(function (res) {
       if (!res.ok) throw new Error("HTTP " + res.status);
@@ -92,7 +114,7 @@
     })
     .then(updateButtons)
     .catch(function (err) {
-      console.warn("[voto+] Latest release fetch failed, using fallback:", err);
+      console.warn("[voto+] Releases fetch failed, using fallback:", err);
       setFallback();
     });
 })();
