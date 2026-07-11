@@ -16,6 +16,15 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.6.3",
+    date: "2026-07-11",
+    title: "Il prof apre la conversazione",
+    emoji: "🎤",
+    highlights: [
+      { icon: "mic", title: "Il prof rompe il ghiaccio", body: "Nella modalità Realtime ora è il professore ad aprire la conversazione con il saluto + prima domanda, invece di aspettare che parli tu. UX più naturale, come in un'interrogazione vera." },
+    ],
+  },
+  {
     version: "0.6.2",
     date: "2026-07-11",
     title: "Interrogazione Realtime + parity mobile completa + icona macOS",
