@@ -381,47 +381,7 @@ export function MathPage() {
 
       {result && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{
-            padding: 20,
-            borderRadius: radius.lg,
-            background: `${colors.cyan}0d`,
-            border: `1px solid ${colors.cyan}55`,
-          }}>
-            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", color: colors.cyan, marginBottom: 10 }}>
-              Soluzione
-            </div>
-            {result.solution && (
-              <div style={{ fontSize: 14, lineHeight: 1.7, whiteSpace: "pre-wrap", color: colors.textPrimary }}>
-                {result.solution}
-              </div>
-            )}
-            {result.steps && Array.isArray(result.steps) && (
-              <ol style={{ paddingLeft: 20, marginTop: 12 }}>
-                {result.steps.map((s: any, i: number) => (
-                  <li key={i} style={{ marginBottom: 8, fontSize: 14, lineHeight: 1.6 }}>
-                    {typeof s === "string" ? s : (s.text || s.description || JSON.stringify(s))}
-                  </li>
-                ))}
-              </ol>
-            )}
-            {result.final_answer && (
-              <div style={{
-                marginTop: 16,
-                padding: 12,
-                borderRadius: radius.sm,
-                background: `${colors.green}14`,
-                border: `1px solid ${colors.green}55`,
-              }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: colors.green, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 }}>Risultato</div>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>{result.final_answer}</div>
-              </div>
-            )}
-            {!result.solution && !result.steps && !result.final_answer && (
-              <pre style={{ fontSize: 12, color: colors.textSub, overflow: "auto" }}>
-                {JSON.stringify(result, null, 2)}
-              </pre>
-            )}
-          </div>
+          <MathResult result={result} />
           <button
             onClick={reset}
             style={{
@@ -440,6 +400,179 @@ export function MathPage() {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Render della risposta /api/math/solve. Il backend ritorna la struttura:
+ * {
+ *   id, user_id, type: "math", problem, topic,
+ *   result: {
+ *     is_off_topic, problem, result, result_latex,
+ *     steps: [{ title, explanation, math }],
+ *     simple_explanation,
+ *     similar_exercises: string[],
+ *     topic, difficulty, graph
+ *   }
+ * }
+ * Ne rendiamo una versione elegante con highlight del risultato finale +
+ * step numerati con formula monospace + esercizi simili clicabili.
+ */
+function MathResult({ result, title }: { result: any; title?: string }) {
+  const r = result?.result || result || {};
+  const finalAnswer: string = r.result || r.result_latex || "";
+  const steps: Array<{ title?: string; explanation?: string; math?: string }> = Array.isArray(r.steps) ? r.steps : [];
+  const simple: string = r.simple_explanation || "";
+  const similar: string[] = Array.isArray(r.similar_exercises) ? r.similar_exercises : [];
+  const topic: string = r.topic || result?.topic || "";
+  const difficulty: string = r.difficulty || "";
+  const isOffTopic = !!r.is_off_topic;
+
+  if (isOffTopic) {
+    return (
+      <div style={{
+        padding: 20, borderRadius: radius.lg,
+        background: `${colors.orange}12`, border: `1px solid ${colors.orange}55`,
+      }}>
+        <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: colors.orange, marginBottom: 8 }}>
+          Non è un problema di matematica
+        </div>
+        <div style={{ fontSize: 14, color: colors.textSub, lineHeight: 1.6 }}>
+          Riformula la richiesta o incolla un esercizio numerico/algebrico.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {/* Header con topic + difficoltà */}
+      {(topic || difficulty) && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {topic && <Chip color={colors.cyan}>{topic}</Chip>}
+          {difficulty && <Chip color={colors.orange}>Difficoltà: {difficulty}</Chip>}
+        </div>
+      )}
+
+      {/* Titolo (dal problema o dal titolo passato) */}
+      {(result.problem || r.problem || title) && (
+        <div style={{ fontSize: 15, color: colors.textSub, fontStyle: "italic", lineHeight: 1.5 }}>
+          {result.problem || r.problem || title}
+        </div>
+      )}
+
+      {/* Risultato finale */}
+      {finalAnswer && (
+        <div style={{
+          padding: 18, borderRadius: radius.lg,
+          background: `linear-gradient(135deg, ${colors.green}18, ${colors.cyan}12)`,
+          border: `1.5px solid ${colors.green}66`,
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: colors.green, marginBottom: 6 }}>
+            Risultato
+          </div>
+          <div style={{
+            fontSize: 22, fontWeight: 900,
+            fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
+            color: "#fff", letterSpacing: -0.2,
+          }}>
+            {finalAnswer}
+          </div>
+        </div>
+      )}
+
+      {/* Step-by-step */}
+      {steps.length > 0 && (
+        <div style={{
+          padding: 18, borderRadius: radius.lg,
+          background: colors.bgGlass, border: `1px solid ${colors.border}`,
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: colors.cyan, marginBottom: 14 }}>
+            Soluzione passo passo
+          </div>
+          <ol style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 14 }}>
+            {steps.map((s, i) => (
+              <li key={i} style={{ display: "flex", gap: 12 }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: 999,
+                  background: `${colors.cyan}18`, border: `1px solid ${colors.cyan}55`,
+                  color: colors.cyan, fontWeight: 900, fontSize: 12,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>{i + 1}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {s.title && <div style={{ fontSize: 14, fontWeight: 800, color: "#fff", marginBottom: 4 }}>{s.title}</div>}
+                  {s.explanation && <div style={{ fontSize: 13, color: colors.textSub, lineHeight: 1.6, marginBottom: s.math ? 6 : 0 }}>{s.explanation}</div>}
+                  {s.math && (
+                    <div style={{
+                      padding: "8px 12px",
+                      borderRadius: radius.sm,
+                      background: colors.bg,
+                      border: `1px solid ${colors.border}`,
+                      fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
+                      fontSize: 13.5,
+                      color: colors.textPrimary,
+                      overflowX: "auto",
+                    }}>{s.math}</div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Spiegamelo facile */}
+      {simple && (
+        <div style={{
+          padding: 16, borderRadius: radius.lg,
+          background: `${colors.purple}0d`, border: `1px solid ${colors.purple}44`,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <Sparkles size={14} color={colors.purple} />
+            <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: colors.purple }}>
+              Spiegamelo facile
+            </div>
+          </div>
+          <div style={{ fontSize: 14, color: colors.textPrimary, lineHeight: 1.65 }}>{simple}</div>
+        </div>
+      )}
+
+      {/* Esercizi simili */}
+      {similar.length > 0 && (
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: colors.textMuted, marginBottom: 8 }}>
+            Esercizi simili
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {similar.map((q, i) => (
+              <div key={i} style={{
+                padding: "10px 14px",
+                borderRadius: radius.md,
+                background: colors.bgGlass,
+                border: `1px solid ${colors.border}`,
+                fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
+                fontSize: 13, color: colors.textPrimary,
+                display: "flex", alignItems: "center", gap: 8,
+              }}>
+                <Zap size={12} color={colors.cyan} />
+                {q}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Chip({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span style={{
+      fontSize: 10, fontWeight: 900, letterSpacing: 0.8,
+      color, background: `${color}18`, border: `1px solid ${color}55`,
+      padding: "3px 10px", borderRadius: 999, textTransform: "uppercase",
+    }}>{children}</span>
   );
 }
 

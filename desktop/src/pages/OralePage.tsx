@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Mic, Play, ChevronRight, GraduationCap, Sparkles, Star, RefreshCw } from "lucide-react";
+import { Mic, Play, ChevronRight, GraduationCap, Sparkles, Star, RefreshCw, Loader2 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
@@ -139,7 +139,7 @@ export function OralePage() {
       </header>
 
       {!attempt && (
-        <section style={cardStyle()}>
+        <section style={{ ...cardStyle(), opacity: starting ? 0.55 : 1, pointerEvents: starting ? "none" : "auto", transition: "opacity 150ms" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <FieldLabel label="Materia">
               <Select
@@ -195,14 +195,15 @@ export function OralePage() {
             disabled={!subject || starting}
             style={primaryBtn(!subject || starting)}
           >
-            {starting ? "Il prof sta preparando le domande…" : "Inizia interrogazione"}
-            {!starting && <ChevronRight size={16} />}
+            {starting ? (<><Loader2 size={16} className="spin" /> Il prof sta preparando le domande…</>) : (
+              <>Inizia interrogazione <ChevronRight size={16} /></>
+            )}
           </button>
         </section>
       )}
 
       {attempt && !isFinished && (
-        <section style={cardStyle()}>
+        <section style={{ ...cardStyle(), opacity: evaluating ? 0.55 : 1, pointerEvents: evaluating ? "none" : "auto", transition: "opacity 150ms" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ fontSize: 11, letterSpacing: 1.2, fontWeight: 900, color: colors.textMuted, textTransform: "uppercase" }}>
               Domanda {currentQ + 1} / {attempt.questions.length}
@@ -236,8 +237,9 @@ export function OralePage() {
               disabled={!answer.trim() || evaluating}
               style={{ ...primaryBtn(!answer.trim() || evaluating), flex: 1 }}
             >
-              {evaluating ? "Il prof sta valutando…" : "Invia risposta"}
-              {!evaluating && <ChevronRight size={16} />}
+              {evaluating ? (<><Loader2 size={16} className="spin" /> Il prof sta valutando…</>) : (
+                <>Invia risposta <ChevronRight size={16} /></>
+              )}
             </button>
           </div>
 

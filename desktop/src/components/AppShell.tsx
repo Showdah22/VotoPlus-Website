@@ -11,40 +11,31 @@ import { colors } from "../theme";
  *  └────────┴────────────────┘
  */
 export function AppShell() {
-  // Container esterno: su monitor ultrawide viene centrato con maxWidth 1600px
-  // così che sidebar + main + right panel restino visivamente connessi.
-  // Le fasce ai lati usano lo stesso bg dell'app per fondersi con la UI.
+  // Layout full-width responsive: sidebar (280px fissa) + main (flex:1) +
+  // right panel (340px fissa). Su ultrawide il main cresce riempiendo tutto
+  // lo spazio, la griglia interna (auto-fill/minmax) fa crescere il numero
+  // di colonne. Le card NON vengono stirate: hanno minmax con maxima ragionevoli.
   return (
     <div
       style={{
         display: "flex",
-        justifyContent: "center",
         height: "100%",
+        width: "100%",
         background: colors.bg,
       }}
     >
-      <div
+      <Sidebar />
+      <main
         style={{
-          display: "flex",
-          height: "100%",
-          width: "100%",
-          maxWidth: 1600,
-          background: colors.bg,
+          flex: 1,
+          minWidth: 0,
+          overflow: "auto",
+          padding: 24,
         }}
       >
-        <Sidebar />
-        <main
-          style={{
-            flex: 1,
-            minWidth: 0,
-            overflow: "auto",
-            padding: 24,
-          }}
-        >
-          <Outlet />
-        </main>
-        <RightPanel />
-      </div>
+        <Outlet />
+      </main>
+      <RightPanel />
     </div>
   );
 }

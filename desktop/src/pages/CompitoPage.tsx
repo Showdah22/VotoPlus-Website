@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Timer, Play, Clock, CheckCircle2, XCircle, ChevronRight, RefreshCw } from "lucide-react";
+import { Timer, Play, Clock, CheckCircle2, XCircle, ChevronRight, RefreshCw, Loader2 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
@@ -153,7 +153,7 @@ export function CompitoPage() {
       </header>
 
       {!cw && (
-        <section style={cardStyle()}>
+        <section style={{ ...cardStyle(), opacity: starting ? 0.55 : 1, pointerEvents: starting ? "none" : "auto", transition: "opacity 150ms" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <FieldLabel label="Materia">
               <Select value={subject} onChange={setSubject} options={subjects.map((s) => ({ value: s, label: s }))} placeholder="— Seleziona —" />
@@ -174,7 +174,7 @@ export function CompitoPage() {
           {err && <ErrorBox msg={err} />}
 
           <button onClick={onStart} disabled={!subject || starting} style={primaryBtn(!subject || starting, colors.orange, colors.pink)}>
-            {starting ? "Generazione compito…" : (<><Play size={16} /> Inizia compito</>)}
+            {starting ? (<><Loader2 size={16} className="spin" /> Generazione compito…</>) : (<><Play size={16} /> Inizia compito</>)}
           </button>
         </section>
       )}
@@ -191,8 +191,9 @@ export function CompitoPage() {
           <div style={{ display: "flex", gap: 10 }}>
             <button onClick={reset} style={secondaryBtn()}>Annulla</button>
             <button onClick={onSubmit} disabled={submitting} style={{ ...primaryBtn(submitting, colors.orange, colors.pink), flex: 1 }}>
-              {submitting ? "Correzione in corso…" : "Consegna compito"}
-              {!submitting && <ChevronRight size={16} />}
+              {submitting ? (<><Loader2 size={16} className="spin" /> Correzione in corso…</>) : (
+                <>Consegna compito <ChevronRight size={16} /></>
+              )}
             </button>
           </div>
         </>

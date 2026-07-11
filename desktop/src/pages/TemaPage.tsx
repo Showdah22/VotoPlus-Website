@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PenLine, Sparkles, Clock, ChevronRight, FileText } from "lucide-react";
+import { PenLine, Sparkles, Clock, ChevronRight, FileText, Loader2 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
@@ -84,7 +84,7 @@ export function TemaPage() {
         </div>
       </header>
 
-      <section style={cardStyle()}>
+      <section style={{ ...cardStyle(), opacity: loading ? 0.55 : 1, pointerEvents: loading ? "none" : "auto", transition: "opacity 150ms" }}>
         <FieldLabel label="Argomento">
           <input
             value={topic}
@@ -92,14 +92,15 @@ export function TemaPage() {
             placeholder="es. Il ruolo dei social media nella democrazia contemporanea"
             style={txtInput()}
             autoFocus
+            disabled={loading}
           />
         </FieldLabel>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <FieldLabel label="Tipologia">
-            <Select value={type} onChange={setType} options={TYPES} />
+            <Select value={type} onChange={setType} options={TYPES} disabled={loading} />
           </FieldLabel>
           <FieldLabel label="Lunghezza">
-            <Select value={length} onChange={setLength} options={LENGTHS} />
+            <Select value={length} onChange={setLength} options={LENGTHS} disabled={loading} />
           </FieldLabel>
         </div>
 
@@ -110,7 +111,7 @@ export function TemaPage() {
           disabled={!topic.trim() || loading}
           style={primaryBtn(!topic.trim() || loading, colors.cyan, colors.blue)}
         >
-          {loading ? "Generazione traccia in corso…" : (
+          {loading ? (<><Loader2 size={16} className="spin" /> Generazione traccia in corso…</>) : (
             <><Sparkles size={16} /> Genera traccia</>
           )}
         </button>

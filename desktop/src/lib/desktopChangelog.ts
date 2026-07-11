@@ -16,6 +16,18 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.6.0",
+    date: "2026-07-11",
+    title: "Fullscreen + Mappa SVG + Loading spinner + Matematica rendered",
+    emoji: "🗺️",
+    highlights: [
+      { icon: "maximize", title: "UI fullscreen davvero fullscreen", body: "Rimosso il tetto di 1600px: sidebar + main + right panel ora si espandono per riempire tutta la finestra su monitor ultrawide. La griglia interna (materie, cronologia) aggiunge automaticamente colonne per usare lo spazio senza stirare le card." },
+      { icon: "git-branch", title: "Mappa concettuale ridisegnata in SVG", body: "Nuovo rendering ad albero orizzontale con nodi arrotondati (root al centro, figli distribuiti proporzionalmente al numero di sottonodi) e connettori curvi Bezier con freccia. Ogni ramo eredita il colore del nodo, come in una mappa concettuale vera." },
+      { icon: "refresh-cw", title: "Loading spinner + UI bloccata durante le chiamate AI", body: "Ora quando premi 'Genera' su Tema, Compito, Interrogazione, Vocabolario o Mappa vedi la rotellina che gira dentro il bottone e il form diventa non-interattivo finché l'AI risponde. Niente più doppi click accidentali." },
+      { icon: "calculator", title: "Matematica: risposta AI renderizzata bene", body: "Prima mostrava il JSON grezzo. Ora vedi il risultato in evidenza, gli step numerati con formula in mono-font, la spiegazione facile in card viola e gli esercizi simili suggeriti." },
+    ],
+  },
+  {
     version: "0.5.0",
     date: "2026-07-11",
     title: "Single instance + Scanner multi-sorgente + Piani/utilizzi",

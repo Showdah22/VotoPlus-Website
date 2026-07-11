@@ -81,8 +81,10 @@ export function HomePage() {
         Cosa vuoi studiare oggi?
       </div>
 
-      {/* Big actions */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      {/* Big actions — su ultrawide restano ben proporzionate grazie a
+          repeat(auto-fit, minmax): 2 card fino a ~1400px, poi si aggiungono
+          righe/wrap. maxWidth 1400 per non stirarle troppo su monitor 4K. */}
+      <div style={{ maxWidth: 1400, width: "100%", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 16 }}>
         <BigCard
           icon={ScanLine}
           title="Scannerizza & Riassumi"

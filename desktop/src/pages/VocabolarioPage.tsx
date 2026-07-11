@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Trash2, Sparkles, Book, ChevronRight } from "lucide-react";
+import { Search, Trash2, Sparkles, Book, ChevronRight, Loader2 } from "lucide-react";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
@@ -161,7 +161,7 @@ export function VocabolarioPage() {
               gap: 6,
             }}
           >
-            <Sparkles size={14} /> Cerca
+            {loading ? (<><Loader2 size={14} className="spin" /> Ricerca…</>) : (<><Sparkles size={14} /> Cerca</>)}
           </button>
         </div>
         <input
