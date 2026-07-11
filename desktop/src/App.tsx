@@ -12,6 +12,11 @@ import { CalendarioPage } from "./pages/CalendarioPage";
 import { CronologiaPage } from "./pages/CronologiaPage";
 import { MateriaDetailPage } from "./pages/MateriaDetailPage";
 import { ImpostazioniPage } from "./pages/ImpostazioniPage";
+import { FlashcardsPage } from "./pages/FlashcardsPage";
+import { VocabolarioPage } from "./pages/VocabolarioPage";
+import { AchievementsPage } from "./pages/AchievementsPage";
+import { NovitaPage } from "./pages/NovitaPage";
+import { ComingSoonPage } from "./pages/ComingSoonPage";
 import { useAuth } from "./store/auth";
 import { subscribeUpdaterEvents } from "./store/updater";
 import { colors } from "./theme";
@@ -66,6 +71,43 @@ export default function App() {
               <Route path="cronologia" element={<CronologiaPage />} />
               <Route path="materia/:name" element={<MateriaDetailPage />} />
               <Route path="impostazioni" element={<ImpostazioniPage />} />
+              <Route path="flashcards" element={<FlashcardsPage />} />
+              <Route path="vocabolario" element={<VocabolarioPage />} />
+              <Route path="traguardi" element={<AchievementsPage />} />
+              <Route path="novita" element={<NovitaPage />} />
+              <Route
+                path="orale"
+                element={
+                  <ComingSoonPage
+                    title="Interrogazione orale"
+                    subtitle="Allenati all'orale con Dante"
+                    body="La modalità Interrogazione con AI (microfono + risposta vocale) sarà disponibile prossimamente sull'app desktop. Per ora la trovi già completa su mobile."
+                    tint="green"
+                  />
+                }
+              />
+              <Route
+                path="tema"
+                element={
+                  <ComingSoonPage
+                    title="Tema"
+                    subtitle="Traccia e revisione tema/saggio"
+                    body="Il generatore di tracce e la revisione AI dei temi arriveranno con la prossima release desktop. Su mobile è già utilizzabile."
+                    tint="cyan"
+                  />
+                }
+              />
+              <Route
+                path="compito"
+                element={
+                  <ComingSoonPage
+                    title="Compito cronometrato"
+                    subtitle="Esercizi a tempo per allenare la resa sotto pressione"
+                    body="I compiti cronometrati arriveranno prossimamente sul desktop. Nel frattempo puoi usare la stessa funzione dall'app mobile."
+                    tint="orange"
+                  />
+                }
+              />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

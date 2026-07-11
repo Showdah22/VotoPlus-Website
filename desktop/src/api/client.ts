@@ -106,6 +106,39 @@ export const api = {
     body: { type: string; subject: string; title?: string; topic?: string; date: string; time?: string },
     token: string,
   ) => request<any>("/api/events", { method: "POST", body, token }),
+
+  // ===== Sprint 2 =====
+
+  // Flashcards
+  flashcardsList: (token: string) => request<any[]>("/api/flashcards", { token }),
+  flashcardsAdd: (
+    body: { front: string; back: string; subject?: string; material_id?: string | null },
+    token: string,
+  ) => request<any>("/api/flashcards", { method: "POST", body, token }),
+  flashcardsDelete: (id: string, token: string) =>
+    request<{ deleted: number }>(`/api/flashcards/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      token,
+    }),
+
+  // Vocab AI
+  vocabLookup: (
+    body: { word: string; lang?: string; context?: string },
+    token: string,
+  ) => request<any>("/api/vocab/lookup", { method: "POST", body, token }),
+  vocabHistory: (token: string) => request<any[]>("/api/vocab/history", { token }),
+  vocabHistoryDelete: (id: string, token: string) =>
+    request<any>(`/api/vocab/history/${encodeURIComponent(id)}`, { method: "DELETE", token }),
+
+  // Gamification / Achievements
+  gamificationProgress: (token: string) => request<any>("/api/gamification/progress", { token }),
+
+  // Changelog
+  appChangelog: (installed?: string, platform: "android" | "ios" | "web" = "web") => {
+    const params = new URLSearchParams({ platform });
+    if (installed) params.set("installed", installed);
+    return request<{ releases: any[] }>(`/api/app/changelog?${params.toString()}`);
+  },
 };
 
 export const backendUrl = BASE_URL;

@@ -85,12 +85,13 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 640,
     backgroundColor: "#0a0a0f", // colors.bg — allineato al mobile
+    // macOS: hiddenInset lascia i traffic lights nativi in alto-sx.
+    // Windows/Linux: frameless completo → titlebar 100% custom (nostro TitleBar.tsx).
+    // NB: NON usiamo titleBarOverlay perché creava una banda nativa sopra al nostro
+    // TitleBar React (double-render + linea di bordo). Ora la titlebar è unica.
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "hidden",
-    titleBarOverlay:
-      process.platform === "win32"
-        ? { color: "#0a0a0f", symbolColor: "#ffffff", height: 40 }
-        : undefined,
-    frame: process.platform === "darwin", // macOS: frame nativo con hiddenInset (traffic lights); Windows/Linux: frameless con overlay
+    trafficLightPosition: process.platform === "darwin" ? { x: 12, y: 8 } : undefined,
+    frame: process.platform === "darwin",
     show: false, // mostro dopo ready-to-show per evitare flicker
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),

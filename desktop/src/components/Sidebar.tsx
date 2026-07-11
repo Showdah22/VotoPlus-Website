@@ -2,7 +2,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   Home,
   Clock,
-  BookOpen,
   Settings,
   LogOut,
   Flame,
@@ -16,6 +15,8 @@ import {
   Calculator,
   Calendar,
   BarChart3,
+  Trophy,
+  Sparkles,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { colors, radius } from "../theme";
@@ -144,11 +145,11 @@ export function Sidebar() {
         <div>
           <div style={sectionTitle}>Azioni rapide</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <QuickAction icon={Mic} label="Interrogazione" hint="Allenati all'orale" color={colors.green} to="/oral-coming" />
-            <QuickAction icon={PenLine} label="Tema" hint="Traccia tema/saggio" color={colors.cyan} to="/tema-coming" />
-            <QuickAction icon={Timer} label="Compito" hint="Esercizi cronometrati" color={colors.orange} to="/compito-coming" />
-            <QuickAction icon={Book} label="Vocabolario AI" hint="Significato ed esempi" color={colors.purple} to="/vocab-coming" />
-            <QuickAction icon={Layers} label="Flashcard" hint="Ripasso rapido" color={colors.pink} to="/flashcards-coming" />
+            <QuickAction icon={Mic} label="Interrogazione" hint="Allenati all'orale" color={colors.green} to="/orale" />
+            <QuickAction icon={PenLine} label="Tema" hint="Traccia tema/saggio" color={colors.cyan} to="/tema" />
+            <QuickAction icon={Timer} label="Compito" hint="Esercizi cronometrati" color={colors.orange} to="/compito" />
+            <QuickAction icon={Book} label="Vocabolario AI" hint="Significato ed esempi" color={colors.purple} to="/vocabolario" />
+            <QuickAction icon={Layers} label="Flashcard" hint="Ripasso rapido" color={colors.pink} to="/flashcards" />
           </div>
         </div>
 
@@ -162,6 +163,8 @@ export function Sidebar() {
             <NavItem to="/voti" icon={BarChart3} label="Voti" />
             <NavItem to="/calendario" icon={Calendar} label="Calendario" />
             <NavItem to="/cronologia" icon={Clock} label="Cronologia" />
+            <NavItem to="/traguardi" icon={Trophy} label="Traguardi" />
+            <NavItem to="/novita" icon={Sparkles} label="Novità" />
             <NavItem to="/impostazioni" icon={Settings} label="Impostazioni" />
           </div>
         </div>
@@ -216,10 +219,7 @@ function QuickAction({
   const navigate = useNavigate();
   return (
     <button
-      onClick={() => {
-        // Per ora azioni rapide non ancora attive → apre alert soft
-        alert(`${label} — in arrivo nella prossima release`);
-      }}
+      onClick={() => navigate(to)}
       style={{
         display: "flex",
         alignItems: "center",

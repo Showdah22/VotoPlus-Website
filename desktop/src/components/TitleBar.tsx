@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Minus, Square, X, Copy } from "lucide-react";
 import { colors } from "../theme";
-// Import diretto dell'icona: Vite la hash-a e la referenzia con path relativo
-// che funziona sia in dev che in produzione (file:// protocol di Electron).
 import votoIcon from "../assets/voto-icon.png";
 
-// TitleBar custom — solo su Windows (frameless completo). Su macOS mostriamo
-// solo il logo/titolo perché i traffic lights sono nativi (titleBarStyle: hiddenInset).
+// TitleBar custom — stile macOS: sottile (30px) + brand centrato.
+// Su Windows i controlli finestra (min/max/close) sono a destra (frameless completo).
+// Su macOS i traffic lights nativi sono a sinistra (titleBarStyle: hiddenInset)
+// e occupano ~78px → compensiamo con spacer per mantenere il brand esattamente al centro.
 export function TitleBar() {
   const [platform, setPlatform] = useState<NodeJS.Platform | null>(null);
   const [maximized, setMaximized] = useState(false);
@@ -17,54 +17,76 @@ export function TitleBar() {
   }, []);
 
   const isWin = platform === "win32";
+  const isMac = platform === "darwin";
+
+  // Larghezze dei blocchi laterali: usiamo la stessa larghezza a sx e dx
+  // così che il brand al centro resti perfettamente centrato.
+  // Win: 3 pulsanti da 46px = 138px. Mac: traffic lights ~78px.
+  const sideWidth = isWin ? 138 : isMac ? 78 : 0;
 
   return (
     <div
       className="drag-region"
       style={{
-        height: 40,
+        height: 30,
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
-        padding: isWin ? "0 0 0 16px" : "0 16px 0 82px", // 82px spazio traffic lights macOS
         background: colors.bg,
-        borderBottom: `1px solid ${colors.border}`,
         flexShrink: 0,
+        position: "relative",
+        userSelect: "none",
       }}
     >
-      {/* Brand */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      {/* Spacer sinistro (traffic lights macOS o simmetria Win) */}
+      <div style={{ width: sideWidth, flexShrink: 0, height: "100%" }} />
+
+      {/* Brand centrato */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          minWidth: 0,
+        }}
+      >
         <img
           src={votoIcon}
           alt="Voto+"
           style={{
-            width: 22,
-            height: 22,
+            width: 16,
+            height: 16,
             objectFit: "contain",
           }}
         />
-        <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: 0.3 }}>
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: 0.2,
+            color: colors.textSub,
+          }}
+        >
           Voto+ Desktop
         </span>
       </div>
 
-      {/* Windows-only window controls */}
-      {isWin && (
-        <div className="no-drag" style={{ display: "flex", height: "100%" }}>
-          <WinCtrl icon={<Minus size={14} />} onClick={() => window.voto.window.minimize()} />
+      {/* Blocco destro: window controls su Win, spacer simmetrico su Mac */}
+      {isWin ? (
+        <div className="no-drag" style={{ display: "flex", height: "100%", flexShrink: 0 }}>
+          <WinCtrl icon={<Minus size={12} />} onClick={() => window.voto.window.minimize()} />
           <WinCtrl
-            icon={maximized ? <Copy size={12} /> : <Square size={12} />}
+            icon={maximized ? <Copy size={11} /> : <Square size={11} />}
             onClick={async () => {
               const isMax = await window.voto.window.maximize();
               setMaximized(isMax);
             }}
           />
-          <WinCtrl
-            icon={<X size={14} />}
-            onClick={() => window.voto.window.close()}
-            danger
-          />
+          <WinCtrl icon={<X size={12} />} onClick={() => window.voto.window.close()} danger />
         </div>
+      ) : (
+        <div style={{ width: sideWidth, flexShrink: 0, height: "100%" }} />
       )}
     </div>
   );
@@ -91,9 +113,12 @@ function WinCtrl({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: hover ? (danger ? "#e81123" : "rgba(255,255,255,0.08)") : "transparent",
+        background: hover ? (danger ? "#e81123" : "rgba(255,255,255,0.06)") : "transparent",
         color: hover && danger ? "#fff" : colors.textSub,
         transition: "background 120ms ease",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
       }}
     >
       {icon}
