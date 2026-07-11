@@ -18,10 +18,10 @@ export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
     version: "0.7.0",
     date: "2026-07-11",
-    title: "Fix accenti Novità + testi Unicode",
-    emoji: "✒️",
+    title: "🐛 Bug Fix — Accenti Novità + testi Unicode",
+    emoji: "🐛",
     highlights: [
-      { icon: "type", title: "Accenti resi correttamente in tutta l'app", body: "Fix ai testi 'Novità', '·' e '—' nella pagina Novità che apparivano come escape Unicode letterali ('Novit\\u00e0'). Ora tutto renderizzato in italiano corretto." },
+      { icon: "type", title: "🐛 Correzione di bug — Accenti resi correttamente in tutta l'app", body: "Fix ai testi 'Novità', '·' e '—' nella pagina Novità che apparivano come escape Unicode letterali ('Novit\\u00e0'). Ora tutto renderizzato in italiano corretto." },
     ],
   },
   {
