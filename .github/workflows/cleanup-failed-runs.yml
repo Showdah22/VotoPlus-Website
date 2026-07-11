@@ -1,0 +1,33 @@
+# Auto-cleanup: cancella automaticamente i workflow run FALLITI del
+# workflow "Release Voto+ Desktop" così la history di Actions resta pulita.
+#
+# Trigger: ogni volta che il workflow "Release Voto+ Desktop" finisce.
+# Se finisce con conclusion=failure, questo workflow lo cancella via API.
+
+name: Cleanup failed runs
+
+on:
+  workflow_run:
+    workflows: ["Release Voto+ Desktop"]
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  delete-if-failed:
+    if: github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete failed workflow run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "Cancello il run fallito $RUN_ID di $REPO"
+          curl -sS -X DELETE \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/actions/runs/$RUN_ID"
+          echo "✓ Run $RUN_ID cancellato"
