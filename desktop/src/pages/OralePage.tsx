@@ -27,10 +27,10 @@ type Evaluation = {
 };
 
 const SEVERITIES = [
-  { value: "facile", label: "Facile — incoraggiante" },
-  { value: "medio", label: "Medio — standard" },
-  { value: "severo", label: "Severo — esigente" },
-  { value: "spietato", label: "Spietato — massima esigenza" },
+  { value: "facile", label: "Comprensivo" },
+  { value: "medio", label: "Standard" },
+  { value: "severo", label: "Esigente" },
+  { value: "spietato", label: "Spietato" },
 ];
 
 export function OralePage() {
@@ -132,7 +132,7 @@ export function OralePage() {
         <div style={{ flex: 1 }}>
           <h1 style={{ margin: 0, fontSize: 28, fontWeight: 900, letterSpacing: -0.5 }}>Interrogazione</h1>
           <p style={{ margin: "4px 0 0 0", color: colors.textSub, fontSize: 13 }}>
-            Allenati all'orale col professore AI. La versione voce arriverà sul desktop in una prossima release.
+            Allenati all'orale col professore AI. Modalità <strong>Voce Realtime</strong> ora attiva su desktop!
           </p>
         </div>
         {stats?.overall != null && (

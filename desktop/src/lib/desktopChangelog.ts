@@ -16,6 +16,20 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.6.2",
+    date: "2026-07-11",
+    title: "Interrogazione Realtime + parity mobile completa + icona macOS",
+    emoji: "🚀",
+    highlights: [
+      { icon: "mic", title: "Interrogazione vocale REALTIME (OpenAI gpt-realtime)", body: "Riscritta da zero con la nuova OpenAI Realtime API su WebRTC. Nessun bottone da premere: parli naturalmente, il prof ti ascolta in tempo reale, ti risponde con voce italiana veramente naturale (voci marin/cedar, GA 2025) e puoi anche interromperlo. Latenza < 500ms." },
+      { icon: "sparkles", title: "Parity 1:1 con l'app mobile", body: "La schermata di setup ora ha tutti gli elementi del mobile: modalità Domande secche / Esposizione + approfondimenti, durata Standard 15min / Lampo 5min, scope 'Tutta la materia' o singoli riassunti (max 8), lingua straniera solo quando serve, argomento obbligatorio, nomi voci italiani (Alex, Marco, Prof. Giorgio, Prof.ssa Sofia, Prof.ssa Chiara)." },
+      { icon: "shield", title: "Filtro allucinazioni Whisper", body: "Non vedrai più frasi come 'Sottotitoli creati dalla comunità Amara.org' quando resti in silenzio: il backend filtra le note allucinazioni di Whisper e chiede semplicemente di riprovare." },
+      { icon: "apple", title: "Icona macOS non trasparente", body: "Nuova icona con sfondo opaco che si visualizza correttamente su Dock, Launchpad e Finder di macOS." },
+      { icon: "graduation-cap", title: "Voto finale automatico", body: "Il prof chiama il tool `end_session` alla fine dell'interrogazione: voto 1-10, punti forti, punti deboli e riepilogo del prof salvati automaticamente in cronologia." },
+      { icon: "mic-off", title: "Controlli live", body: "Durante la sessione: pulsante Silenzia mic, Interrompi audio del prof (barge-in manuale) e Termina anticipatamente." },
+    ],
+  },
+  {
     version: "0.6.0",
     date: "2026-07-11",
     title: "Interrogazione vocale + Mindmap SVG + Fullscreen + Loading spinners + Math parsed",

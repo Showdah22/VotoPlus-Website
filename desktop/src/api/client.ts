@@ -261,6 +261,34 @@ export const api = {
     }
     return data as any;
   },
+
+  // Oral REALTIME (WebRTC bidirezionale)
+  oralRealtimeSession: (
+    body: {
+      subject: string;
+      severity?: string;
+      topic: string;
+      voice?: string;
+      mode?: "domande" | "esposizione";
+      duration_min?: number;
+      language_mode?: "immersione" | "misto" | "italiano";
+      material_ids?: string[];
+    },
+    token: string,
+  ) => request<any>("/api/oral/realtime/session", { method: "POST", body, token }),
+
+  oralRealtimeFinish: (
+    body: {
+      attempt_id: string;
+      grade?: number;
+      grade_label?: string;
+      summary?: string;
+      strengths?: string[];
+      weaknesses?: string[];
+      transcript?: Array<{ role: string; text: string }>;
+    },
+    token: string,
+  ) => request<any>("/api/oral/realtime/finish", { method: "POST", body, token }),
 };
 
 function blobExt(b: Blob): string {
