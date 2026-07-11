@@ -40,7 +40,6 @@ export function TitleBar() {
           style={{
             width: 22,
             height: 22,
-            borderRadius: 6,
             objectFit: "contain",
           }}
         />

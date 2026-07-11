@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
+import votoIcon from "../assets/voto-icon.png";
 
 export function LoginPage() {
   const token = useAuth((s) => s.token);
@@ -49,22 +50,16 @@ export function LoginPage() {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginBottom: 8 }}>
-          <div
+          <img
+            src={votoIcon}
+            alt="Voto+"
             style={{
-              width: 56,
-              height: 56,
-              borderRadius: 16,
-              background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 22,
-              fontWeight: 900,
-              boxShadow: "0 0 30px rgba(168,85,247,0.55)",
+              width: 72,
+              height: 72,
+              objectFit: "contain",
+              filter: "drop-shadow(0 0 24px rgba(168,85,247,0.55))",
             }}
-          >
-            V+
-          </div>
+          />
           <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, letterSpacing: -0.4 }}>
             Bentornato
           </h1>

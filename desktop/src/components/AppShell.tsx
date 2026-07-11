@@ -11,26 +11,40 @@ import { colors } from "../theme";
  *  └────────┴────────────────┘
  */
 export function AppShell() {
+  // Container esterno: su monitor ultrawide viene centrato con maxWidth 1600px
+  // così che sidebar + main + right panel restino visivamente connessi.
+  // Le fasce ai lati usano lo stesso bg dell'app per fondersi con la UI.
   return (
     <div
       style={{
         display: "flex",
+        justifyContent: "center",
         height: "100%",
         background: colors.bg,
       }}
     >
-      <Sidebar />
-      <main
+      <div
         style={{
-          flex: 1,
-          minWidth: 0,
-          overflow: "auto",
-          padding: 24,
+          display: "flex",
+          height: "100%",
+          width: "100%",
+          maxWidth: 1600,
+          background: colors.bg,
         }}
       >
-        <Outlet />
-      </main>
-      <RightPanel />
+        <Sidebar />
+        <main
+          style={{
+            flex: 1,
+            minWidth: 0,
+            overflow: "auto",
+            padding: 24,
+          }}
+        >
+          <Outlet />
+        </main>
+        <RightPanel />
+      </div>
     </div>
   );
 }

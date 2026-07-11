@@ -1,6 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ScanLine, Calculator, BookOpen, TrendingUp } from "lucide-react";
+import {
+  ScanLine,
+  Calculator,
+  BookOpen,
+  TrendingUp,
+  Bookmark,
+  Languages,
+  Globe,
+  Infinity as InfinityIcon,
+  Zap,
+  Leaf,
+  FlaskConical,
+  Palette,
+  Library,
+  GraduationCap,
+  Landmark,
+  Music,
+  Dumbbell,
+  Cpu,
+  Sigma,
+  type LucideIcon,
+} from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
@@ -46,7 +67,7 @@ export function HomePage() {
   const greet = greeting();
 
   return (
-    <div style={{ maxWidth: 1000, display: "flex", flexDirection: "column", gap: 28 }}>
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 28 }}>
       {/* Greeting */}
       <div>
         <div style={{ fontSize: 15, color: colors.textSub }}>
@@ -111,6 +132,7 @@ export function HomePage() {
               const avg = stat?.avg ?? null;
               const count = recentStudies.filter((r) => r.subject === s).length;
               const meta = subjectMeta(s);
+              const SubjIcon = meta.icon;
               const gradeColor = colorForGrade(avg);
               return (
                 <button
@@ -142,7 +164,7 @@ export function HomePage() {
                       background: `${meta.color}1a`, border: `1px solid ${meta.color}55`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                     }}>
-                      <BookOpen size={18} color={meta.color} />
+                      <SubjIcon size={18} color={meta.color} />
                     </div>
                     <div style={{
                       padding: "3px 10px",
@@ -181,6 +203,7 @@ export function HomePage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {recentStudies.slice(0, 3).map((r) => {
               const meta = subjectMeta(r.subject || "Generale");
+              const StudyIcon = meta.icon;
               return (
                 <button
                   key={r.id}
@@ -201,7 +224,7 @@ export function HomePage() {
                     background: `${meta.color}1a`, border: `1px solid ${meta.color}55`,
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <BookOpen size={20} color={meta.color} />
+                    <StudyIcon size={20} color={meta.color} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 800 }}>{r.title}</div>
@@ -228,8 +251,35 @@ function greeting() {
   return { label: "Buonasera, ripasso serale?", emoji: "🌙" };
 }
 
-function subjectMeta(_s: string) {
-  return { color: colors.purple };
+// Mappa materia → icona + colore, allineata 1:1 con /app/frontend/app/(tabs)/index.tsx (SUBJECT_META).
+// Fallback su Bookmark viola come nel mobile.
+const SUBJECT_META: Record<string, { icon: LucideIcon; color: string }> = {
+  Matematica: { icon: Calculator, color: colors.cyan },
+  Storia: { icon: BookOpen, color: colors.orange },
+  Filosofia: { icon: InfinityIcon, color: colors.purple },
+  Fisica: { icon: Zap, color: colors.blue },
+  Italiano: { icon: Languages, color: colors.pink },
+  Inglese: { icon: Globe, color: colors.green },
+  Latino: { icon: GraduationCap, color: colors.purple },
+  Greco: { icon: Library, color: colors.orange },
+  Scienze: { icon: Leaf, color: colors.green },
+  Chimica: { icon: FlaskConical, color: colors.pink },
+  Biologia: { icon: Leaf, color: colors.green },
+  Arte: { icon: Palette, color: colors.pink },
+  // Aggiunte utili non presenti su mobile ma comuni: fallback graziosi
+  "Storia dell'arte": { icon: Palette, color: colors.pink },
+  Geografia: { icon: Globe, color: colors.cyan },
+  Diritto: { icon: Landmark, color: colors.blue },
+  Economia: { icon: Landmark, color: colors.orange },
+  Musica: { icon: Music, color: colors.pink },
+  "Scienze motorie": { icon: Dumbbell, color: colors.green },
+  Informatica: { icon: Cpu, color: colors.cyan },
+  Algebra: { icon: Sigma, color: colors.cyan },
+  Geometria: { icon: Sigma, color: colors.cyan },
+};
+
+function subjectMeta(s: string): { icon: LucideIcon; color: string } {
+  return SUBJECT_META[s] || { icon: Bookmark, color: colors.purple };
 }
 function colorForGrade(g: number | null): string {
   if (g == null) return colors.textMuted;
