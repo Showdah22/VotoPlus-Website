@@ -10,12 +10,6 @@
 #   3. Pubblica su GitHub Releases DI QUESTO STESSO REPO (draft → latest)
 #   4. Genera latest.yml / latest-mac.yml usati da electron-updater
 #      per l'auto-update in-app
-#
-# Come rilasciare una nuova versione:
-#   cd desktop
-#   npm version patch                  # bump version (0.1.0 → 0.1.1) + crea commit + tag v0.1.1
-#   git tag v-desktop-$(node -p "require('./package.json').version") -f  # rinomina tag col prefisso
-#   git push --follow-tags                                                # push tutto
 
 name: Release Voto+ Desktop
 
@@ -23,6 +17,10 @@ on:
   push:
     tags:
       - "v-desktop-*"
+
+# Serve write permission per creare le Release + caricare gli asset
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -41,19 +39,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: desktop/package-lock.json
+          cache: yarn
+          cache-dependency-path: desktop/yarn.lock
 
       - name: Install deps
         working-directory: desktop
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Build & publish (Windows)
         if: matrix.os == 'windows-latest'
         working-directory: desktop
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-builder --win --publish always
+        run: yarn electron-builder --win --publish always
 
       - name: Build & publish (macOS)
         if: matrix.os == 'macos-latest'
@@ -63,4 +61,4 @@ jobs:
           # NOTE: senza Apple Developer ID il DMG è unsigned e Mac Auto-Update NON funziona.
           # Gli utenti dovranno riscaricare manualmente il DMG dal sito.
           CSC_IDENTITY_AUTO_DISCOVERY: false
-        run: npx electron-builder --mac --publish always
+        run: yarn electron-builder --mac --publish always
