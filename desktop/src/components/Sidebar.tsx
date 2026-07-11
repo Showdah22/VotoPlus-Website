@@ -141,23 +141,11 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* Azioni rapide */}
-        <div>
-          <div style={sectionTitle}>Azioni rapide</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <QuickAction icon={Mic} label="Interrogazione" hint="Allenati all'orale" color={colors.green} to="/orale" />
-            <QuickAction icon={PenLine} label="Tema" hint="Traccia tema/saggio" color={colors.cyan} to="/tema" />
-            <QuickAction icon={Timer} label="Compito" hint="Esercizi cronometrati" color={colors.orange} to="/compito" />
-            <QuickAction icon={Book} label="Vocabolario AI" hint="Significato ed esempi" color={colors.purple} to="/vocabolario" />
-            <QuickAction icon={Layers} label="Flashcard" hint="Ripasso rapido" color={colors.pink} to="/flashcards" />
-          </div>
-        </div>
-
-        {/* Nav principale */}
+        {/* Nav principale — Home in primo piano, non richiede scroll */}
         <div>
           <div style={sectionTitle}>Navigazione</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <NavItem to="/" icon={Home} label="Home" end />
+            <NavItem to="/" icon={Home} label="Home" end primary />
             <NavItem to="/scanner" icon={ScanLine} label="Scannerizza" />
             <NavItem to="/math" icon={Calculator} label="Matematica" />
             <NavItem to="/voti" icon={BarChart3} label="Voti" />
@@ -166,6 +154,18 @@ export function Sidebar() {
             <NavItem to="/traguardi" icon={Trophy} label="Traguardi" />
             <NavItem to="/novita" icon={Sparkles} label="Novità" />
             <NavItem to="/impostazioni" icon={Settings} label="Impostazioni" />
+          </div>
+        </div>
+
+        {/* Azioni rapide — sotto la nav principale così Home è subito visibile */}
+        <div>
+          <div style={sectionTitle}>Azioni rapide</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <QuickAction icon={Mic} label="Interrogazione" hint="Allenati all'orale" color={colors.green} to="/orale" />
+            <QuickAction icon={PenLine} label="Tema" hint="Traccia tema/saggio" color={colors.cyan} to="/tema" />
+            <QuickAction icon={Timer} label="Compito" hint="Esercizi cronometrati" color={colors.orange} to="/compito" />
+            <QuickAction icon={Book} label="Vocabolario AI" hint="Significato ed esempi" color={colors.purple} to="/vocabolario" />
+            <QuickAction icon={Layers} label="Flashcard" hint="Ripasso rapido" color={colors.pink} to="/flashcards" />
           </div>
         </div>
       </div>
@@ -261,11 +261,14 @@ function NavItem({
   icon: Icon,
   label,
   end = false,
+  primary = false,
 }: {
   to: string;
   icon: any;
   label: string;
   end?: boolean;
+  /** primary=true → Home: stile leggermente più marcato per essere subito individuato (icona colorata purple, testo bianco anche quando inattivo). */
+  primary?: boolean;
 }) {
   return (
     <NavLink
@@ -275,18 +278,28 @@ function NavItem({
         display: "flex",
         alignItems: "center",
         gap: 10,
-        padding: "9px 12px",
+        padding: primary ? "11px 12px" : "9px 12px",
         borderRadius: radius.sm,
-        fontSize: 13,
-        fontWeight: 700,
-        color: isActive ? "#fff" : colors.textSub,
-        background: isActive ? "rgba(168,85,247,0.14)" : "transparent",
-        border: `1px solid ${isActive ? "rgba(168,85,247,0.5)" : "transparent"}`,
+        fontSize: primary ? 14 : 13,
+        fontWeight: primary ? 800 : 700,
+        color: isActive || primary ? "#fff" : colors.textSub,
+        background: isActive
+          ? "rgba(168,85,247,0.16)"
+          : primary
+          ? "rgba(168,85,247,0.06)"
+          : "transparent",
+        border: `1px solid ${
+          isActive
+            ? "rgba(168,85,247,0.5)"
+            : primary
+            ? "rgba(168,85,247,0.22)"
+            : "transparent"
+        }`,
         textDecoration: "none",
         transition: "all 120ms ease",
       })}
     >
-      <Icon size={15} />
+      <Icon size={primary ? 16 : 15} color={primary ? colors.purple : undefined} />
       <span>{label}</span>
     </NavLink>
   );
