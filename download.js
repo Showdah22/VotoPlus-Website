@@ -75,8 +75,6 @@
 
     if (winMatch && winBtn) {
       winBtn.setAttribute("href", winMatch.asset.browser_download_url);
-      // Safari: senza `download` attribute con nome file, il link cross-origin
-      // viene "navigato" invece che scaricato quando l'utente clicca.
       winBtn.setAttribute("download", winMatch.asset.name || "");
       if (winInfo)
         winInfo.textContent =
@@ -84,6 +82,7 @@
       if (winVer)
         winVer.textContent =
           "Versione " + (winMatch.release.tag_name || winMatch.release.name || "");
+      attachSafariSafeDownload(winBtn);
     } else if (winBtn) {
       winBtn.classList.add("disabled");
       winBtn.textContent = "In arrivo";
@@ -101,6 +100,7 @@
       if (macVer)
         macVer.textContent =
           "Versione " + (macMatch.release.tag_name || macMatch.release.name || "");
+      attachSafariSafeDownload(macBtn);
     } else if (macBtn) {
       macBtn.classList.add("disabled");
       macBtn.textContent = "In arrivo";
@@ -109,6 +109,38 @@
         e.preventDefault();
       });
     }
+  }
+
+  // Su Safari, i download cross-origin verso release GitHub falliscono
+  // perché il primo hop 302 restituisce `Content-Type: text/html` e Safari
+  // decide di trattarlo come navigazione HTML invece che come download.
+  // Fix: al click, forziamo il download tramite un iframe nascosto.
+  // L'iframe carica il DMG URL, riceve `Content-Disposition: attachment`
+  // dal S3 finale e triggera il download nativo del browser senza uscire
+  // dalla pagina votoplus.it.
+  var _dlIframe = null;
+  function attachSafariSafeDownload(btn) {
+    if (!btn || btn._safariSafe) return;
+    btn._safariSafe = true;
+    btn.addEventListener("click", function (e) {
+      var href = btn.getAttribute("href") || "";
+      if (!href || href === "#") return; // guardClick gestirà
+      e.preventDefault();
+      if (!_dlIframe) {
+        _dlIframe = document.createElement("iframe");
+        _dlIframe.style.display = "none";
+        _dlIframe.setAttribute("aria-hidden", "true");
+        _dlIframe.title = "Download frame";
+        document.body.appendChild(_dlIframe);
+      }
+      _dlIframe.src = href;
+      // Feedback visuale
+      var orig = btn.textContent;
+      btn.textContent = "Download in corso…";
+      setTimeout(function () {
+        btn.textContent = orig;
+      }, 3000);
+    });
   }
 
   // Bloccante finché non abbiamo il vero URL: se l'utente clicca prima che
