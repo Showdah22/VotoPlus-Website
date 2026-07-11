@@ -1,0 +1,227 @@
+import { useEffect, useState } from "react";
+import { Calendar, GraduationCap, Sparkles, TrendingUp } from "lucide-react";
+import { colors, radius } from "../theme";
+import { useAuth } from "../store/auth";
+import { api } from "../api/client";
+import { useNavigate } from "react-router-dom";
+
+const eventMeta = (t: string) =>
+  t === "interrogazione"
+    ? { icon: GraduationCap, color: colors.pink, label: "Interrogazione" }
+    : t === "verifica"
+    ? { icon: Sparkles, color: colors.cyan, label: "Verifica" }
+    : t === "esame"
+    ? { icon: TrendingUp, color: colors.orange, label: "Esame" }
+    : { icon: Calendar, color: colors.purple, label: "Evento" };
+
+const daysUntil = (iso: string) => {
+  const t = new Date();
+  t.setHours(0, 0, 0, 0);
+  const d = new Date(iso);
+  d.setHours(0, 0, 0, 0);
+  return Math.round((d.getTime() - t.getTime()) / 86400000);
+};
+
+export function RightPanel() {
+  const token = useAuth((s) => s.token);
+  const navigate = useNavigate();
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      if (!token) return;
+      try {
+        const data = await api.dashboard(token);
+        if (alive) setEvents((data?.upcoming_events || []).slice(0, 8));
+      } catch {
+        // silent — il main content mostra già errori di rete
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [token]);
+
+  return (
+    <aside
+      style={{
+        width: 340,
+        borderLeft: `1px solid ${colors.border}`,
+        background: colors.bg,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "auto",
+        padding: 20,
+        gap: 16,
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          paddingBottom: 12,
+          borderBottom: `1px solid ${colors.border}`,
+        }}
+      >
+        <div
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 10,
+            background: `${colors.pink}1a`,
+            border: `1px solid ${colors.pink}55`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Calendar size={17} color={colors.pink} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 800, fontSize: 14 }}>Prossime scadenze</div>
+          <div style={{ fontSize: 11, color: colors.textMuted }}>
+            Verifiche, interrogazioni ed esami
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{ color: colors.textMuted, fontSize: 12 }}>Caricamento…</div>
+      ) : events.length === 0 ? (
+        <div
+          style={{
+            padding: 20,
+            borderRadius: radius.md,
+            border: `1px dashed ${colors.border}`,
+            background: colors.bgGlass,
+            textAlign: "center",
+          }}
+        >
+          <Calendar size={36} color={colors.textMuted} style={{ margin: "4px auto 8px" }} />
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4 }}>
+            Nessuna scadenza
+          </div>
+          <div style={{ fontSize: 11, color: colors.textMuted, lineHeight: 1.5 }}>
+            Aggiungi verifiche dal calendario per pianificare lo studio.
+          </div>
+          <button
+            onClick={() => navigate("/calendario")}
+            style={{
+              marginTop: 12,
+              padding: "8px 14px",
+              borderRadius: 999,
+              background: `${colors.pink}1a`,
+              border: `1px solid ${colors.pink}55`,
+              color: colors.pink,
+              fontWeight: 700,
+              fontSize: 12,
+            }}
+          >
+            + Aggiungi al calendario
+          </button>
+        </div>
+      ) : (
+        events.map((ev) => {
+          const m = eventMeta(ev.type);
+          const dleft = daysUntil(ev.date);
+          const urgency =
+            dleft <= 2 ? colors.red : dleft <= 5 ? colors.orange : colors.cyan;
+          const dayLabel =
+            dleft < 0 ? "Scaduto" : dleft === 0 ? "Oggi" : dleft === 1 ? "Domani" : `Tra ${dleft} giorni`;
+          const Icon = m.icon;
+          return (
+            <button
+              key={ev.id}
+              onClick={() => navigate("/calendario")}
+              style={{
+                display: "flex",
+                gap: 10,
+                padding: 12,
+                borderRadius: radius.md,
+                background: colors.bgGlass,
+                border: `1px solid ${m.color}55`,
+                textAlign: "left",
+                transition: "transform 120ms ease, border-color 120ms ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.borderColor = `${m.color}aa`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = `${m.color}55`;
+              }}
+            >
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  background: `${m.color}1f`,
+                  border: `1px solid ${m.color}55`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Icon size={18} color={m.color} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 800 }}>
+                  {m.label} · {ev.subject}
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: colors.textSub,
+                    marginTop: 2,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {ev.title || ev.topic || "Senza titolo"}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: 6,
+                    alignItems: "center",
+                  }}
+                >
+                  <span style={{ fontSize: 10, color: colors.textMuted, fontWeight: 700 }}>
+                    {new Date(ev.date).toLocaleDateString("it-IT", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 900,
+                      color: urgency,
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      background: `${urgency}1a`,
+                      border: `1px solid ${urgency}88`,
+                    }}
+                  >
+                    {dayLabel}
+                  </span>
+                </div>
+              </div>
+            </button>
+          );
+        })
+      )}
+    </aside>
+  );
+}

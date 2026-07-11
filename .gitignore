@@ -1,0 +1,25 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+
+# Environments
+.env.local
+.env.*.local
+
+# Build artifacts (Electron/Vite)
+desktop/dist/
+desktop/dist-electron/
+desktop/release/
+desktop/.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

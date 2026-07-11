@@ -12,7 +12,7 @@
   "use strict";
 
   var OWNER = "Showdah22";
-  var REPO = "VotoPlus-Desktop";
+  var REPO = "VotoPlus-Website";
   var API_URL = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/releases/latest";
   var RELEASES_URL = "https://github.com/" + OWNER + "/" + REPO + "/releases";
 
