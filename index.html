@@ -38,6 +38,20 @@
     .platform-card .dl-btn:hover:not(.disabled) { transform: translateY(-1px); }
     .platform-card .version-info { font-size: 11px; color: #666; margin-top: -2px; }
     .desktop-note { margin-top: 30px; padding: 14px 20px; background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.25); border-radius: 12px; color: #a0d8e0; font-size: 13px; max-width: 640px; margin-left: auto; margin-right: auto; }
+
+    /* Mobile stores section */
+    .mobile-stores { max-width: 960px; margin: 20px auto; padding: 40px 24px 20px; text-align: center; }
+    .mobile-stores h2 { font-size: 30px; font-weight: 900; letter-spacing: -1px; margin: 0 0 12px; background: linear-gradient(135deg, #06b6d4, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .mobile-stores p.lead { color: #a8a8b3; font-size: 15px; max-width: 520px; margin: 0 auto 28px; }
+    .store-badges { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .store-badge { display: inline-flex; align-items: center; gap: 12px; padding: 12px 22px; background: #000; border: 1px solid rgba(255,255,255,0.15); border-radius: 14px; text-decoration: none; color: #fff; transition: transform 200ms ease, border-color 200ms ease; min-width: 200px; }
+    .store-badge:hover { transform: translateY(-2px); border-color: rgba(168,85,247,0.5); }
+    .store-badge.disabled { opacity: 0.5; cursor: not-allowed; }
+    .store-badge.disabled:hover { transform: none; border-color: rgba(255,255,255,0.15); }
+    .store-badge .icon { font-size: 30px; line-height: 1; }
+    .store-badge .txt { display: flex; flex-direction: column; text-align: left; line-height: 1.2; }
+    .store-badge .small { font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+    .store-badge .big { font-size: 17px; font-weight: 800; }
   </style>
 </head>
 <body>
@@ -45,7 +59,7 @@
     <div class="badge">📚 PER STUDENTI ITALIANI</div>
     <h1 class="logo">Voto+</h1>
     <p class="tag">L'assistente AI che ti aiuta a studiare meglio, simulare interrogazioni e prendere voti più alti. Pensato per le scuole superiori italiane.</p>
-    <a href="#desktop" class="cta">Scarica per Desktop</a>
+    <a href="#download-start" id="cta-main" class="cta">Scarica ora</a>
   </section>
 
   <section class="features">
@@ -72,6 +86,28 @@
     <div class="feat">
       <h3>🔥 Streak &amp; gamification</h3>
       <p>Studia ogni giorno, sblocca badge e mantieni la motivazione alta.</p>
+    </div>
+  </section>
+
+  <section class="mobile-stores" id="download-start">
+    <div class="badge">📱 SU IPHONE, IPAD E ANDROID</div>
+    <h2>Scarica dagli store</h2>
+    <p class="lead">Voto+ è disponibile su App Store per iPhone e iPad. Presto anche su Google Play per Android.</p>
+    <div class="store-badges">
+      <a id="dl-ios" class="store-badge" href="https://apps.apple.com/it/app/voto/id6787898039" target="_blank" rel="noopener">
+        <span class="icon">🍎</span>
+        <span class="txt">
+          <span class="small">Scarica su</span>
+          <span class="big">App Store</span>
+        </span>
+      </a>
+      <a id="dl-android" class="store-badge disabled" href="#" target="_blank" rel="noopener" aria-disabled="true">
+        <span class="icon">🤖</span>
+        <span class="txt">
+          <span class="small">Disponibile a breve su</span>
+          <span class="big">Google Play</span>
+        </span>
+      </a>
     </div>
   </section>
 
@@ -104,7 +140,7 @@
   </section>
 
   <footer id="download">
-    <p>App in arrivo su <strong>Google Play</strong> 🤖 e <strong>App Store</strong> 🍎</p>
+    <p>Segui <strong>@votoplus.it</strong> per novità e aggiornamenti 📚</p>
     <p>
       <a href="./privacy.html">Privacy Policy</a> ·
       <a href="./terms.html">Termini di Servizio</a> ·

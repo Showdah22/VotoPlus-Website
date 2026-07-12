@@ -132,7 +132,7 @@ export function OralePage() {
         <div style={{ flex: 1 }}>
           <h1 style={{ margin: 0, fontSize: 28, fontWeight: 900, letterSpacing: -0.5 }}>Interrogazione</h1>
           <p style={{ margin: "4px 0 0 0", color: colors.textSub, fontSize: 13 }}>
-            Allenati all'orale col professore AI. Modalità <strong>Voce Realtime</strong> ora attiva su desktop!
+            Allenati all'orale col professore AI. Parla in tempo reale con <strong>Voce Realtime</strong>.
           </p>
         </div>
         {stats?.overall != null && (

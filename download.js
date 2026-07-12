@@ -20,6 +20,79 @@
     "https://api.github.com/repos/" + OWNER + "/" + REPO + "/releases?per_page=10";
   var RELEASES_URL = "https://github.com/" + OWNER + "/" + REPO + "/releases";
 
+  // Store URLs
+  var APP_STORE_URL = "https://apps.apple.com/it/app/voto/id6787898039";
+  var PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=it.votoplus.app";
+  // Google Play attualmente in review (14 giorni). Quando approvato basta
+  // impostare `PLAY_STORE_READY = true` per abilitare il pulsante Android.
+  var PLAY_STORE_READY = false;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Smart CTA: reindirizza il pulsante "Scarica ora" dell'hero al posto
+  // giusto in base al device dell'utente.
+  //   - iOS (iPhone/iPad)  → App Store
+  //   - Android            → Play Store (se pronto), altrimenti fallback
+  //                          alla sezione mobile per mostrare "a breve"
+  //   - Desktop / altro    → scroll alla sezione Desktop
+  // ═══════════════════════════════════════════════════════════════════════
+  function detectPlatform() {
+    var ua = (navigator.userAgent || navigator.vendor || "").toLowerCase();
+    // iPadOS 13+ si maschera come Mac desktop; distinguiamo dai touch events.
+    var isIpadDesktopMode =
+      /macintosh/.test(ua) && "ontouchend" in document && navigator.maxTouchPoints > 1;
+    if (/iphone|ipad|ipod/.test(ua) || isIpadDesktopMode) return "ios";
+    if (/android/.test(ua)) return "android";
+    return "desktop";
+  }
+
+  function wireSmartCta() {
+    var cta = document.getElementById("cta-main");
+    if (!cta) return;
+    var platform = detectPlatform();
+    if (platform === "ios") {
+      cta.setAttribute("href", APP_STORE_URL);
+      cta.setAttribute("target", "_blank");
+      cta.setAttribute("rel", "noopener");
+      cta.textContent = "Scarica su App Store";
+    } else if (platform === "android") {
+      if (PLAY_STORE_READY) {
+        cta.setAttribute("href", PLAY_STORE_URL);
+        cta.setAttribute("target", "_blank");
+        cta.setAttribute("rel", "noopener");
+        cta.textContent = "Scarica su Google Play";
+      } else {
+        cta.setAttribute("href", "#download-start");
+        cta.textContent = "Presto su Google Play";
+      }
+    } else {
+      // Desktop → scroll alla sezione Desktop dove ci sono i .exe/.dmg
+      cta.setAttribute("href", "#desktop");
+      cta.textContent = "Scarica per Desktop";
+    }
+  }
+
+  // Attiva il pulsante Android se il Play Store è pronto
+  function wireAndroidBadge() {
+    var androidBtn = document.getElementById("dl-android");
+    if (!androidBtn) return;
+    if (PLAY_STORE_READY) {
+      androidBtn.setAttribute("href", PLAY_STORE_URL);
+      androidBtn.classList.remove("disabled");
+      androidBtn.removeAttribute("aria-disabled");
+      var small = androidBtn.querySelector(".small");
+      if (small) small.textContent = "Scarica su";
+    } else {
+      // Prevent click quando il Play Store non è ancora pronto
+      androidBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+      });
+    }
+  }
+
+  // Esegui subito (script è defer, quindi DOM già parsato)
+  try { wireSmartCta(); } catch (e) { console.warn("[smart-cta] failed", e); }
+  try { wireAndroidBadge(); } catch (e) { console.warn("[android-badge] failed", e); }
+
   var winBtn = document.getElementById("dl-win");
   var macBtn = document.getElementById("dl-mac");
   var winInfo = document.getElementById("dl-win-info");
