@@ -16,6 +16,16 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.8",
+    date: "2026-07-13",
+    title: "🎨 Icona con contrasto migliorato per Windows",
+    emoji: "✨",
+    highlights: [
+      { icon: "sparkles", title: "✨ Nuova icona con sfondo circolare trasparente", body: "L'icona V+ ora ha un cerchio nero pieno con esterno completamente trasparente: su Windows con tema chiaro (taskbar bianca) il cerchio nero fornisce il contrasto necessario per rendere il monogramma V+ perfettamente visibile. Su tema scuro l'aspetto rimane invariato." },
+      { icon: "image", title: "✨ Multi-risoluzione ottimizzata", body: "Il file .ico Windows include 7 risoluzioni native (16, 24, 32, 48, 64, 128, 256 px) con canale alpha corretto: rendering nitido in taskbar, Alt-Tab, jump list, Start menu, tile Live Windows 11 e cartella app." },
+    ],
+  },
+  {
     version: "0.8.7",
     date: "2026-07-13",
     title: "🎨 Nuova icona Voto+ (Windows + macOS + Linux)",
