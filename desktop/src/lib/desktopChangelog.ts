@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.2",
+    date: "2026-07-13",
+    title: "🐛 Trial universale — via i 7 giorni doppi",
+    emoji: "⏳",
+    highlights: [
+      { icon: "clock", title: "🐛 Correzione — nessun doppio addebito su trial", body: "Prima ogni abbonamento Stripe aggiungeva altri 7 giorni gratis sopra ai 7 giorni di prova che avevi già dall'iscrizione. Ora il backend riconosce il tuo trial in corso e allinea il primo addebito Stripe alla scadenza del tuo trial universale (nessun doppio periodo)." },
+      { icon: "type", title: "✨ Testi CTA più chiari", body: "I pulsanti dei piani ora dicono 'Attiva Premium' invece di 'Attiva con 7gg di prova'. Il banner sotto spiega esattamente come funziona: 7 giorni gratis dal primo accesso a Voto+, poi paghi il piano che preferisci." },
+      { icon: "info", title: "✨ Banner informativo dinamico", body: "Se sei ancora in prova, ti diciamo quanti giorni ti restano e come funziona il passaggio al pagamento. Se sei già oltre, mostriamo un messaggio pulito senza promesse ingannevoli." },
+    ],
+  },
+  {
     version: "0.8.1",
     date: "2026-07-13",
     title: "✨ Cambia piano in un click (mensile ↔ annuale)",

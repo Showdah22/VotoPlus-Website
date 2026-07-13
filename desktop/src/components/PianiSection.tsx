@@ -124,6 +124,8 @@ export function PianiSection() {
     active: boolean;
     provider: "apple" | "google" | "stripe" | null;
     plan_sku: string | null;
+    is_trial: boolean;
+    plan_expires_at: string | null;
   } | null>(null);
   const [portalLoading, setPortalLoading] = useState<Plan["id"] | "manage" | null>(null);
 
@@ -134,6 +136,19 @@ export function PianiSection() {
   const currentPlan: Plan["id"] = currentPlanFromSku ?? currentPlanFromUser;
   const currentProvider = subStatus?.provider ?? null;
   const hasActiveSub = !!subStatus?.active;
+
+  // Trial-onboarding: dato dal backend al primo signup (7gg universali).
+  // È DIVERSO dal trial di Stripe: qui l'utente è già Premium senza aver
+  // pagato. Se si abbona ora, Stripe allinea il primo addebito alla scadenza
+  // del nostro trial (nessun doppio addebito).
+  const isTrialOnboarding = !!subStatus?.is_trial;
+  const trialDaysLeft = (() => {
+    if (!isTrialOnboarding || !subStatus?.plan_expires_at) return 0;
+    const exp = new Date(subStatus.plan_expires_at).getTime();
+    const now = Date.now();
+    if (isNaN(exp) || exp <= now) return 0;
+    return Math.max(1, Math.ceil((exp - now) / (24 * 60 * 60 * 1000)));
+  })();
 
   useEffect(() => {
     if (!token) return;
@@ -146,6 +161,8 @@ export function PianiSection() {
           active: s.active,
           provider: s.provider,
           plan_sku: s.plan_sku,
+          is_trial: s.is_trial,
+          plan_expires_at: s.plan_expires_at,
         }))
         .catch(() => {}),
     ]).finally(() => setLoading(false));
@@ -184,6 +201,8 @@ export function PianiSection() {
             active: status.active,
             provider: status.provider,
             plan_sku: status.plan_sku,
+            is_trial: status.is_trial,
+            plan_expires_at: status.plan_expires_at,
           });
           try {
             await refreshUser?.();
@@ -478,7 +497,7 @@ export function PianiSection() {
           </div>
         )}
 
-        {/* Info Stripe checkout desktop (Fase B 2026-07) */}
+        {/* Info Stripe checkout desktop (allineato al trial universale onboarding) */}
         <div style={{
           marginTop: 14,
           padding: 14,
@@ -491,9 +510,22 @@ export function PianiSection() {
         }}>
           <Crown size={18} color={colors.purple} style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ fontSize: 12.5, color: colors.textSub, lineHeight: 1.6 }}>
-            <strong style={{ color: colors.textPrimary }}>7 giorni di prova gratuita.</strong>{" "}
-            Il checkout si apre nel browser di sistema (via Stripe). Puoi cancellare
-            l&apos;abbonamento in qualsiasi momento senza addebiti durante i primi 7 giorni.
+            {isTrialOnboarding ? (
+              <>
+                <strong style={{ color: colors.textPrimary }}>
+                  Sei già in prova gratuita — ti restano {trialDaysLeft} {trialDaysLeft === 1 ? "giorno" : "giorni"}.
+                </strong>{" "}
+                Se ti abboni ora, il primo addebito parte solo alla fine dei tuoi giorni di prova.
+                Il checkout si apre nel browser di sistema (via Stripe).
+              </>
+            ) : (
+              <>
+                <strong style={{ color: colors.textPrimary }}>Come funziona.</strong>{" "}
+                I 7 giorni di prova gratuita partono automaticamente dal tuo primo accesso a Voto+.
+                Se ti abboni ora, l&apos;addebito è immediato e continui senza interruzioni.
+                Il checkout si apre nel browser di sistema (via Stripe).
+              </>
+            )}
             <br />
             <span style={{ color: colors.textMuted, fontSize: 11 }}>
               Se hai già un abbonamento attivo su iPhone/Android, verrà riconosciuto qui
@@ -634,11 +666,13 @@ function PlanCard({
       : "Attivo su Google Play";
     ctaDisabled = true;
   } else {
-    // Nessuna sub attiva → checkout classico con trial 7gg
+    // Nessuna sub attiva → checkout classico. Se l'utente è in trial-onboarding
+    // il primo addebito Stripe verrà allineato dal backend alla fine del trial
+    // (cioè `plan_expires_at`) — non serve promettere "7gg di prova" qui.
     ctaMode = "checkout";
     ctaLabel = (
       <>
-        Attiva con 7gg di prova <ExternalLink size={12} />
+        Attiva Premium <ExternalLink size={12} />
       </>
     );
   }
