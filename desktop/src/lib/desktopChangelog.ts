@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.9",
+    date: "2026-07-13",
+    title: "🪟 Correzione: icona V+ Windows soltanto",
+    emoji: "🐛",
+    highlights: [
+      { icon: "bug", title: "🐛 Ripristinata icona macOS originale", body: "In v0.8.8 avevo modificato erroneamente anche l'icona macOS/Linux (icon.png) mentre la richiesta era di aggiornare SOLO l'icona Windows (icon.ico). Ora l'icona macOS è stata ripristinata alla versione originale in uso da v0.6.2, e la nuova icona con cerchio nero + esterno trasparente resta attiva solo per Windows." },
+      { icon: "apple", title: "✅ macOS invariato", body: "Dock, Finder e Alt-Tab su Mac usano di nuovo l'icona V+ storica (identica a quella pre-0.8.8), come richiesto." },
+      { icon: "monitor", title: "✅ Windows aggiornato correttamente", body: "Taskbar, Start menu, Alt-Tab e jump list su Windows continuano a mostrare la nuova icona V+ con cerchio nero pieno + esterno trasparente per contrasto ottimale su tema chiaro." },
+    ],
+  },
+  {
     version: "0.8.8",
     date: "2026-07-13",
     title: "🎨 Icona con contrasto migliorato per Windows",
