@@ -8,7 +8,6 @@ import {
   Check,
   ExternalLink,
   Info,
-  Smartphone,
   type LucideIcon,
 } from "lucide-react";
 import { colors, radius } from "../theme";
@@ -112,8 +111,13 @@ const PLANS: Plan[] = [
 export function PianiSection() {
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
+  const refreshUser = useAuth((s) => s.refreshUser);
   const [quota, setQuota] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  // Stripe checkout state (Fase B — 2026-07)
+  const [purchasing, setPurchasing] = useState<Plan["id"] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pollingSince, setPollingSince] = useState<number | null>(null);
 
   const currentPlan = (user?.plan || "free") as Plan["id"];
 
@@ -126,6 +130,85 @@ export function PianiSection() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [token]);
+
+  // Polling subscription status dopo apertura Stripe Checkout esterna.
+  // L'utente completa il pagamento nel browser → Stripe manda webhook al
+  // backend → backend aggiorna il DB. Noi polliamo GET /subscription-status
+  // ogni 3s per max 5 minuti, e appena `active=true` con `provider=stripe`
+  // aggiorniamo user store + notifichiamo l'utente.
+  useEffect(() => {
+    if (!pollingSince || !token) return;
+    let stopped = false;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 100; // ~5 min a 3s interval
+
+    const tick = async () => {
+      if (stopped) return;
+      attempts += 1;
+      if (attempts > MAX_ATTEMPTS) {
+        setPollingSince(null);
+        setError(
+          "Non abbiamo ancora rilevato l'attivazione. Se hai completato il pagamento, chiudi e riapri l'app.",
+        );
+        return;
+      }
+      try {
+        const status = await api.billingSubscriptionStatus(token);
+        if (status.active && status.provider === "stripe") {
+          // Abbonamento attivato! Refresh dell'user store + stop polling.
+          setPollingSince(null);
+          setPurchasing(null);
+          setError(null);
+          try {
+            await refreshUser?.();
+          } catch (_e) {
+            /* refresh ottimistico: se il refresh fallisce non ha importanza,
+               al prossimo refetch dell'user store verrà preso comunque. */
+          }
+          return;
+        }
+      } catch {
+        // Ignora errori transitori (rete), continua polling
+      }
+      if (!stopped) setTimeout(tick, 3000);
+    };
+    setTimeout(tick, 2500); // primo tick dopo 2.5s (dà tempo al webhook)
+    return () => { stopped = true; };
+  }, [pollingSince, token, refreshUser]);
+
+  const handlePurchase = async (planId: Plan["id"]) => {
+    setError(null);
+    if (!token) {
+      setError("Devi essere loggato per acquistare un abbonamento.");
+      return;
+    }
+    if (planId === "free") return;
+    setPurchasing(planId);
+    try {
+      const sku = planId as "premium" | "family" | "school_year" | "maturita";
+      const resp = await api.billingStripeCreateCheckout({ sku }, token);
+      // Apri il checkout nel browser di sistema (fuori dall'Electron)
+      const w = (window as any).voto;
+      if (w?.openExternal) {
+        await w.openExternal(resp.checkout_url);
+      } else {
+        window.open(resp.checkout_url, "_blank");
+      }
+      // Avvia polling per detectare l'attivazione
+      setPollingSince(Date.now());
+    } catch (e: any) {
+      const msg = String(e?.message || e || "Errore sconosciuto");
+      if (msg.includes("409") || msg.toLowerCase().includes("già un abbonamento")) {
+        setError(
+          "Hai già un abbonamento attivo (su App Store, Google Play o Stripe). " +
+          "Gestiscilo dalla piattaforma dove l'hai acquistato.",
+        );
+      } else {
+        setError(`Errore checkout: ${msg}`);
+      }
+      setPurchasing(null);
+    }
+  };
 
   const tierLabel = quota?.tier === "premium" ? "PIANO ATTIVO" : "PIANO FREE";
 
@@ -183,30 +266,84 @@ export function PianiSection() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
           {PLANS.map((p) => (
-            <PlanCard key={p.id} plan={p} isCurrent={currentPlan === p.id} />
+            <PlanCard
+              key={p.id}
+              plan={p}
+              isCurrent={currentPlan === p.id}
+              onPurchase={handlePurchase}
+              purchasing={purchasing === p.id}
+              anyPurchasing={purchasing !== null}
+              pollingActive={pollingSince !== null}
+            />
           ))}
         </div>
 
-        {/* Disclaimer desktop */}
+        {/* Banner errore checkout */}
+        {error && (
+          <div style={{
+            marginTop: 12,
+            padding: 12,
+            borderRadius: radius.sm,
+            background: `${colors.red}15`,
+            border: `1px solid ${colors.red}55`,
+            color: colors.red,
+            fontSize: 12,
+            lineHeight: 1.5,
+          }}>
+            {error}
+          </div>
+        )}
+
+        {/* Banner polling in corso */}
+        {pollingSince && (
+          <div style={{
+            marginTop: 12,
+            padding: 12,
+            borderRadius: radius.sm,
+            background: `${colors.cyan}12`,
+            border: `1px solid ${colors.cyan}55`,
+            color: colors.textSub,
+            fontSize: 12,
+            lineHeight: 1.5,
+            display: "flex",
+            gap: 10,
+            alignItems: "center",
+          }}>
+            <div style={{
+              width: 14,
+              height: 14,
+              borderRadius: "50%",
+              border: `2px solid ${colors.cyan}`,
+              borderTopColor: "transparent",
+              animation: "spin 1s linear infinite",
+            }} />
+            <span>
+              Completa il pagamento nel browser. Appena Stripe ci conferma l&apos;attivazione
+              (di solito entro 10 secondi), l&apos;abbonamento si sbloccherà qui automaticamente.
+            </span>
+          </div>
+        )}
+
+        {/* Info Stripe checkout desktop (Fase B 2026-07) */}
         <div style={{
           marginTop: 14,
           padding: 14,
           borderRadius: radius.md,
-          background: `${colors.cyan}10`,
-          border: `1px solid ${colors.cyan}44`,
+          background: `${colors.purple}10`,
+          border: `1px solid ${colors.purple}44`,
           display: "flex",
           gap: 12,
           alignItems: "flex-start",
         }}>
-          <Smartphone size={18} color={colors.cyan} style={{ flexShrink: 0, marginTop: 2 }} />
+          <Crown size={18} color={colors.purple} style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ fontSize: 12.5, color: colors.textSub, lineHeight: 1.6 }}>
-            <strong style={{ color: colors.textPrimary }}>Acquisti dall'app mobile.</strong>{" "}
-            Al momento gli abbonamenti si acquistano solo dall'app iOS/Android di Voto+.
-            Il tuo abbonamento è riconosciuto anche qui: appena lo attivi, tutte le funzioni
-            Premium sono sbloccate anche sul desktop.
+            <strong style={{ color: colors.textPrimary }}>7 giorni di prova gratuita.</strong>{" "}
+            Il checkout si apre nel browser di sistema (via Stripe). Puoi cancellare
+            l&apos;abbonamento in qualsiasi momento senza addebiti durante i primi 7 giorni.
             <br />
-            <span style={{ color: colors.textMuted, fontStyle: "italic", fontSize: 11 }}>
-              Nelle prossime release integreremo il checkout Stripe direttamente dal desktop.
+            <span style={{ color: colors.textMuted, fontSize: 11 }}>
+              Se hai già un abbonamento attivo su iPhone/Android, verrà riconosciuto qui
+              automaticamente al login — non serve acquistare di nuovo.
             </span>
           </div>
         </div>
@@ -258,7 +395,21 @@ function QuotaBar({ label, used, limit }: { label: string; used: number; limit: 
   );
 }
 
-function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }) {
+function PlanCard({
+  plan,
+  isCurrent,
+  onPurchase,
+  purchasing,
+  anyPurchasing,
+  pollingActive,
+}: {
+  plan: Plan;
+  isCurrent: boolean;
+  onPurchase: (planId: Plan["id"]) => void;
+  purchasing: boolean;
+  anyPurchasing: boolean;
+  pollingActive: boolean;
+}) {
   const { Icon, color, featured } = plan;
   return (
     <article
@@ -338,17 +489,8 @@ function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }) {
       </ul>
 
       <button
-        onClick={() => {
-          // Nessun checkout desktop ancora: apri deep-link universale mobile
-          // (o comunque il sito votoplus.it → download store). Per ora un alert
-          // esplicito, evolveremo con Stripe.
-          alert(
-            plan.id === "free"
-              ? "Sei sul piano Free."
-              : "Per acquistare questo piano usa l'app Voto+ mobile (iOS o Android). L'abbonamento verrà riconosciuto anche qui sul desktop.",
-          );
-        }}
-        disabled={isCurrent || plan.id === "free"}
+        onClick={() => onPurchase(plan.id)}
+        disabled={isCurrent || plan.id === "free" || anyPurchasing || pollingActive}
         style={{
           marginTop: 4,
           padding: "9px 12px",
@@ -358,16 +500,25 @@ function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }) {
           color: isCurrent ? colors.green : plan.id === "free" ? colors.textMuted : color,
           fontWeight: 800,
           fontSize: 12,
-          cursor: isCurrent || plan.id === "free" ? "default" : "pointer",
+          cursor: isCurrent || plan.id === "free" || anyPurchasing || pollingActive ? "default" : "pointer",
+          opacity: (anyPurchasing && !purchasing) || (pollingActive && !purchasing) ? 0.5 : 1,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           gap: 6,
         }}
       >
-        {isCurrent ? "Il tuo piano" : plan.id === "free" ? "Piano base" : <>
-          Acquista su mobile <ExternalLink size={12} />
-        </>}
+        {isCurrent ? (
+          "Il tuo piano"
+        ) : plan.id === "free" ? (
+          "Piano base"
+        ) : purchasing ? (
+          <>Apertura checkout…</>
+        ) : (
+          <>
+            Attiva con 7gg di prova <ExternalLink size={12} />
+          </>
+        )}
       </button>
     </article>
   );

@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.0",
+    date: "2026-07-13",
+    title: "✨ Abbonamenti direttamente dal desktop",
+    emoji: "💳",
+    highlights: [
+      { icon: "credit-card", title: "✨ Acquista Premium senza uscire dall'app", body: "Ora puoi attivare gli abbonamenti Premium, Family, Annuale e Maturità direttamente dall'app desktop. Il checkout si apre nel browser di sistema (Stripe), 7 giorni di prova gratuita, zero addebiti se cancelli entro la settimana." },
+      { icon: "shield-check", title: "✨ Riconosciamo l'abbonamento mobile", body: "Se hai già un abbonamento attivo su iPhone/iPad/Android, viene riconosciuto automaticamente qui — non serve pagare due volte. Il pulsante di acquisto si disabilita se sei già Premium." },
+      { icon: "refresh-cw", title: "✨ Attivazione automatica post-pagamento", body: "Appena Stripe conferma il pagamento (di solito entro 10 secondi), l'abbonamento si sblocca qui automaticamente senza dover chiudere e riaprire l'app." },
+    ],
+  },
+  {
     version: "0.7.0",
     date: "2026-07-11",
     title: "🐛 Bug Fix — Accenti Novità + testi Unicode",

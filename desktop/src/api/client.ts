@@ -227,9 +227,35 @@ export const api = {
       "/api/study/pdf-extract", { method: "POST", body, token },
     ),
 
-  // Quota & billing (readonly su desktop, checkout gestito su mobile finché Stripe non è wired)
+  // Quota & billing
   meQuota: (token: string) => request<any>("/api/me/quota", { token }),
   billingProducts: (token: string) => request<any>("/api/billing/products", { token }),
+
+  // Stripe Desktop (Fase A+B — 2026-07)
+  // Nota cross-provider: se l'utente ha già Premium via Apple/Google (mobile),
+  // il backend risponde 409 e blocca il checkout. Vedi routes/stripe_billing.py.
+  billingSubscriptionStatus: (token: string) =>
+    request<{
+      active: boolean;
+      provider: "apple" | "google" | "stripe" | null;
+      plan: string | null;
+      plan_sku: string | null;
+      plan_expires_at: string | null;
+      is_trial: boolean;
+      auto_renew: boolean;
+      maturita_unlocked: boolean;
+      maturita_expires_at: string | null;
+      stripe_manage_url: string | null;
+    }>("/api/billing/subscription-status", { token }),
+
+  billingStripeCreateCheckout: (
+    body: { sku: "premium" | "family" | "school_year" | "maturita" },
+    token: string,
+  ) =>
+    request<{ checkout_url: string; session_id: string }>(
+      "/api/billing/stripe/create-checkout-session",
+      { method: "POST", body, token },
+    ),
 
   // Oral VOCE (STT+TTS OpenAI)
   oralVoiceStart: (
