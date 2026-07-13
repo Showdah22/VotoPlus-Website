@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Calendar, GraduationCap, Sparkles, TrendingUp, Flame } from "lucide-react";
+import { Calendar, GraduationCap, Sparkles, TrendingUp, Flame, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
+import { useLayout } from "../store/layout";
 import { api } from "../api/client";
 import { useNavigate } from "react-router-dom";
 
@@ -28,6 +29,8 @@ export function RightPanel() {
   const [events, setEvents] = useState<any[]>([]);
   const [nudge, setNudge] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const collapsed = useLayout((s) => s.rightCollapsed);
+  const toggle = useLayout((s) => s.toggleRight);
 
   useEffect(() => {
     let alive = true;
@@ -51,6 +54,62 @@ export function RightPanel() {
     };
   }, [token]);
 
+  // Modalità collapsed: solo icone verticali (Calendar + Flame se nudge attivo)
+  if (collapsed) {
+    return (
+      <aside
+        style={{
+          width: 64,
+          borderLeft: `1px solid ${colors.border}`,
+          background: colors.bg,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "10px 8px",
+          gap: 8,
+          flexShrink: 0,
+          transition: "width 220ms cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        <button
+          onClick={toggle}
+          title="Espandi pannello scadenze"
+          aria-label="Espandi pannello"
+          style={toggleBtnStyle()}
+        >
+          <ChevronsLeft size={16} />
+        </button>
+        <button
+          onClick={() => navigate("/calendario")}
+          title={events.length > 0 ? `${events.length} scadenze in arrivo` : "Calendario"}
+          aria-label="Calendario"
+          style={compactIconBtn(colors.pink)}
+        >
+          <Calendar size={18} color={colors.pink} />
+          {events.length > 0 && (
+            <span style={{
+              position: "absolute", top: -4, right: -4,
+              width: 18, height: 18, borderRadius: 9,
+              background: colors.pink, color: "#fff",
+              fontSize: 10, fontWeight: 900,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>{events.length}</span>
+          )}
+        </button>
+        {nudge && (
+          <button
+            onClick={() => navigate("/")}
+            title={nudge.headline || "Suggerimento del coach"}
+            aria-label="Suggerimento del coach"
+            style={compactIconBtn(colors.orange)}
+          >
+            <Flame size={18} color={colors.orange} />
+          </button>
+        )}
+      </aside>
+    );
+  }
+
   return (
     <aside
       style={{
@@ -63,6 +122,7 @@ export function RightPanel() {
         padding: 20,
         gap: 16,
         flexShrink: 0,
+        transition: "width 220ms cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
       <div
@@ -94,6 +154,14 @@ export function RightPanel() {
             Verifiche, interrogazioni ed esami
           </div>
         </div>
+        <button
+          onClick={toggle}
+          title="Comprimi pannello (solo icone)"
+          aria-label="Comprimi pannello"
+          style={toggleBtnStyle()}
+        >
+          <ChevronsRight size={16} />
+        </button>
       </div>
 
       {loading ? (
@@ -302,4 +370,36 @@ export function RightPanel() {
       )}
     </aside>
   );
+}
+
+function toggleBtnStyle(): React.CSSProperties {
+  return {
+    width: 32,
+    height: 32,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+    background: colors.bgGlass,
+    border: `1px solid ${colors.border}`,
+    color: colors.textSub,
+    cursor: "pointer",
+    flexShrink: 0,
+  };
+}
+
+function compactIconBtn(color: string): React.CSSProperties {
+  return {
+    position: "relative",
+    width: 44,
+    height: 44,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.sm,
+    background: `${color}1a`,
+    border: `1px solid ${color}55`,
+    cursor: "pointer",
+    flexShrink: 0,
+  };
 }

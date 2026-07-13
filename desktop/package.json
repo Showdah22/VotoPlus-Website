@@ -1,7 +1,7 @@
 {
   "name": "voto-plus-desktop",
   "private": true,
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Voto+ Desktop — app companion per Windows e macOS. Studia con Voto+ dal computer.",
   "author": "Voto+ Team",
   "license": "UNLICENSED",
@@ -19,13 +19,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "electron-store": "^10.0.0",
+    "electron-updater": "^6.3.9",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^0.460.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
-    "zustand": "^5.0.1",
-    "lucide-react": "^0.460.0",
-    "electron-store": "^10.0.0",
-    "electron-updater": "^6.3.9"
+    "react-zoom-pan-pinch": "^4.0.3",
+    "svg2pdf.js": "^2.7.0",
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

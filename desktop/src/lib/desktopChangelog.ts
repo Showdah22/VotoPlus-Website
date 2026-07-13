@@ -16,6 +16,20 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.4",
+    date: "2026-07-13",
+    title: "🔍 Mappe più dettagliate + sidebar comprimibili",
+    emoji: "🗺️",
+    highlights: [
+      { icon: "book-open", title: "✨ Mappe concettuali ora studiabili davvero", body: "Ogni nodo della mappa ora include una descrizione concreta di 1-2 frasi (date, nomi, esempi, dati). Basta con 'cause, innovazioni, trasformazioni' senza contenuto — ora leggi la mappa e sai davvero cosa studiare per l'interrogazione." },
+      { icon: "graduation-cap", title: "✨ Collegamenti Maturità (opt-in)", body: "Nuovo toggle 'Aggiungi collegamenti Maturità' nel generatore di mappe: se attivo, la mappa aggiunge un ramo con collegamenti interdisciplinari utili per l'orale (letteratura, storia, filosofia, arte). Default OFF — così se non stai facendo la Maturità, la mappa resta concentrata sulla tua materia." },
+      { icon: "zoom-in", title: "✨ Zoom e trascinamento sulle mappe", body: "Le mappe di 2° e 3° livello ora sono leggibili anche su MacBook Air 13\". Rotellina per zoomare, trascina per spostare, doppio-click per ingrandire, pulsante 'adatta alla finestra'." },
+      { icon: "file-down", title: "✨ Export PDF orizzontale", body: "Nuovo pulsante 'PDF' nella toolbar della mappa: esporta in A4 orizzontale con rendering vettoriale nitido. Perfetto per stampare o condividere." },
+      { icon: "layout-panel-left", title: "✨ Sidebar comprimibile (solo icone)", body: "Nuovo pulsante « in cima alla sidebar sinistra: comprimila per liberare spazio e vedere solo le icone. Ideale su schermi piccoli. La tua scelta resta salvata tra sessioni." },
+      { icon: "layout-panel-right", title: "✨ Pannello scadenze comprimibile", body: "Anche la colonna destra (calendario + streak + coach) è comprimibile: quando è ridotta vedi solo un'icona con badge numerico degli eventi in arrivo. Un click e torna espansa." },
+    ],
+  },
+  {
     version: "0.8.3",
     date: "2026-07-13",
     title: "🐛 Pacchetto Maturità sbloccato + guida cambio piano",

@@ -244,7 +244,7 @@ export const api = {
 
   // Mindmap
   mindmapCreate: (
-    body: { title?: string; subject?: string; text?: string; depth?: "small" | "medium" | "big"; source_material_id?: string },
+    body: { title?: string; subject?: string; text?: string; depth?: "small" | "medium" | "big"; source_material_id?: string; maturita_links?: boolean },
     token: string,
   ) => request<any>("/api/study/mindmap", { method: "POST", body, token }),
   mindmapsList: (token: string) => request<any[]>("/api/mindmaps", { token }),
