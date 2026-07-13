@@ -199,7 +199,7 @@ export function VocabolarioPage() {
         {history.length === 0 ? (
           <Placeholder label="Ancora nessuna ricerca. Prova con una parola qui sopra." />
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 10 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10 }}>
             {history.map((e) => (
               <button
                 key={e.id || `${e.word}-${e.lang}`}

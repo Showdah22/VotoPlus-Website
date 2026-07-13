@@ -143,6 +143,9 @@ export const api = {
     token: string,
   ) => request<any>("/api/math/solve", { method: "POST", body, token }),
 
+  mathHistory: (token: string) =>
+    request<any[]>("/api/math/history", { token }),
+
   gradesRealList: (token: string) =>
     request<any[]>("/api/grades/real", { token }),
 
@@ -216,6 +219,18 @@ export const api = {
   ) => request<any>("/api/oral/evaluate", { method: "POST", body, token }),
   oralHistory: (token: string) => request<any[]>("/api/oral/history", { token }),
   oralStats: (token: string) => request<any>("/api/oral/stats", { token }),
+
+  // Maturità Radar
+  // - `radarSeason` restituisce lo stato attivo/dormiente e i messaggi UI.
+  // - `radar` chiama il backend per generare i contenuti AI di uno specifico tab.
+  radarSeason: (token: string) => request<{
+    state: "active" | "dormant";
+    wake_at: string; sleep_at: string; now: string;
+    title: string; message: string; cta_label: string;
+    year_archived: number; next_year: number;
+  }>("/api/maturita/radar/season", { token }),
+  radar: (body: { tab: string; subject?: string }, token: string) =>
+    request<any>("/api/maturita/radar", { method: "POST", body, token }),
 
   // Tema (essay)
   essayPrompt: (

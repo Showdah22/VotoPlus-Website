@@ -144,7 +144,7 @@ export function AchievementsPage() {
               marginBottom: 10,
               paddingLeft: 4,
             }}>{g}</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
               {groups[g].map((a) => (
                 <AchievementCard key={a.id} a={a} />
               ))}

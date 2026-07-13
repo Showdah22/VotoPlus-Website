@@ -16,8 +16,8 @@ type SubjectStat = {
 
 type StatsResp = {
   by_subject?: SubjectStat[];
-  real?: { averages: SubjectStat[]; overall: number | null };
-  simulation?: { averages: SubjectStat[]; overall: number | null };
+  real?: { by_subject: SubjectStat[]; overall: number | null };
+  simulation?: { by_subject: SubjectStat[]; overall: number | null };
 };
 
 export function VotiPage() {
@@ -48,10 +48,12 @@ export function VotiPage() {
     return () => { alive = false; };
   }, [token, refreshKey]);
 
-  const realAvgs = stats?.real?.averages ?? [];
-  const overall = stats?.real?.overall ?? stats?.simulation?.overall ?? null;
-  const displayAvgs =
-    realAvgs.length > 0 ? realAvgs : stats?.simulation?.averages ?? [];
+  // Media materia mostrata: SOLO voti reali inseriti dall'utente.
+  // Le interrogazioni AI sono simulazioni, non contano nella media (le vedi
+  // separatamente nella pagina Interrogazione).
+  const realAvgs = stats?.real?.by_subject ?? [];
+  const overall = stats?.real?.overall ?? null;
+  const displayAvgs = realAvgs;
 
   return (
     <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
@@ -115,7 +117,7 @@ export function VotiPage() {
             Nessun voto ancora. Aggiungi voti dall'app mobile o fai un'interrogazione simulata.
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
             {displayAvgs.map((s) => (
               <SubjectAvgCard key={s.subject} data={s} />
             ))}

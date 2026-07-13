@@ -169,7 +169,7 @@ export function MindmapPage() {
       {history.length > 0 && (
         <section>
           <h2 style={{ margin: "0 0 12px 0", fontSize: 16, fontWeight: 800 }}>Le tue mappe ({history.length})</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 10 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10 }}>
             {history.map((h) => (
               <button key={h.id} onClick={() => setCurrent(h)} style={{
                 padding: 12,

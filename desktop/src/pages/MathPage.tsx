@@ -8,10 +8,12 @@ import {
   X,
   Zap,
   ArrowRight,
+  TrendingUp,
 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { colors, radius } from "../theme";
+import { MathGraphSVG, type MathGraphData } from "../components/MathGraphSVG";
 
 type Difficulty = "base" | "standard" | "avanzato" | "maturita";
 
@@ -427,6 +429,11 @@ function MathResult({ result, title }: { result: any; title?: string }) {
   const topic: string = r.topic || result?.topic || "";
   const difficulty: string = r.difficulty || "";
   const isOffTopic = !!r.is_off_topic;
+  // Il backend restituisce `graph` quando l'esercizio è graficabile
+  // (funzioni, parabole, sistemi, intervalli). Vedi backend/routes/math.py
+  // per la struttura completa: { type, x_range, y_range, curves[], highlight_points[] }.
+  const graph: MathGraphData | null =
+    r.graph && Array.isArray(r.graph.curves) && r.graph.curves.length > 0 ? r.graph : null;
 
   if (isOffTopic) {
     return (
@@ -478,6 +485,24 @@ function MathResult({ result, title }: { result: any; title?: string }) {
           }}>
             {finalAnswer}
           </div>
+        </div>
+      )}
+
+      {/* Grafico matematico (funzioni, parabole, sistemi) — vettoriale, con
+          curve, punti di interesse (vertici, intersezioni, soluzioni), assi
+          cartesiani e legenda. Renderizzato solo se il backend lo popola. */}
+      {graph && (
+        <div style={{
+          padding: 18, borderRadius: radius.lg,
+          background: colors.bgGlass, border: `1px solid ${colors.border}`,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <TrendingUp size={14} color={colors.purple} />
+            <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: colors.purple }}>
+              Grafico
+            </div>
+          </div>
+          <MathGraphSVG graph={graph} />
         </div>
       )}
 

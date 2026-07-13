@@ -16,6 +16,20 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.6",
+    date: "2026-07-13",
+    title: "🎓 Maturità Radar, grafici matematici, layout finalmente centrato",
+    emoji: "🚀",
+    highlights: [
+      { icon: "radar", title: "✨ Maturità Radar completo (nuova sezione)", body: "Porting completo del Maturità Radar dal mobile: nuovo item 'Maturità Radar' nella sidebar (visibile solo se sei al 5° anno), banner dedicato sulla home, e pagina /radar con tutti e 4 i tab: Trend 2026 con grafico radar animato, Per materia, Attualità, Collegamenti interdisciplinari. Include gate off-season estivo (22 giu → 15 set) con countdown al risveglio automatico." },
+      { icon: "line-chart", title: "✨ Grafici matematici anche su desktop", body: "Quando risolvi un'equazione, una funzione o un sistema che si può visualizzare, ora vedi il grafico cartesiano vettoriale (con curve, assi, punti notevoli come vertici e intersezioni, legenda). Fino a ora questo esisteva solo sul mobile — ora è nitido anche su schermi grandi." },
+      { icon: "history", title: "✨ Interrogazioni sincronizzate mobile ↔ desktop", body: "La pagina Interrogazione ora mostra la cronologia di TUTTE le interrogazioni fatte (mobile + desktop). Click su una card per rivedere le domande, le risposte del prof e il voto. La sezione Cronologia è stata riscritta per includere anche interrogazioni ed esercizi di matematica, con filtri per tipo." },
+      { icon: "bug", title: "🐛 Correzione — media materia solo dai voti reali", body: "Prima le interrogazioni AI (simulazioni) influenzavano la media della materia quando non c'erano voti reali. Ora la media dipende SOLO dai voti che inserisci a scuola (verifiche/interrogazioni reali). Le medie delle simulazioni restano visibili separatamente nella pagina Interrogazione." },
+      { icon: "bug", title: "🐛 Correzione — voti reali finalmente visibili sul desktop", body: "Il campo 'real.averages' letto dal frontend non esisteva nel backend (era 'real.by_subject'). Risultato: i voti reali inseriti da mobile o desktop non venivano mostrati nel badge materia della home o nella pagina Voti. Ora sono visibili e allineati con il mobile." },
+      { icon: "layout-dashboard", title: "🐛 Correzione — layout centrato su schermi grandi", body: "Su Windows con monitor 24\" o più, il contenuto era spinto tutto a sinistra invece di essere centrato. Ora c'è un wrapper max 1400px + margin auto in AppShell che centra sempre il contenuto. Inoltre le griglie di card (Traguardi, Home, Voti, Interrogazione) usano 'auto-fit' invece di 'auto-fill': le card si allargano per riempire lo spazio disponibile invece di lasciare zone morte a destra." },
+    ],
+  },
+  {
     version: "0.8.5",
     date: "2026-07-13",
     title: "🎨 Rifiniture UI: mappe più fluide, card decorate, avatar perfetto",

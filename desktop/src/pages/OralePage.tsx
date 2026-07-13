@@ -15,6 +15,8 @@ type OralAttempt = {
   questions: Array<{ q: string; focus: string; difficulty: "facile" | "medio" | "difficile" }>;
   evaluations: any[];
   avg_grade?: number | null;
+  created_at?: string;
+  finished?: boolean;
 };
 
 type Evaluation = {
@@ -51,6 +53,10 @@ export function OralePage() {
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [stats, setStats] = useState<any>(null);
+  // Cronologia interrogazioni completate (mobile + desktop, sincronizzata via backend).
+  // Serve a mostrare all'utente le interrogazioni fatte da qualsiasi dispositivo.
+  const [history, setHistory] = useState<OralAttempt[]>([]);
+  const [reviewMode, setReviewMode] = useState(false);
 
   useEffect(() => {
     if (!subject && subjects.length > 0) setSubject(subjects[0]);
@@ -59,7 +65,18 @@ export function OralePage() {
   useEffect(() => {
     if (!token) return;
     api.oralStats(token).then(setStats).catch(() => {});
+    api.oralHistory(token).then((h) => setHistory(Array.isArray(h) ? h : [])).catch(() => {});
   }, [token]);
+
+  // Ricarica cronologia dopo una nuova interrogazione completata
+  async function refreshHistory() {
+    if (!token) return;
+    try {
+      const [h, s] = await Promise.all([api.oralHistory(token), api.oralStats(token)]);
+      if (Array.isArray(h)) setHistory(h);
+      if (s) setStats(s);
+    } catch {}
+  }
 
   async function onStart() {
     if (!token || !subject) return;
@@ -115,6 +132,23 @@ export function OralePage() {
     setCurrentQ(0);
     setAnswer("");
     setErr(null);
+    setReviewMode(false);
+    // Ogni volta che si chiude un'interrogazione (nuova o rivista), aggiorna cronologia
+    refreshHistory();
+  }
+
+  // Apre in modalità sola lettura un'interrogazione già completata dalla cronologia.
+  // Utile per rivedere risposte del prof, punti forti/deboli, voto — sincronizzato
+  // tra tutti i dispositivi (mobile ↔ desktop) via backend.
+  function openPastAttempt(h: OralAttempt) {
+    setAttempt(h);
+    setEvaluations((h.evaluations as Evaluation[]) || []);
+    setCurrentQ(h.questions.length); // → isFinished = true, mostra la vista risultato
+    setAnswer("");
+    setErr(null);
+    setReviewMode(true);
+    // Scrolla in alto in modo che l'utente veda subito la review
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   const isFinished = attempt && currentQ >= attempt.questions.length;
@@ -288,13 +322,35 @@ export function OralePage() {
           background: `linear-gradient(135deg, ${colors.green}18 0%, ${colors.cyan}10 100%)`,
           border: `1.5px solid ${colors.green}55`,
         })}>
+          {reviewMode && (
+            <div style={{
+              display: "inline-flex",
+              alignSelf: "center",
+              alignItems: "center",
+              gap: 6,
+              padding: "4px 12px",
+              borderRadius: 999,
+              background: `${colors.cyan}22`,
+              border: `1px solid ${colors.cyan}77`,
+              color: colors.cyan,
+              fontSize: 11,
+              fontWeight: 900,
+              letterSpacing: 0.6,
+              textTransform: "uppercase",
+            }}>
+              👁 Anteprima interrogazione passata
+            </div>
+          )}
           <div style={{ textAlign: "center", padding: 16 }}>
             <GraduationCap size={40} color={colors.green} style={{ marginBottom: 8 }} />
             <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1.4, color: colors.green, textTransform: "uppercase" }}>
-              Interrogazione conclusa
+              {reviewMode ? "Interrogazione salvata" : "Interrogazione conclusa"}
+            </div>
+            <div style={{ fontSize: 14, color: colors.textMuted, marginTop: 4 }}>
+              {attempt.subject}{attempt.severity ? ` · ${attempt.severity}` : ""}
             </div>
             <div style={{ fontSize: 48, fontWeight: 900, marginTop: 8 }}>
-              {overallGrade != null ? overallGrade.toFixed(1) : "—"}
+              {overallGrade != null ? overallGrade.toFixed(1) : (attempt.avg_grade != null ? attempt.avg_grade.toFixed(1) : "—")}
               <span style={{ fontSize: 22, color: colors.textMuted }}>/10</span>
             </div>
           </div>
@@ -302,15 +358,20 @@ export function OralePage() {
           <PastEval evals={evaluations} full />
 
           <button onClick={reset} style={secondaryBtn()}>
-            <RefreshCw size={14} /> Nuova interrogazione
+            <RefreshCw size={14} /> {reviewMode ? "Chiudi anteprima" : "Nuova interrogazione"}
           </button>
         </section>
       )}
 
       {inputMode === "text" && !attempt && stats?.by_subject?.length > 0 && (
         <section>
-          <h2 style={{ margin: "0 0 10px 0", fontSize: 16, fontWeight: 800 }}>Le tue medie per materia</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
+          <h2 style={{ margin: "0 0 10px 0", fontSize: 16, fontWeight: 800 }}>
+            Le tue medie per materia
+            <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: colors.textMuted }}>
+              (solo simulazioni AI — non incide sulla media scolastica)
+            </span>
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
             {stats.by_subject.map((s: any) => (
               <div key={s.subject} style={{
                 padding: 12,
@@ -325,6 +386,72 @@ export function OralePage() {
                 <div style={{ fontSize: 11, color: colors.textSub }}>{s.count} interrogazioni</div>
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Cronologia interrogazioni: sincronizzata tra mobile e desktop.
+          Include SIA le interrogazioni testuali che quelle vocali (Realtime).
+          Click su una card → apre la review in sola lettura. */}
+      {inputMode === "text" && !attempt && history.length > 0 && (
+        <section>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Cronologia interrogazioni</h2>
+            <span style={{ fontSize: 11, color: colors.textMuted, fontWeight: 700 }}>
+              {history.length} in totale · sincronizzate con mobile
+            </span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
+            {history.map((h) => {
+              const grade = h.avg_grade;
+              const gColor = grade != null ? gradeColor(grade) : colors.textMuted;
+              const dateLabel = (h as any).created_at
+                ? formatOralDate((h as any).created_at)
+                : "";
+              return (
+                <button
+                  key={h.id}
+                  onClick={() => openPastAttempt(h)}
+                  style={{
+                    padding: 14,
+                    borderRadius: radius.md,
+                    background: colors.bgGlass,
+                    border: `1px solid ${gColor}44`,
+                    textAlign: "left",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 6,
+                    cursor: "pointer",
+                    transition: "transform 150ms, border-color 150ms",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.borderColor = `${gColor}99`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.borderColor = `${gColor}44`;
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <div style={{
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      padding: "3px 10px", borderRadius: 999,
+                      background: `${gColor}1a`, border: `1px solid ${gColor}77`,
+                      color: gColor, fontSize: 13, fontWeight: 900,
+                    }}>
+                      {grade != null ? `${grade.toFixed(1)}/10` : "—"}
+                    </div>
+                    <ChevronRight size={14} color={colors.textMuted} />
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>{h.subject}</div>
+                  <div style={{ fontSize: 11, color: colors.textSub }}>
+                    {h.severity} · {h.mode === "lampo" ? "3 domande" : "5 domande"}
+                    {dateLabel ? ` · ${dateLabel}` : ""}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </section>
       )}
@@ -411,6 +538,22 @@ function gradeColor(g: number): string {
   if (g >= 6) return colors.cyan;
   if (g >= 5) return colors.orange;
   return colors.red;
+}
+
+// Format ISO date/datetime dai record oral_attempts del backend in un formato
+// compatto italiano ("13 lug", "ieri", "oggi 14:30") per le card cronologia.
+function formatOralDate(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+    const isYesterday = d.toDateString() === yesterday.toDateString();
+    if (sameDay) return `oggi ${d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}`;
+    if (isYesterday) return "ieri";
+    return d.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+  } catch { return ""; }
 }
 
 function DifficultyBadge({ diff }: { diff: string }) {

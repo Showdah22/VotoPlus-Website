@@ -33,7 +33,13 @@ export function AppShell() {
           padding: 24,
         }}
       >
-        <Outlet />
+        {/* Wrapper centrato: su schermi ultra-wide (>1400px utili tra le due
+            sidebar) il contenuto delle route resta al centro invece di essere
+            spinto tutto a sinistra. Le pagine con maxWidth interno più piccolo
+            (es. 900px) restano comunque centrate perché sono nested. */}
+        <div style={{ width: "100%", maxWidth: 1400, margin: "0 auto" }}>
+          <Outlet />
+        </div>
       </main>
       <RightPanel />
     </div>

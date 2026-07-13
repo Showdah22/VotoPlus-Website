@@ -22,6 +22,7 @@ import { OralePage } from "./pages/OralePage";
 import { TemaPage } from "./pages/TemaPage";
 import { CompitoPage } from "./pages/CompitoPage";
 import { MindmapPage } from "./pages/MindmapPage";
+import { RadarPage } from "./pages/RadarPage";
 import { useAuth } from "./store/auth";
 import { subscribeUpdaterEvents } from "./store/updater";
 import { colors } from "./theme";
@@ -86,6 +87,7 @@ export default function App() {
               <Route path="tema" element={<TemaPage />} />
               <Route path="compito" element={<CompitoPage />} />
               <Route path="mindmap" element={<MindmapPage />} />
+              <Route path="radar" element={<RadarPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

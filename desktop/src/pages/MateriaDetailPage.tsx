@@ -87,7 +87,7 @@ export function MateriaDetailPage() {
         <h2 style={sectionTitle}>Voti recenti</h2>
         {loading ? <div style={placeholder}>Caricamento…</div> :
          grades.length === 0 ? <div style={placeholder}>Nessun voto ancora in {subject}</div> :
-         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(120px,1fr))", gap: 8 }}>
+         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", gap: 8 }}>
            {grades.slice(0, 12).map((g) => (
              <div key={g.id} style={{
                padding: 12, borderRadius: radius.sm,

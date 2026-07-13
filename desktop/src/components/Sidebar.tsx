@@ -20,6 +20,7 @@ import {
   Trophy,
   Sparkles,
   GitBranch,
+  Radar as RadarIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { colors, radius } from "../theme";
@@ -226,6 +227,9 @@ export function Sidebar() {
             <NavItem to="/calendario" icon={Calendar} label="Calendario" compact={collapsed} />
             <NavItem to="/cronologia" icon={Clock} label="Cronologia" compact={collapsed} />
             <NavItem to="/traguardi" icon={Trophy} label="Traguardi" compact={collapsed} />
+            {user?.school_year === 5 && (
+              <NavItem to="/radar" icon={RadarIcon} label="Maturità Radar" compact={collapsed} />
+            )}
             <NavItem to="/novita" icon={Sparkles} label="Novità" compact={collapsed} />
             <NavItem to="/impostazioni" icon={Settings} label="Impostazioni" compact={collapsed} />
           </div>

@@ -393,7 +393,7 @@ export function PianiSection() {
           <span style={{ fontSize: 13, fontWeight: 800, color: colors.textPrimary }}>Piani &amp; abbonamenti</span>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
           {PLANS.map((p) => (
             <PlanCard
               key={p.id}

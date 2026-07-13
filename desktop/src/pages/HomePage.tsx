@@ -20,6 +20,8 @@ import {
   Dumbbell,
   Cpu,
   Sigma,
+  Radar as RadarIcon,
+  Lock,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "../store/auth";
@@ -61,13 +63,15 @@ export function HomePage() {
 
   const allSubjects: string[] = (user as any)?.subjects || dashboard?.subjects || [];
   const subjects = showAll ? allSubjects : allSubjects.slice(0, 6);
-  const gradesBySubj: SubjectStat[] = stats?.real?.averages ?? [];
+  // Media materia mostrata sulle card: SOLO voti reali (real.by_subject).
+  // Le simulazioni AI (interrogazioni orali) non influenzano la media della materia.
+  const gradesBySubj: SubjectStat[] = stats?.real?.by_subject ?? [];
   const recentStudies: any[] = dashboard?.recent_studies ?? [];
 
   const greet = greeting();
 
   return (
-    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 28 }}>
+    <div style={{ width: "100%", maxWidth: 1400, margin: "0 auto", display: "flex", flexDirection: "column", gap: 28 }}>
       {/* Greeting */}
       <div>
         <div style={{ fontSize: 15, color: colors.textSub }}>
@@ -81,10 +85,9 @@ export function HomePage() {
         Cosa vuoi studiare oggi?
       </div>
 
-      {/* Big actions — su ultrawide restano ben proporzionate grazie a
-          repeat(auto-fit, minmax): 2 card fino a ~1400px, poi si aggiungono
-          righe/wrap. maxWidth 1400 per non stirarle troppo su monitor 4K. */}
-      <div style={{ maxWidth: 1400, width: "100%", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 16 }}>
+      {/* Big actions — griglia responsive: 2 colonne quando c'è spazio,
+          1 sotto la soglia. Prendono tutta la larghezza del container centrato. */}
+      <div style={{ width: "100%", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 16 }}>
         <BigCard
           icon={ScanLine}
           title="Scannerizza & Riassumi"
@@ -102,6 +105,16 @@ export function HomePage() {
           decoration={<MathDecoration tint={colors.cyan} />}
         />
       </div>
+
+      {/* Maturità Radar banner — visibile solo per utenti del 5° anno.
+          - Se `maturita_unlocked` → apri /radar
+          - Altrimenti → apri /impostazioni per acquisto Pacchetto Maturità */}
+      {user?.school_year === 5 && (
+        <MaturitaBanner
+          unlocked={!!user?.maturita_unlocked}
+          onClick={() => navigate(user?.maturita_unlocked ? "/radar" : "/impostazioni")}
+        />
+      )}
 
       {/* Materie con voto badge (come iPad) */}
       <section>
@@ -130,7 +143,7 @@ export function HomePage() {
         ) : subjects.length === 0 ? (
           <div style={placeholder}>Configura le tue materie dall'app mobile.</div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
             {subjects.map((s) => {
               const stat = gradesBySubj.find((g) => g.subject === s);
               const avg = stat?.avg ?? null;
@@ -291,6 +304,68 @@ function colorForGrade(g: number | null): string {
   if (g >= 6) return colors.cyan;
   if (g >= 5) return colors.orange;
   return colors.red;
+}
+
+// Banner "Maturità Radar" sulla HomePage — visibile solo per utenti al 5° anno.
+// Design ispirato al banner mobile (`app/(tabs)/index.tsx` — sezione radar shortcut).
+// Due varianti visive:
+//   - unlocked (verde/ciano) → "I temi più probabili dell'anno" → apre /radar
+//   - lockato (arancio/viola) → "Sblocca il Radar Maturità" → apre /impostazioni
+function MaturitaBanner({ unlocked, onClick }: { unlocked: boolean; onClick: () => void }) {
+  const primary = unlocked ? colors.green : colors.orange;
+  const secondary = unlocked ? colors.cyan : colors.purple;
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        padding: 24,
+        borderRadius: radius.xl,
+        background: `linear-gradient(135deg, ${primary}25 0%, ${secondary}15 100%)`,
+        border: `1px solid ${primary}66`,
+        display: "flex",
+        alignItems: "center",
+        gap: 20,
+        textAlign: "left",
+        cursor: "pointer",
+        transition: "transform 150ms, box-shadow 150ms",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = `0 10px 32px ${primary}44`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "none";
+      }}
+    >
+      <div style={{
+        width: 60, height: 60, borderRadius: 18,
+        background: `${primary}25`, border: `1px solid ${primary}77`,
+        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+      }}>
+        {unlocked ? <RadarIcon size={30} color={primary} /> : <Lock size={26} color={primary} />}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontSize: 11, fontWeight: 900, letterSpacing: 1.4, color: primary, textTransform: "uppercase",
+          display: "flex", alignItems: "center", gap: 6,
+        }}>
+          Maturità Radar
+          {!unlocked && <Lock size={11} color={primary} />}
+        </div>
+        <div style={{ fontSize: 17, fontWeight: 800, marginTop: 4, color: "#fff" }}>
+          {unlocked ? "I temi più probabili dell'anno" : "Sblocca il Radar Maturità"}
+        </div>
+        <div style={{ fontSize: 12, color: colors.textSub, marginTop: 4, lineHeight: 1.5 }}>
+          {unlocked
+            ? "Trend, attualità, collegamenti interdisciplinari"
+            : "Acquisto una tantum · valido fino al tuo esame"}
+        </div>
+      </div>
+    </button>
+  );
 }
 
 function BigCard({
