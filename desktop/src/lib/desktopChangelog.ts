@@ -16,6 +16,16 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.7",
+    date: "2026-07-13",
+    title: "🎨 Nuova icona Voto+ (Windows + macOS + Linux)",
+    emoji: "✨",
+    highlights: [
+      { icon: "sparkles", title: "✨ Nuova icona app in stile 'V+'", body: "Installata la nuova icona ufficiale di Voto+ Desktop: monogramma 'V+' con gradient violetto-blu su cerchio nero, uguale al brand dell'app mobile. Su Windows viene mostrata in taskbar, Alt-Tab, jump list e Start menu; su macOS in Dock e Finder; su Linux nel launcher e nella finestra." },
+      { icon: "image", title: "✨ Icona multi-risoluzione ottimizzata", body: "Il file .ico per Windows include 7 risoluzioni native (16, 24, 32, 48, 64, 128, 256 px): niente più icona sfocata su schermi 4K o quando l'app viene ridimensionata in taskbar. Su macOS la .png è a 1024×1024 per rendering nitido anche su Retina." },
+    ],
+  },
+  {
     version: "0.8.6",
     date: "2026-07-13",
     title: "🎓 Maturità Radar, grafici matematici, layout finalmente centrato",
