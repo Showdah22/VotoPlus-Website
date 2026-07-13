@@ -16,6 +16,19 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.5",
+    date: "2026-07-13",
+    title: "🎨 Rifiniture UI: mappe più fluide, card decorate, avatar perfetto",
+    emoji: "✨",
+    highlights: [
+      { icon: "file-down", title: "🐛 Correzione — Export PDF mappe ora funziona", body: "L'export PDF delle mappe concettuali produceva una pagina bianca a causa di un'incompatibilità tra il renderer SVG e le annotazioni HTML dentro la mappa. Ora la mappa viene generata in SVG puro: il PDF esce vettoriale, nitido a qualsiasi zoom, pronto per la stampa." },
+      { icon: "git-branch", title: "✨ Layout mappe adattivo — mappe più strette", body: "Prima le mappe a 3 livelli si allargavano tantissimo in orizzontale e diventavano illeggibili su MacBook Air. Ora al livello 2+ (o quando un nodo ha 3 o più figli) le ramificazioni si impilano verticalmente sotto il parent: mappe molto più compatte, che ci stanno in una schermata sola." },
+      { icon: "zoom-in", title: "✨ Zoom con rotellina più fluido", body: "La rotellina del mouse ora zooma con incrementi 2,5× più graduati (da 0,15 a 0,06 per tacca): niente più salti bruschi tra due livelli di zoom, controllo preciso per centrare esattamente la parte di mappa che vuoi vedere." },
+      { icon: "user-circle", title: "🐛 Correzione — Avatar profilo sempre rotondo", body: "Nella sidebar compressa (modalità solo icone) l'avatar del profilo poteva apparire leggermente ovale invece che perfettamente rotondo. Ora usa border-radius al 50% e aspect-ratio forzato: cerchio impeccabile sia in modalità estesa che compressa." },
+      { icon: "sparkles", title: "✨ Card Home con decorazioni tematiche", body: "Le card 'Scannerizza & Riassumi' e 'Matematica' della schermata iniziale ora hanno pattern decorativi in background con opacità delicata: righe di documento, angoli di scansione e simbolo ¶ per Scanner; π, ∑, √, ∫, x², operatori e numeri per Matematica. Il titolo resta perfettamente leggibile grazie a una maschera sfumata sul lato sinistro." },
+    ],
+  },
+  {
     version: "0.8.4",
     date: "2026-07-13",
     title: "🔍 Mappe più dettagliate + sidebar comprimibili",

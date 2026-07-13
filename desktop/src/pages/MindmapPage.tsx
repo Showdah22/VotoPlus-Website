@@ -195,53 +195,166 @@ export function MindmapPage() {
 }
 
 /**
- * Rendering SVG di una mappa concettuale gerarchica.
- * Layout: root centrato in alto, i figli distribuiti orizzontalmente
- * proporzionalmente al numero di foglie del loro sottoalbero (Reingold-Tilford
- * semplificato). Connettori curvi (Bezier) da bordo inferiore parent → bordo
- * superiore child. Ogni livello ha il proprio color-scheme dal nodo backend.
+ * Rendering SVG di una mappa concettuale gerarchica con layout ADATTIVO.
+ *
+ * Strategia (ispirata a mappe scolastiche reali):
+ *  - Livello 0 (root): centrato in alto.
+ *  - Livello 1: distribuzione orizzontale con leggero stagger Y (dinamismo).
+ *  - Livello 2+ o nodi con ≥3 figli: orientamento VERTICALE (figli impilati
+ *    a destra del parent). Questo riduce drasticamente la larghezza totale
+ *    e permette di leggere mappe grandi anche su MacBook Air 13".
+ *  - Connettori: curve Bezier orizzontali quando il child è sotto,
+ *    curve Bezier a "L" quando il child è a destra (vertical stack).
+ *
+ * Rendering: usa SVG puro (<text>/<tspan>) invece di <foreignObject>,
+ * così l'export PDF con svg2pdf.js funziona correttamente (svg2pdf NON
+ * supporta foreignObject, era il motivo del PDF vuoto).
  */
 
-const NODE_W = 180;
-const NODE_H = 110;
-const NODE_H_ROOT = 60;
-const H_GAP = 18;
-const V_GAP = 50;
-const PADDING = 20;
+const NODE_W = 170;
+const NODE_H = 96;
+const NODE_H_ROOT = 56;
+const H_GAP = 26;
+const V_GAP = 44;         // gap verticale in layout orizzontale (parent -> figli)
+const V_GAP_STACK = 14;   // gap verticale tra fratelli impilati (layout verticale)
+const PADDING = 24;
 
-type Pos = { node: MapNode; x: number; y: number; w: number; h: number; parent?: Pos };
+// Wrap parameters (heuristica basata su char count perche' misurare SVG text server-side e' complesso)
+const LABEL_MAX_CHARS = 22;    // caratteri per riga label
+const DETAIL_MAX_CHARS = 26;   // caratteri per riga detail
+const LABEL_MAX_LINES = 2;
+const DETAIL_MAX_LINES = 4;
 
-function countLeaves(n: MapNode): number {
-  if (!n.children || n.children.length === 0) return 1;
-  return n.children.reduce((s, c) => s + countLeaves(c), 0);
+type Orient = "H" | "V";
+type Pos = { node: MapNode; x: number; y: number; w: number; h: number; parent?: Pos; orient: Orient };
+type Extent = { w: number; h: number };
+
+// Decide the orientation of a node's children based on level and count.
+// Level 0 -> H (root spread orizzontale)
+// Level 1 con <=2 figli -> H (mantiene look ad albero)
+// Altrimenti V (impila verticalmente a destra: mappe piu' strette)
+function decideOrient(level: number, numChildren: number): Orient {
+  if (level === 0) return "H";
+  if (level === 1 && numChildren <= 2) return "H";
+  return "V";
+}
+
+// Calcola l'estensione (bounding box) del sottoalbero radicato in `node`.
+function computeExtent(node: MapNode, level: number): Extent {
+  const nodeH = level === 0 ? NODE_H_ROOT : NODE_H;
+  const kids = node.children || [];
+  if (kids.length === 0) return { w: NODE_W, h: nodeH };
+
+  const orient = decideOrient(level, kids.length);
+  const childExtents = kids.map((k) => computeExtent(k, level + 1));
+
+  if (orient === "H") {
+    const totalW = childExtents.reduce((s, e) => s + e.w, 0) + (kids.length - 1) * H_GAP;
+    const maxChildH = Math.max(...childExtents.map((e) => e.h));
+    return { w: Math.max(NODE_W, totalW), h: nodeH + V_GAP + maxChildH };
+  } else {
+    const totalH = childExtents.reduce((s, e) => s + e.h, 0) + (kids.length - 1) * V_GAP_STACK;
+    const maxChildW = Math.max(...childExtents.map((e) => e.w));
+    return { w: NODE_W + H_GAP + maxChildW, h: Math.max(nodeH, totalH) };
+  }
+}
+
+// Piazza il sottoalbero nel rettangolo [x, y] con dimensione ext.
+// Il nodo stesso viene centrato sopra il proprio blocco figli (H) o
+// posto in alto-sinistra (V) con i figli impilati a destra.
+function placeSubtree(
+  node: MapNode,
+  level: number,
+  x: number,
+  y: number,
+  positions: Pos[],
+  parent: Pos | undefined,
+  siblingIndex: number,
+  siblingCount: number,
+): void {
+  const nodeH = level === 0 ? NODE_H_ROOT : NODE_H;
+  const kids = node.children || [];
+  const orient = decideOrient(level, kids.length);
+
+  if (kids.length === 0) {
+    positions.push({ node, x, y, w: NODE_W, h: nodeH, parent, orient });
+    return;
+  }
+
+  const childExtents = kids.map((k) => computeExtent(k, level + 1));
+
+  if (orient === "H") {
+    const totalW = childExtents.reduce((s, e) => s + e.w, 0) + (kids.length - 1) * H_GAP;
+    // Nodo centrato sopra il proprio blocco figli
+    const nodeX = x + (totalW - NODE_W) / 2;
+    // Stagger Y solo al livello 1 con >=3 figli (look organico da concept map)
+    const stagger =
+      parent && parent.orient === "H" && level === 1 && siblingCount >= 3
+        ? (siblingIndex % 2) * 22
+        : 0;
+    const pos: Pos = { node, x: nodeX, y: y + stagger, w: NODE_W, h: nodeH, parent, orient };
+    positions.push(pos);
+    const childY = y + nodeH + V_GAP + stagger;
+    let cx = x;
+    for (let i = 0; i < kids.length; i++) {
+      placeSubtree(kids[i], level + 1, cx, childY, positions, pos, i, kids.length);
+      cx += childExtents[i].w + H_GAP;
+    }
+  } else {
+    // Verticale: nodo in alto, figli a destra impilati.
+    // Centro verticalmente il nodo rispetto al blocco figli per un look bilanciato.
+    const totalH = childExtents.reduce((s, e) => s + e.h, 0) + (kids.length - 1) * V_GAP_STACK;
+    const nodeY = y + Math.max(0, (totalH - nodeH) / 2);
+    const pos: Pos = { node, x, y: nodeY, w: NODE_W, h: nodeH, parent, orient };
+    positions.push(pos);
+    const childX = x + NODE_W + H_GAP;
+    let cy = y;
+    for (let i = 0; i < kids.length; i++) {
+      placeSubtree(kids[i], level + 1, childX, cy, positions, pos, i, kids.length);
+      cy += childExtents[i].h + V_GAP_STACK;
+    }
+  }
 }
 
 function computeLayout(root: MapNode): { positions: Pos[]; width: number; height: number } {
-  const totalLeaves = Math.max(1, countLeaves(root));
-  const totalW = totalLeaves * (NODE_W + H_GAP);
   const positions: Pos[] = [];
+  const ext = computeExtent(root, 0);
+  placeSubtree(root, 0, PADDING, PADDING, positions, undefined, 0, 1);
+  const maxX = Math.max(...positions.map((p) => p.x + p.w)) + PADDING;
+  const maxY = Math.max(...positions.map((p) => p.y + p.h)) + PADDING;
+  return { positions, width: Math.max(ext.w + PADDING * 2, maxX), height: maxY };
+}
 
-  function place(node: MapNode, level: number, xStart: number, xEnd: number, parent: Pos | undefined) {
-    const cx = (xStart + xEnd) / 2;
-    const h = level === 0 ? NODE_H_ROOT : NODE_H;
-    const y = PADDING + level * (NODE_H + V_GAP);
-    const pos: Pos = { node, x: cx - NODE_W / 2, y, w: NODE_W, h, parent };
-    positions.push(pos);
-    const children = node.children || [];
-    if (children.length === 0) return;
-    const leafCounts = children.map((c) => countLeaves(c));
-    const totalLeavesLocal = leafCounts.reduce((a, b) => a + b, 0);
-    const availableW = xEnd - xStart;
-    let cursor = xStart;
-    for (let i = 0; i < children.length; i++) {
-      const w = (leafCounts[i] / totalLeavesLocal) * availableW;
-      place(children[i], level + 1, cursor, cursor + w, pos);
-      cursor += w;
+// Word-wrap greedy per SVG (non possiamo misurare text server-side)
+function wrapText(text: string, maxChars: number, maxLines: number): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let cur = "";
+  for (const w of words) {
+    if (!cur) {
+      cur = w;
+    } else if (cur.length + 1 + w.length <= maxChars) {
+      cur += " " + w;
+    } else {
+      lines.push(cur);
+      cur = w;
+      if (lines.length === maxLines - 1) break;
     }
   }
-  place(root, 0, PADDING, totalW + PADDING, undefined);
-  const maxY = Math.max(...positions.map((p) => p.y + p.h)) + PADDING;
-  return { positions, width: totalW + PADDING * 2, height: maxY };
+  if (cur && lines.length < maxLines) lines.push(cur);
+  // Truncate last line with ellipsis if too long
+  if (lines.length === maxLines) {
+    const remainingWords = words.slice(lines.join(" ").split(/\s+/).length);
+    if (remainingWords.length > 0 && lines[lines.length - 1].length + 1 <= maxChars) {
+      const last = lines[lines.length - 1];
+      if (last.length > maxChars - 1) {
+        lines[lines.length - 1] = last.slice(0, maxChars - 1) + "…";
+      } else {
+        lines[lines.length - 1] = last + "…";
+      }
+    }
+  }
+  return lines.length > 0 ? lines : [text.slice(0, maxChars)];
 }
 
 function SvgMindmap({ root, title }: { root: MapNode; title: string }) {
@@ -306,11 +419,12 @@ function SvgMindmap({ root, title }: { root: MapNode; title: string }) {
     <div style={{ width: "100%", padding: "4px 0" }}>
       <TransformWrapper
         initialScale={1}
-        minScale={0.5}
+        minScale={0.3}
         maxScale={4}
         centerOnInit
-        wheel={{ step: 0.15 }}
-        doubleClick={{ mode: "zoomIn", step: 0.7 }}
+        wheel={{ step: 0.06 }}
+        pinch={{ step: 5 }}
+        doubleClick={{ mode: "zoomIn", step: 0.5 }}
         limitToBounds={false}
         panning={{ velocityDisabled: true }}
       >
@@ -395,21 +509,35 @@ function SvgMindmap({ root, title }: { root: MapNode; title: string }) {
                     </marker>
                   </defs>
 
-                  {/* Connettori curvi parent → figlio */}
+                  {/* Connettori curvi parent → figlio (H: verso il basso, V: verso destra) */}
                   {positions.map((p, i) => {
                     if (!p.parent) return null;
-                    const x1 = p.parent.x + p.parent.w / 2;
-                    const y1 = p.parent.y + p.parent.h;
-                    const x2 = p.x + p.w / 2;
-                    const y2 = p.y;
-                    const midY = (y1 + y2) / 2;
-                    const d = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2 - 2}`;
+                    const parentOrient = p.parent.orient;
+                    let x1: number, y1: number, x2: number, y2: number, d: string;
+                    if (parentOrient === "V") {
+                      // Parent verticale: connettore parte dal bordo destro del parent
+                      // verso il bordo sinistro del child (curva a "L" Bezier)
+                      x1 = p.parent.x + p.parent.w;
+                      y1 = p.parent.y + p.parent.h / 2;
+                      x2 = p.x;
+                      y2 = p.y + p.h / 2;
+                      const midX = (x1 + x2) / 2;
+                      d = `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2 - 2} ${y2}`;
+                    } else {
+                      // Parent orizzontale: dal bordo inferiore parent al bordo sup child
+                      x1 = p.parent.x + p.parent.w / 2;
+                      y1 = p.parent.y + p.parent.h;
+                      x2 = p.x + p.w / 2;
+                      y2 = p.y;
+                      const midY = (y1 + y2) / 2;
+                      d = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2 - 2}`;
+                    }
                     const strokeColor = COLOR_MAP[p.parent.node.color || ""] || rootColor;
                     return (
                       <path
                         key={`link-${i}`}
                         d={d}
-                        stroke={`${strokeColor}88`}
+                        stroke={`${strokeColor}99`}
                         strokeWidth={1.8}
                         fill="none"
                         markerEnd="url(#voto-arrow)"
@@ -417,12 +545,27 @@ function SvgMindmap({ root, title }: { root: MapNode; title: string }) {
                     );
                   })}
 
-        {/* Nodi (rect + testo) */}
+        {/* Nodi: SVG puro (rect + text) per compatibilita' svg2pdf export */}
         {positions.map((p, i) => {
           const color = COLOR_MAP[p.node.color || ""] || (p.parent ? COLOR_MAP[p.parent.node.color || ""] || rootColor : rootColor);
           const isRoot = !p.parent;
-          const fill = isRoot ? `${color}33` : `${color}22`;
+          const fill = isRoot ? `${color}44` : `${color}2a`;
           const stroke = color;
+          const cx = p.x + p.w / 2;
+          const labelLines = wrapText(p.node.label, LABEL_MAX_CHARS, LABEL_MAX_LINES);
+          const detailLines = !isRoot && p.node.detail
+            ? wrapText(p.node.detail, DETAIL_MAX_CHARS, DETAIL_MAX_LINES)
+            : [];
+
+          // Vertical layout of text inside the box
+          const labelFS = isRoot ? 14 : 12.5;
+          const labelLH = isRoot ? 16 : 14;
+          const detailFS = 9.5;
+          const detailLH = 11.5;
+          const totalTextH = labelLines.length * labelLH + (detailLines.length > 0 ? 4 + detailLines.length * detailLH : 0);
+          const topOffset = (p.h - totalTextH) / 2;
+          const firstLabelY = p.y + topOffset + labelFS;
+
           return (
             <g key={`node-${i}`}>
               <rect
@@ -434,51 +577,44 @@ function SvgMindmap({ root, title }: { root: MapNode; title: string }) {
                 ry={12}
                 fill={fill}
                 stroke={stroke}
-                strokeWidth={isRoot ? 2.4 : 1.6}
+                strokeWidth={isRoot ? 2.6 : 1.6}
               />
-              <foreignObject x={p.x + 6} y={p.y} width={p.w - 12} height={p.h}>
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: isRoot ? "center" : "flex-start",
-                    textAlign: "center",
-                    color: "#fff",
-                    padding: isRoot ? "2px 4px" : "8px 6px",
-                    overflow: "hidden",
-                    fontFamily: "inherit",
-                    gap: 4,
-                  }}
-                  title={p.node.detail || p.node.label}
+              {/* Label (nome del nodo) */}
+              <text
+                x={cx}
+                y={firstLabelY}
+                textAnchor="middle"
+                fontFamily="Inter, -apple-system, system-ui, sans-serif"
+                fontSize={labelFS}
+                fontWeight={isRoot ? 900 : 800}
+                fill="#ffffff"
+              >
+                {labelLines.map((line, li) => (
+                  <tspan key={li} x={cx} dy={li === 0 ? 0 : labelLH}>
+                    {line}
+                  </tspan>
+                ))}
+              </text>
+              {/* Detail (breve descrizione) */}
+              {detailLines.length > 0 && (
+                <text
+                  x={cx}
+                  y={firstLabelY + labelLines.length * labelLH + 4}
+                  textAnchor="middle"
+                  fontFamily="Inter, -apple-system, system-ui, sans-serif"
+                  fontSize={detailFS}
+                  fontWeight={500}
+                  fill="rgba(255,255,255,0.86)"
                 >
-                  <div style={{
-                    fontWeight: isRoot ? 900 : 800,
-                    fontSize: isRoot ? 13.5 : 12.5,
-                    lineHeight: 1.2,
-                    textShadow: "0 1px 2px rgba(0,0,0,0.4)",
-                  }}>
-                    {p.node.label}
-                  </div>
-                  {!isRoot && p.node.detail && (
-                    <div style={{
-                      fontSize: 9.5,
-                      lineHeight: 1.25,
-                      fontWeight: 500,
-                      color: "rgba(255,255,255,0.88)",
-                      overflow: "hidden",
-                      display: "-webkit-box",
-                      WebkitBoxOrient: "vertical" as any,
-                      WebkitLineClamp: 5,
-                      wordBreak: "break-word",
-                    }}>
-                      {p.node.detail}
-                    </div>
-                  )}
-                </div>
-              </foreignObject>
+                  {detailLines.map((line, li) => (
+                    <tspan key={li} x={cx} dy={li === 0 ? 0 : detailLH}>
+                      {line}
+                    </tspan>
+                  ))}
+                </text>
+              )}
+              {/* Tooltip su hover (accessibilita') */}
+              <title>{p.node.detail ? `${p.node.label} — ${p.node.detail}` : p.node.label}</title>
             </g>
           );
         })}

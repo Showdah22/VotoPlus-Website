@@ -91,6 +91,7 @@ export function HomePage() {
           sub="Foto, PDF o testo → riassunto AI"
           tint={colors.purple}
           onClick={() => navigate("/scanner")}
+          decoration={<ScannerDecoration tint={colors.purple} />}
         />
         <BigCard
           icon={Calculator}
@@ -98,6 +99,7 @@ export function HomePage() {
           sub="Esercizi e formule spiegate passo passo"
           tint={colors.cyan}
           onClick={() => navigate("/math")}
+          decoration={<MathDecoration tint={colors.cyan} />}
         />
       </div>
 
@@ -297,17 +299,21 @@ function BigCard({
   sub,
   tint,
   onClick,
+  decoration,
 }: {
   icon: any;
   title: string;
   sub: string;
   tint: string;
   onClick: () => void;
+  decoration?: React.ReactNode;
 }) {
   return (
     <button
       onClick={onClick}
       style={{
+        position: "relative",
+        overflow: "hidden",
         padding: 24,
         borderRadius: radius.xl,
         background: `linear-gradient(135deg, ${tint}30 0%, ${tint}10 100%)`,
@@ -329,18 +335,161 @@ function BigCard({
         e.currentTarget.style.boxShadow = "none";
       }}
     >
+      {/* Sfondo decorativo tematico — right side, con mask sfumata a sinistra
+          per non disturbare la leggibilità del testo. */}
+      {decoration && (
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: "58%",
+            pointerEvents: "none",
+            overflow: "hidden",
+            maskImage: "linear-gradient(to left, black 30%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to left, black 30%, transparent 100%)",
+          }}
+        >
+          {decoration}
+        </div>
+      )}
       <div style={{
+        position: "relative",
         width: 60, height: 60, borderRadius: 18,
         background: `${tint}25`, border: `1px solid ${tint}66`,
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         <Icon size={30} color={tint} />
       </div>
-      <div>
+      <div style={{ position: "relative" }}>
         <div style={{ fontSize: 19, fontWeight: 800, marginBottom: 4 }}>{title}</div>
         <div style={{ fontSize: 13, color: colors.textSub, lineHeight: 1.4 }}>{sub}</div>
       </div>
     </button>
+  );
+}
+
+// Decorazioni SVG tematiche per le BigCard.
+// Utilizzano il tint del brand della card, opacità 8-15% e sono renderizzate
+// nel lato destro con mask a sfumatura per non disturbare il testo.
+
+function ScannerDecoration({ tint }: { tint: string }) {
+  // Motivo: angoli di scansione + righe di documento + simboli riassunto (¶, ✓, "abc")
+  return (
+    <svg
+      viewBox="0 0 320 200"
+      preserveAspectRatio="xMidYMid slice"
+      style={{ width: "100%", height: "100%" }}
+    >
+      {/* Grande angolo di scansione (top-right) */}
+      <path
+        d="M 220 20 L 300 20 L 300 60"
+        fill="none"
+        stroke={tint}
+        strokeWidth={3}
+        strokeLinecap="round"
+        opacity={0.28}
+      />
+      {/* Angolo bottom-right */}
+      <path
+        d="M 300 150 L 300 185 L 265 185"
+        fill="none"
+        stroke={tint}
+        strokeWidth={3}
+        strokeLinecap="round"
+        opacity={0.22}
+      />
+      {/* Angolo top-left (piccolo) */}
+      <path
+        d="M 80 40 L 60 40 L 60 60"
+        fill="none"
+        stroke={tint}
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        opacity={0.18}
+      />
+      {/* Linea di scansione orizzontale */}
+      <line
+        x1={40}
+        y1={100}
+        x2={280}
+        y2={100}
+        stroke={tint}
+        strokeWidth={1.5}
+        strokeDasharray="3 5"
+        opacity={0.22}
+      />
+      {/* Righe di "documento" (testo stilizzato) */}
+      <g opacity={0.14} fill={tint}>
+        <rect x={80} y={68} width={110} height={5} rx={2.5} />
+        <rect x={80} y={80} width={140} height={5} rx={2.5} />
+        <rect x={80} y={122} width={90} height={5} rx={2.5} />
+        <rect x={80} y={134} width={130} height={5} rx={2.5} />
+        <rect x={80} y={146} width={70} height={5} rx={2.5} />
+      </g>
+      {/* Simbolo paragrafo grande (riassunto) */}
+      <text
+        x={245}
+        y={130}
+        fontSize={78}
+        fontWeight={900}
+        fill={tint}
+        opacity={0.13}
+        fontFamily="Georgia, serif"
+        textAnchor="middle"
+      >
+        ¶
+      </text>
+      {/* Check di completamento */}
+      <path
+        d="M 175 40 L 182 48 L 200 28"
+        fill="none"
+        stroke={tint}
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.18}
+      />
+    </svg>
+  );
+}
+
+function MathDecoration({ tint }: { tint: string }) {
+  // Motivo: simboli matematici sparsi (π, ∑, √, ∫, x², =, +) con opacità variabile
+  return (
+    <svg
+      viewBox="0 0 320 200"
+      preserveAspectRatio="xMidYMid slice"
+      style={{ width: "100%", height: "100%" }}
+    >
+      <g fill={tint} fontFamily="'Times New Roman', Georgia, serif" fontWeight={700}>
+        {/* π — grande al centro-destra */}
+        <text x={245} y={125} fontSize={95} opacity={0.13} textAnchor="middle" fontStyle="italic">π</text>
+        {/* ∑ — sinistra */}
+        <text x={70} y={80} fontSize={54} opacity={0.12} textAnchor="middle">∑</text>
+        {/* √ — top center */}
+        <text x={150} y={62} fontSize={44} opacity={0.11} textAnchor="middle">√</text>
+        {/* ∫ — top right piccolo */}
+        <text x={295} y={45} fontSize={38} opacity={0.14} textAnchor="middle" fontStyle="italic">∫</text>
+        {/* x² */}
+        <text x={90} y={155} fontSize={30} opacity={0.13} fontStyle="italic">
+          x
+          <tspan fontSize={18} baselineShift="super" dy={-8}>2</tspan>
+        </text>
+        {/* = */}
+        <text x={165} y={158} fontSize={30} opacity={0.11} textAnchor="middle">=</text>
+        {/* + */}
+        <text x={200} y={75} fontSize={26} opacity={0.13} textAnchor="middle">+</text>
+        {/* − */}
+        <text x={40} y={140} fontSize={30} opacity={0.10} textAnchor="middle">−</text>
+        {/* numeri */}
+        <text x={130} y={110} fontSize={22} opacity={0.10} textAnchor="middle">a+b</text>
+        <text x={280} y={175} fontSize={20} opacity={0.11} textAnchor="middle">42</text>
+        <text x={45} y={185} fontSize={20} opacity={0.10} textAnchor="middle">7</text>
+      </g>
+    </svg>
   );
 }
 

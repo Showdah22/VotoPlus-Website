@@ -106,7 +106,7 @@ export function Sidebar() {
             cursor: "pointer",
           }}
         >
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative", flexShrink: 0, lineHeight: 0 }}>
             {user?.profile_picture ? (
               <img
                 src={user.profile_picture}
@@ -114,9 +114,15 @@ export function Sidebar() {
                 style={{
                   width: collapsed ? 40 : 72,
                   height: collapsed ? 40 : 72,
-                  borderRadius: collapsed ? 20 : 36,
+                  minWidth: collapsed ? 40 : 72,
+                  minHeight: collapsed ? 40 : 72,
+                  aspectRatio: "1 / 1",
+                  borderRadius: "50%",
                   objectFit: "cover",
                   border: `2px solid ${colors.borderStrong}`,
+                  boxSizing: "border-box",
+                  display: "block",
+                  flexShrink: 0,
                 }}
               />
             ) : (
@@ -124,13 +130,19 @@ export function Sidebar() {
                 style={{
                   width: collapsed ? 40 : 72,
                   height: collapsed ? 40 : 72,
-                  borderRadius: collapsed ? 20 : 36,
+                  minWidth: collapsed ? 40 : 72,
+                  minHeight: collapsed ? 40 : 72,
+                  aspectRatio: "1 / 1",
+                  borderRadius: "50%",
                   background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: collapsed ? 14 : 24,
                   fontWeight: 900,
+                  color: "#fff",
+                  boxSizing: "border-box",
+                  flexShrink: 0,
                 }}
               >
                 {(user?.username || "?").slice(0, 2).toUpperCase()}
