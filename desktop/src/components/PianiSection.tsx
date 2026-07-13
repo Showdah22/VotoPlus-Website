@@ -126,6 +126,7 @@ export function PianiSection() {
     plan_sku: string | null;
     is_trial: boolean;
     plan_expires_at: string | null;
+    maturita_unlocked: boolean;
   } | null>(null);
   const [portalLoading, setPortalLoading] = useState<Plan["id"] | "manage" | null>(null);
 
@@ -163,6 +164,7 @@ export function PianiSection() {
           plan_sku: s.plan_sku,
           is_trial: s.is_trial,
           plan_expires_at: s.plan_expires_at,
+          maturita_unlocked: s.maturita_unlocked,
         }))
         .catch(() => {}),
     ]).finally(() => setLoading(false));
@@ -203,6 +205,7 @@ export function PianiSection() {
             plan_sku: status.plan_sku,
             is_trial: status.is_trial,
             plan_expires_at: status.plan_expires_at,
+            maturita_unlocked: status.maturita_unlocked,
           });
           try {
             await refreshUser?.();
@@ -313,17 +316,17 @@ export function PianiSection() {
       if (code === "already_on_this_sku") {
         setError("Hai già questo piano attivo. Usa 'Gestisci abbonamento' se vuoi modificarlo o cancellarlo.");
       } else if (code === "already_on_other_provider") {
+        // Non mostriamo errore rosso qui: il wizard sotto la sezione piani
+        // (visibile in permanenza quando hasActiveSub && provider==apple/google)
+        // già spiega come procedere con link deep-link agli store.
+        // Solo un piccolo hint informativo:
         const prov = (e instanceof ApiError && typeof e.detailObj?.provider === "string")
           ? (e.detailObj.provider as string)
           : "mobile";
-        const provLabel = prov === "apple"
-          ? "App Store (iPhone/iPad)"
-          : prov === "google"
-            ? "Google Play (Android)"
-            : "sul tuo dispositivo mobile";
-        setError(
-          `Hai già un abbonamento attivo su ${provLabel}. ` +
-          "Gestiscilo da lì — non serve pagare di nuovo qui, il tuo Premium è già attivo.",
+        const provLabel = prov === "apple" ? "App Store" : prov === "google" ? "Google Play" : "il tuo dispositivo";
+        setInfo(
+          `Per cambiare piano devi prima annullare l'abbonamento su ${provLabel}. ` +
+          `Vedi le istruzioni qui sotto ↓`,
         );
       } else if (msg.includes("409")) {
         setError(
@@ -407,6 +410,92 @@ export function PianiSection() {
             />
           ))}
         </div>
+
+        {/* Wizard "come cambiare provider" — visibile se ha sub Apple/Google
+            attiva (upgrade cross-provider non è possibile: i sistemi Apple,
+            Google e Stripe non si parlano tra loro). */}
+        {hasActiveSub && (currentProvider === "apple" || currentProvider === "google") && (
+          <div style={{
+            marginTop: 14,
+            padding: 16,
+            borderRadius: radius.md,
+            background: `${colors.orange}12`,
+            border: `1px solid ${colors.orange}55`,
+            display: "flex",
+            gap: 12,
+            alignItems: "flex-start",
+          }}>
+            <Info size={20} color={colors.orange} style={{ flexShrink: 0, marginTop: 2 }} />
+            <div style={{ flex: 1, fontSize: 12.5, color: colors.textPrimary, lineHeight: 1.6 }}>
+              <strong style={{ color: colors.textPrimary, fontSize: 13 }}>
+                Vuoi cambiare piano? Prima annulla su {currentProvider === "apple" ? "App Store" : "Google Play"}.
+              </strong>
+              <p style={{ margin: "6px 0 10px", color: colors.textSub }}>
+                Il tuo Premium è gestito da {currentProvider === "apple" ? "Apple" : "Google"} e i loro sistemi non permettono
+                a Stripe di cancellarlo automaticamente. Ma il tuo Premium <strong>resta attivo</strong> fino
+                alla scadenza del periodo già pagato — poi puoi attivare qui il piano che preferisci senza
+                interruzioni.
+              </p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  onClick={() => {
+                    const url = currentProvider === "apple"
+                      ? "https://apps.apple.com/account/subscriptions"
+                      : "https://play.google.com/store/account/subscriptions";
+                    const w = (window as any).voto;
+                    if (w?.openExternal) w.openExternal(url);
+                    else window.open(url, "_blank");
+                  }}
+                  style={{
+                    padding: "7px 12px",
+                    borderRadius: radius.sm,
+                    background: colors.orange,
+                    border: "none",
+                    color: "#0a0a0f",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  {currentProvider === "apple" ? "Gestisci su App Store" : "Gestisci su Google Play"}
+                  <ExternalLink size={12} />
+                </button>
+                {currentProvider === "apple" && (
+                  <button
+                    onClick={() => {
+                      const w = (window as any).voto;
+                      if (w?.openExternal) w.openExternal("https://reportaproblem.apple.com");
+                      else window.open("https://reportaproblem.apple.com", "_blank");
+                    }}
+                    style={{
+                      padding: "7px 12px",
+                      borderRadius: radius.sm,
+                      background: "transparent",
+                      border: `1px solid ${colors.orange}77`,
+                      color: colors.orange,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    Chiedi rimborso Apple (entro 14gg)
+                    <ExternalLink size={12} />
+                  </button>
+                )}
+              </div>
+              <p style={{ margin: "10px 0 0", color: colors.textMuted, fontSize: 11 }}>
+                💡 <strong>Buona notizia</strong>: il <strong>Pacchetto Maturità</strong> qui sotto è indipendente dal tuo abbonamento
+                Premium e <strong>puoi comprarlo subito</strong> senza cancellare nulla.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Bottone "Gestisci abbonamento" — visibile solo se Stripe attivo */}
         {hasActiveSub && currentProvider === "stripe" && (
@@ -604,6 +693,7 @@ function PlanCard({
     active: boolean;
     provider: "apple" | "google" | "stripe" | null;
     plan_sku: string | null;
+    maturita_unlocked: boolean;
   } | null;
   portalLoading: boolean;
   anyPortalLoading: boolean;
@@ -614,6 +704,8 @@ function PlanCard({
   const provider = subStatus?.provider ?? null;
   const hasActiveSub = !!subStatus?.active;
   const isFree = plan.id === "free";
+  const isMaturita = plan.id === "maturita";
+  const hasMaturitaActive = !!subStatus?.maturita_unlocked;
   const isMobileProvider = provider === "apple" || provider === "google";
 
   // Cosa mostrare come label del CTA
@@ -633,8 +725,39 @@ function PlanCard({
     ctaMode = "loading";
     ctaLabel = "Apertura Portale…";
     ctaDisabled = true;
+  } else if (isMaturita) {
+    // ─── Maturità è un ADDON INDIPENDENTE ───
+    // Non conflitta con abbonamenti Premium: puoi avere Premium mensile
+    // Apple E comprare Maturità qui su Stripe, sono due prodotti separati.
+    if (hasMaturitaActive) {
+      // Già attivo (comprato via qualche provider)
+      if (provider === "stripe") {
+        ctaMode = "current_manage";
+        ctaLabel = (
+          <>
+            Il tuo pacchetto · Gestisci <ExternalLink size={12} />
+          </>
+        );
+      } else {
+        ctaMode = "disabled_mobile";
+        ctaLabel = provider === "apple"
+          ? "Attivo su App Store"
+          : provider === "google"
+            ? "Attivo su Google Play"
+            : "Già attivo";
+        ctaDisabled = true;
+      }
+    } else {
+      // Non attivo → sempre acquistabile, anche con Premium su altro provider
+      ctaMode = "checkout";
+      ctaLabel = (
+        <>
+          Attiva Maturità <ExternalLink size={12} />
+        </>
+      );
+    }
   } else if (isCurrent && hasActiveSub) {
-    // È il piano corrente ATTIVO
+    // È il piano corrente ATTIVO (Premium/Family/Annuale)
     if (provider === "stripe") {
       ctaMode = "current_manage";
       ctaLabel = (
@@ -659,11 +782,13 @@ function PlanCard({
       </>
     );
   } else if (isMobileProvider) {
-    // Utente ha Apple/Google attivo → non ha senso comprare qui
+    // Utente ha Apple/Google attivo su un piano Premium → non può fare
+    // upgrade cross-provider (i due sistemi non si parlano). Ci pensa il
+    // wizard sotto la sezione (banner di aiuto con link diretti allo store).
     ctaMode = "disabled_mobile";
     ctaLabel = provider === "apple"
-      ? "Attivo su App Store"
-      : "Attivo su Google Play";
+      ? "Devi annullare su App Store"
+      : "Devi annullare su Google Play";
     ctaDisabled = true;
   } else {
     // Nessuna sub attiva → checkout classico. Se l'utente è in trial-onboarding

@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.3",
+    date: "2026-07-13",
+    title: "🐛 Pacchetto Maturità sbloccato + guida cambio piano",
+    emoji: "🎓",
+    highlights: [
+      { icon: "graduation-cap", title: "🐛 Correzione — Pacchetto Maturità sempre acquistabile", body: "Prima se avevi Premium mensile su App Store non potevi comprare il Pacchetto Maturità qui. Ora è indipendente: Maturità è un addon separato dai piani abbonamento, quindi puoi acquistarlo anche se sei già Premium su iPhone/Android. Il tuo Premium mensile e la Maturità sono due prodotti distinti che coesistono senza conflitti." },
+      { icon: "info", title: "✨ Guida chiara al cambio piano cross-provider", body: "Se hai Premium su App Store/Google Play e vuoi passare all'annuale Stripe, ora ti mostriamo una guida chiara: annulla su App Store/Google (il tuo Premium resta attivo fino alla scadenza), poi attivi l'annuale qui. Pulsante diretto per aprire la gestione abbonamenti. Nessun più messaggio d'errore rosso ingannevole." },
+      { icon: "gift", title: "✨ Rimborso Apple entro 14 giorni", body: "Se hai comprato l'abbonamento Apple da poco, ti mostriamo il pulsante diretto per chiedere il rimborso al Support Apple (entro 14 giorni per legge EU), così puoi passare a Stripe subito senza aspettare." },
+    ],
+  },
+  {
     version: "0.8.2",
     date: "2026-07-13",
     title: "🐛 Trial universale — via i 7 giorni doppi",
