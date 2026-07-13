@@ -110,7 +110,7 @@
     .window-titlebar .title { flex: 1; text-align: center; color: #666; font-size: 12px; font-weight: 500; margin-right: 60px; letter-spacing: 0.3px; }
 
     .slides-container {
-      position: relative; aspect-ratio: 1080 / 700;
+      position: relative; aspect-ratio: 1936 / 1048;
       background: linear-gradient(180deg, #0a0a0f, #0f0f18);
     }
     .slide {
@@ -120,7 +120,7 @@
       pointer-events: none;
     }
     .slide.active { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-    .slide img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+    .slide img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; background: #0a0a0f; }
 
     /* Controls */
     .slide-arrow {
@@ -156,7 +156,7 @@
     }
     .thumb:hover { opacity: 0.85; transform: translateY(-2px); }
     .thumb.active { opacity: 1; border-color: #a855f7; box-shadow: 0 4px 20px -4px rgba(168,85,247,0.5); }
-    .thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+    .thumb img { width: 100%; height: 100%; object-fit: contain; object-position: center; background: #0a0a0f; }
 
     @media (max-width: 720px) {
       .showcase { padding: 40px 16px 30px; }

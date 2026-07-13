@@ -16,7 +16,6 @@
   var BASE = "./assets/screens/";
   var SLIDES = [
     { file: "voto-desktop-home-demo.png", label: "Home — la tua dashboard di studio" },
-    { file: "voto-desktop-main-demo.png", label: "Riassunto della giornata" },
     { file: "voto-desktop-azione-interrogazione-demo.png", label: "Interrogazione con l'AI Professore" },
     { file: "voto-desktop-azione-compito-demo.png", label: "Compito in classe simulato" },
     { file: "voto-desktop-azione-tema-demo.png", label: "Tema svolto con l'AI" },
