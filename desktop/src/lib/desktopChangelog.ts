@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.8.1",
+    date: "2026-07-13",
+    title: "✨ Cambia piano in un click (mensile ↔ annuale)",
+    emoji: "🔁",
+    highlights: [
+      { icon: "refresh-cw", title: "✨ Passa da mensile ad annuale (o viceversa) senza attriti", body: "Se sei già abbonato via Stripe, ora puoi passare tra Premium mensile, Family, Annuale e Maturità con un solo click. Stripe calcola in automatico la proration: paghi solo la differenza, niente doppio addebito." },
+      { icon: "settings", title: "✨ Gestisci abbonamento dal Portale Stripe", body: "Nuovo pulsante 'Gestisci abbonamento' che apre il Portale Stripe: aggiorna carta, scarica fatture, cambia piano o cancella — tutto self-service, senza contattarci." },
+      { icon: "info", title: "🐛 Correzione — messaggio bloccante rimosso", body: "Rimosso il messaggio d'errore rosso che appariva erroneamente quando cercavi di passare a un altro piano Stripe. Ora l'app apre direttamente il flusso di cambio." },
+    ],
+  },
+  {
     version: "0.8.0",
     date: "2026-07-13",
     title: "✨ Abbonamenti direttamente dal desktop",

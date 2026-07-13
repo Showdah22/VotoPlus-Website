@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
-import { api } from "../api/client";
+import { api, ApiError } from "../api/client";
 
 /**
  * Sezione Piani (Impostazioni desktop) — parity con la pagina Premium mobile.
@@ -117,18 +117,38 @@ export function PianiSection() {
   // Stripe checkout state (Fase B — 2026-07)
   const [purchasing, setPurchasing] = useState<Plan["id"] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [pollingSince, setPollingSince] = useState<number | null>(null);
+  // Subscription state (per capire se mostrare checkout / portal / niente)
+  const [subStatus, setSubStatus] = useState<{
+    active: boolean;
+    provider: "apple" | "google" | "stripe" | null;
+    plan_sku: string | null;
+  } | null>(null);
+  const [portalLoading, setPortalLoading] = useState<Plan["id"] | "manage" | null>(null);
 
-  const currentPlan = (user?.plan || "free") as Plan["id"];
+  // Il piano corrente si desume dal plan_sku (più preciso di `plan`, che
+  // colassa "premium" e "school_year" entrambi su "premium").
+  const currentPlanFromSku = (subStatus?.plan_sku || null) as Plan["id"] | null;
+  const currentPlanFromUser = (user?.plan || "free") as Plan["id"];
+  const currentPlan: Plan["id"] = currentPlanFromSku ?? currentPlanFromUser;
+  const currentProvider = subStatus?.provider ?? null;
+  const hasActiveSub = !!subStatus?.active;
 
   useEffect(() => {
     if (!token) return;
     setLoading(true);
-    api
-      .meQuota(token)
-      .then(setQuota)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      api.meQuota(token).then(setQuota).catch(() => {}),
+      api
+        .billingSubscriptionStatus(token)
+        .then((s) => setSubStatus({
+          active: s.active,
+          provider: s.provider,
+          plan_sku: s.plan_sku,
+        }))
+        .catch(() => {}),
+    ]).finally(() => setLoading(false));
   }, [token]);
 
   // Polling subscription status dopo apertura Stripe Checkout esterna.
@@ -159,6 +179,12 @@ export function PianiSection() {
           setPollingSince(null);
           setPurchasing(null);
           setError(null);
+          setInfo("✅ Abbonamento attivato! Grazie 🎉");
+          setSubStatus({
+            active: status.active,
+            provider: status.provider,
+            plan_sku: status.plan_sku,
+          });
           try {
             await refreshUser?.();
           } catch (_e) {
@@ -176,13 +202,71 @@ export function PianiSection() {
     return () => { stopped = true; };
   }, [pollingSince, token, refreshUser]);
 
+  // Apre il Billing Portal Stripe. Se `targetSku` è passato → deep-link al
+  // flusso "subscription_update" (proration automatica). Se non è passato →
+  // portale generico (gestione carta, fatture, cancellazione).
+  const openBillingPortal = async (targetSku?: Plan["id"]) => {
+    setError(null);
+    setInfo(null);
+    if (!token) {
+      setError("Devi essere loggato per gestire l'abbonamento.");
+      return;
+    }
+    const key: Plan["id"] | "manage" = targetSku ?? "manage";
+    setPortalLoading(key);
+    try {
+      const body: {
+        target_sku?: "premium" | "family" | "school_year" | "maturita";
+      } = {};
+      if (targetSku && targetSku !== "free") {
+        body.target_sku = targetSku as "premium" | "family" | "school_year" | "maturita";
+      }
+      const resp = await api.billingStripePortal(body, token);
+      const w = (window as any).voto;
+      if (w?.openExternal) {
+        await w.openExternal(resp.portal_url);
+      } else {
+        window.open(resp.portal_url, "_blank");
+      }
+      // Dopo aver aperto il portale, avviamo un polling leggero per
+      // captare eventuali cambi (upgrade da mensile ad annuale).
+      setPollingSince(Date.now());
+      setInfo(
+        targetSku
+          ? "Ti abbiamo mandato al Portale Stripe per il cambio piano. Torna qui dopo la conferma — aggiorneremo tutto in automatico."
+          : "Ti abbiamo mandato al Portale Stripe per gestire il tuo abbonamento.",
+      );
+    } catch (e: any) {
+      const msg = String(e?.message || e || "Errore sconosciuto");
+      if (msg.toLowerCase().includes("customer portal") || msg.includes("503")) {
+        setError(
+          "Il Portale Stripe non è ancora attivo lato Dashboard. " +
+          "Amministratore: Dashboard Stripe → Settings → Billing → Customer portal → Activate.",
+        );
+      } else {
+        setError(`Errore Portale Stripe: ${msg.slice(0, 200)}`);
+      }
+    } finally {
+      setPortalLoading(null);
+    }
+  };
+
   const handlePurchase = async (planId: Plan["id"]) => {
     setError(null);
+    setInfo(null);
     if (!token) {
       setError("Devi essere loggato per acquistare un abbonamento.");
       return;
     }
     if (planId === "free") return;
+
+    // Se l'utente ha già una sub attiva Stripe su un altro SKU → non fare
+    // checkout, apri direttamente il Portal in modalità update-subscription.
+    if (hasActiveSub && currentProvider === "stripe" && currentPlanFromSku !== planId) {
+      await openBillingPortal(planId);
+      return;
+    }
+
     setPurchasing(planId);
     try {
       const sku = planId as "premium" | "family" | "school_year" | "maturita";
@@ -197,11 +281,34 @@ export function PianiSection() {
       // Avvia polling per detectare l'attivazione
       setPollingSince(Date.now());
     } catch (e: any) {
+      const code = e instanceof ApiError ? e.code : undefined;
       const msg = String(e?.message || e || "Errore sconosciuto");
-      if (msg.includes("409") || msg.toLowerCase().includes("già un abbonamento")) {
+      // Il backend risponde 409 con detail.code = "use_portal_to_switch"
+      // quando l'utente ha già Stripe attivo su un altro SKU. In quel caso,
+      // invece di mostrare errore, apriamo il Portal con target_sku.
+      if (code === "use_portal_to_switch") {
+        setPurchasing(null);
+        await openBillingPortal(planId);
+        return;
+      }
+      if (code === "already_on_this_sku") {
+        setError("Hai già questo piano attivo. Usa 'Gestisci abbonamento' se vuoi modificarlo o cancellarlo.");
+      } else if (code === "already_on_other_provider") {
+        const prov = (e instanceof ApiError && typeof e.detailObj?.provider === "string")
+          ? (e.detailObj.provider as string)
+          : "mobile";
+        const provLabel = prov === "apple"
+          ? "App Store (iPhone/iPad)"
+          : prov === "google"
+            ? "Google Play (Android)"
+            : "sul tuo dispositivo mobile";
         setError(
-          "Hai già un abbonamento attivo (su App Store, Google Play o Stripe). " +
-          "Gestiscilo dalla piattaforma dove l'hai acquistato.",
+          `Hai già un abbonamento attivo su ${provLabel}. ` +
+          "Gestiscilo da lì — non serve pagare di nuovo qui, il tuo Premium è già attivo.",
+        );
+      } else if (msg.includes("409")) {
+        setError(
+          "Hai già un abbonamento attivo. Usa 'Gestisci abbonamento' per modificarlo.",
         );
       } else {
         setError(`Errore checkout: ${msg}`);
@@ -271,12 +378,59 @@ export function PianiSection() {
               plan={p}
               isCurrent={currentPlan === p.id}
               onPurchase={handlePurchase}
+              onOpenPortal={openBillingPortal}
               purchasing={purchasing === p.id}
               anyPurchasing={purchasing !== null}
               pollingActive={pollingSince !== null}
+              subStatus={subStatus}
+              portalLoading={portalLoading === p.id}
+              anyPortalLoading={portalLoading !== null}
             />
           ))}
         </div>
+
+        {/* Bottone "Gestisci abbonamento" — visibile solo se Stripe attivo */}
+        {hasActiveSub && currentProvider === "stripe" && (
+          <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
+            <button
+              onClick={() => openBillingPortal()}
+              disabled={portalLoading !== null || pollingSince !== null}
+              style={{
+                padding: "9px 16px",
+                borderRadius: radius.sm,
+                background: `${colors.purple}18`,
+                border: `1px solid ${colors.purple}77`,
+                color: colors.purple,
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: portalLoading !== null ? "default" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                opacity: portalLoading === "manage" ? 0.6 : 1,
+              }}
+            >
+              {portalLoading === "manage" ? "Apertura Portale…" : "Gestisci abbonamento"}
+              <ExternalLink size={12} />
+            </button>
+          </div>
+        )}
+
+        {/* Banner info (upgrade in corso, riuscito, ecc.) */}
+        {info && (
+          <div style={{
+            marginTop: 12,
+            padding: 12,
+            borderRadius: radius.sm,
+            background: `${colors.green}15`,
+            border: `1px solid ${colors.green}55`,
+            color: colors.green,
+            fontSize: 12,
+            lineHeight: 1.5,
+          }}>
+            {info}
+          </div>
+        )}
 
         {/* Banner errore checkout */}
         {error && (
@@ -399,18 +553,110 @@ function PlanCard({
   plan,
   isCurrent,
   onPurchase,
+  onOpenPortal,
   purchasing,
   anyPurchasing,
   pollingActive,
+  subStatus,
+  portalLoading,
+  anyPortalLoading,
 }: {
   plan: Plan;
   isCurrent: boolean;
   onPurchase: (planId: Plan["id"]) => void;
+  onOpenPortal: (targetSku?: Plan["id"]) => void;
   purchasing: boolean;
   anyPurchasing: boolean;
   pollingActive: boolean;
+  subStatus: {
+    active: boolean;
+    provider: "apple" | "google" | "stripe" | null;
+    plan_sku: string | null;
+  } | null;
+  portalLoading: boolean;
+  anyPortalLoading: boolean;
 }) {
   const { Icon, color, featured } = plan;
+
+  // Deriva "stato del pulsante" in base al contesto:
+  const provider = subStatus?.provider ?? null;
+  const hasActiveSub = !!subStatus?.active;
+  const isFree = plan.id === "free";
+  const isMobileProvider = provider === "apple" || provider === "google";
+
+  // Cosa mostrare come label del CTA
+  let ctaLabel: React.ReactNode;
+  let ctaMode: "checkout" | "portal_upgrade" | "current_manage" | "disabled_free" | "disabled_mobile" | "loading";
+  let ctaDisabled = false;
+
+  if (isFree) {
+    ctaMode = "disabled_free";
+    ctaLabel = "Piano base";
+    ctaDisabled = true;
+  } else if (purchasing) {
+    ctaMode = "loading";
+    ctaLabel = "Apertura checkout…";
+    ctaDisabled = true;
+  } else if (portalLoading) {
+    ctaMode = "loading";
+    ctaLabel = "Apertura Portale…";
+    ctaDisabled = true;
+  } else if (isCurrent && hasActiveSub) {
+    // È il piano corrente ATTIVO
+    if (provider === "stripe") {
+      ctaMode = "current_manage";
+      ctaLabel = (
+        <>
+          Il tuo piano · Gestisci <ExternalLink size={12} />
+        </>
+      );
+    } else {
+      // Apple/Google: il piano corrente si gestisce sullo store, non qui
+      ctaMode = "disabled_mobile";
+      ctaLabel = provider === "apple"
+        ? "Gestisci su App Store"
+        : "Gestisci su Google Play";
+      ctaDisabled = true;
+    }
+  } else if (hasActiveSub && provider === "stripe") {
+    // Utente ha Stripe attivo su un ALTRO piano → propone upgrade/downgrade
+    ctaMode = "portal_upgrade";
+    ctaLabel = (
+      <>
+        Passa a {plan.name.replace("Premium ", "").toLowerCase()} <ExternalLink size={12} />
+      </>
+    );
+  } else if (isMobileProvider) {
+    // Utente ha Apple/Google attivo → non ha senso comprare qui
+    ctaMode = "disabled_mobile";
+    ctaLabel = provider === "apple"
+      ? "Attivo su App Store"
+      : "Attivo su Google Play";
+    ctaDisabled = true;
+  } else {
+    // Nessuna sub attiva → checkout classico con trial 7gg
+    ctaMode = "checkout";
+    ctaLabel = (
+      <>
+        Attiva con 7gg di prova <ExternalLink size={12} />
+      </>
+    );
+  }
+
+  const globallyBlocked = (anyPurchasing && !purchasing)
+    || (anyPortalLoading && !portalLoading)
+    || pollingActive;
+  if (globallyBlocked && !ctaDisabled) ctaDisabled = true;
+
+  const onCtaClick = () => {
+    if (ctaMode === "checkout" || ctaMode === "portal_upgrade") {
+      onPurchase(plan.id);
+    } else if (ctaMode === "current_manage") {
+      onOpenPortal();
+    }
+    // Gli altri stati sono disabled → nessuna azione
+  };
+
   return (
     <article
       style={{
@@ -489,36 +735,42 @@ function PlanCard({
       </ul>
 
       <button
-        onClick={() => onPurchase(plan.id)}
-        disabled={isCurrent || plan.id === "free" || anyPurchasing || pollingActive}
+        onClick={onCtaClick}
+        disabled={ctaDisabled}
         style={{
           marginTop: 4,
           padding: "9px 12px",
           borderRadius: radius.sm,
-          background: isCurrent || plan.id === "free" ? colors.bgGlass : `${color}18`,
-          border: `1px solid ${isCurrent || plan.id === "free" ? colors.border : color}`,
-          color: isCurrent ? colors.green : plan.id === "free" ? colors.textMuted : color,
+          background: ctaMode === "disabled_free" || ctaMode === "disabled_mobile"
+            ? colors.bgGlass
+            : ctaMode === "current_manage"
+              ? `${colors.green}18`
+              : `${color}18`,
+          border: `1px solid ${
+            ctaMode === "disabled_free" || ctaMode === "disabled_mobile"
+              ? colors.border
+              : ctaMode === "current_manage"
+                ? colors.green
+                : color
+          }`,
+          color: ctaMode === "disabled_free"
+            ? colors.textMuted
+            : ctaMode === "disabled_mobile"
+              ? colors.textSub
+              : ctaMode === "current_manage"
+                ? colors.green
+                : color,
           fontWeight: 800,
           fontSize: 12,
-          cursor: isCurrent || plan.id === "free" || anyPurchasing || pollingActive ? "default" : "pointer",
-          opacity: (anyPurchasing && !purchasing) || (pollingActive && !purchasing) ? 0.5 : 1,
+          cursor: ctaDisabled ? "default" : "pointer",
+          opacity: globallyBlocked ? 0.5 : 1,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           gap: 6,
         }}
       >
-        {isCurrent ? (
-          "Il tuo piano"
-        ) : plan.id === "free" ? (
-          "Piano base"
-        ) : purchasing ? (
-          <>Apertura checkout…</>
-        ) : (
-          <>
-            Attiva con 7gg di prova <ExternalLink size={12} />
-          </>
-        )}
+        {ctaLabel}
       </button>
     </article>
   );

@@ -8,10 +8,31 @@ const BASE_URL =
 export class ApiError extends Error {
   status: number;
   detail?: string;
-  constructor(status: number, message: string, detail?: string) {
+  /**
+   * Payload completo di `detail` quando il backend lo invia come oggetto
+   * strutturato (es. 409 con `{ code, provider, current_sku, target_sku }`).
+   * Undefined per errori con detail piatto (stringa) o 422 (array).
+   */
+  detailObj?: Record<string, unknown>;
+  /**
+   * Codice diagnostico letto da `detail.code`. Undefined se non presente.
+   * Esempi: "use_portal_to_switch", "already_on_this_sku",
+   * "already_on_other_provider".
+   */
+  code?: string;
+  constructor(
+    status: number,
+    message: string,
+    detail?: string,
+    detailObj?: Record<string, unknown>,
+  ) {
     super(message);
     this.status = status;
     this.detail = detail;
+    this.detailObj = detailObj;
+    if (detailObj && typeof detailObj.code === "string") {
+      this.code = detailObj.code;
+    }
   }
 }
 
@@ -46,6 +67,7 @@ async function request<T = unknown>(path: string, opts: RequestOpts = {}): Promi
     // di oggetti { loc, msg, type }. Estraiamo il primo msg per un errore
     // parlante ("field required: title") invece di un opaco "HTTP 422".
     let msg = `HTTP ${res.status}`;
+    let detailObj: Record<string, unknown> | undefined;
     if (isRecord(data)) {
       if (typeof data.detail === "string") {
         msg = data.detail;
@@ -54,11 +76,27 @@ async function request<T = unknown>(path: string, opts: RequestOpts = {}): Promi
         const field = Array.isArray(first?.loc) ? first.loc.slice(-1)[0] : null;
         const em = first?.msg || "campo non valido";
         msg = field ? `${em} (${field})` : em;
+      } else if (isRecord(data.detail)) {
+        // Nuovo formato usato da Stripe billing (409 conflict etc.):
+        // detail = { code, provider, message, ... } → serializziamo il
+        // messaggio per gli utilizzatori legacy e conserviamo l'oggetto
+        // strutturato in ApiError.detailObj/code per gli utilizzatori nuovi.
+        detailObj = data.detail;
+        if (typeof detailObj.message === "string") {
+          msg = detailObj.message as string;
+        } else if (typeof detailObj.code === "string") {
+          msg = detailObj.code as string;
+        }
       } else if (typeof data.message === "string") {
         msg = data.message;
       }
     }
-    throw new ApiError(res.status, msg, typeof data === "string" ? data : undefined);
+    throw new ApiError(
+      res.status,
+      msg,
+      typeof data === "string" ? data : undefined,
+      detailObj,
+    );
   }
   return data as T;
 }
@@ -254,6 +292,22 @@ export const api = {
   ) =>
     request<{ checkout_url: string; session_id: string }>(
       "/api/billing/stripe/create-checkout-session",
+      { method: "POST", body, token },
+    ),
+
+  // Stripe Billing Portal — cambio piano mensile ↔ annuale con proration,
+  // gestione carta, download fatture, cancellazione.
+  // Se `target_sku` è passato, apre direttamente il flusso "subscription_update"
+  // con il nuovo price pre-selezionato (Stripe calcola la proration automatica).
+  billingStripePortal: (
+    body: {
+      target_sku?: "premium" | "family" | "school_year" | "maturita";
+      return_url?: string;
+    },
+    token: string,
+  ) =>
+    request<{ portal_url: string }>(
+      "/api/billing/stripe/portal",
       { method: "POST", body, token },
     ),
 
