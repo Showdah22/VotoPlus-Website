@@ -14,6 +14,70 @@ const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
 
 let mainWindow: BrowserWindow | null = null;
 
+// ===================== DEEP-LINK CUSTOM PROTOCOL =====================
+// Voto+ Desktop registra il custom URL scheme `votoplus://` per ricevere le
+// callback di autenticazione Google (via Emergent) e altri deep-link.
+// Flusso Google:
+//   1. Renderer → main IPC "auth:startGoogle"
+//   2. Main apre https://auth.emergentagent.com/?redirect=votoplus%3A%2F%2Fauth
+//      nel browser di sistema
+//   3. Utente logga con Google → Emergent redirige a `votoplus://auth?session_id=XYZ`
+//      (o `#session_id=XYZ` nell'hash)
+//   4. Il SO apre Voto+ Desktop se non è già aperto (single-instance).
+//      Su macOS arriva via `open-url`; su Windows come argomento in `argv`.
+//   5. Main parse il session_id e invia IPC "auth:googleCallback" al renderer,
+//      che chiama POST /api/auth/google con il session_id come session_token.
+const PROTOCOL_SCHEME = "votoplus";
+// Ultimo session_id ricevuto quando il renderer non era ancora pronto ad
+// ascoltare (es. app freschi lanciata dal deep-link). Verrà consegnato al
+// primo subscribe.
+let pendingAuthSessionId: string | null = null;
+let pendingAuthError: string | null = null;
+
+function parseAuthDeepLink(deepLinkUrl: string): { session_id?: string; error?: string } {
+  try {
+    // Accetta sia `?session_id=` che `#session_id=` (Emergent usa fragment).
+    // Normalizziamo sostituendo il primo `#` con `?` se non c'è già `?`.
+    const normalized = deepLinkUrl.includes("?")
+      ? deepLinkUrl.replace(/#/, "&")
+      : deepLinkUrl.replace(/#/, "?");
+    const u = new URL(normalized);
+    // Verifica che sia effettivamente il nostro protocollo + path auth
+    if (u.protocol !== `${PROTOCOL_SCHEME}:`) return {};
+    if (!u.host && !u.pathname.startsWith("/auth") && u.pathname !== "//auth" && u.pathname !== "auth") {
+      // Alcune varianti Windows mettono "auth" come host
+    }
+    const session_id = u.searchParams.get("session_id") || undefined;
+    const error = u.searchParams.get("error") || undefined;
+    return { session_id, error };
+  } catch (e) {
+    console.warn("[deeplink] parse failed:", e, deepLinkUrl);
+    return {};
+  }
+}
+
+function handleAuthDeepLink(deepLinkUrl: string) {
+  const { session_id, error } = parseAuthDeepLink(deepLinkUrl);
+  if (!session_id && !error) return; // non è un deep-link auth valido
+
+  // Se la window esiste ed è pronta, invia subito. Altrimenti, memorizza per
+  // il primo subscribe dal renderer (via IPC "auth:consumePending").
+  if (mainWindow && !mainWindow.webContents.isLoading()) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+    mainWindow.webContents.send("auth:googleCallback", { session_id, error });
+  } else {
+    pendingAuthSessionId = session_id ?? null;
+    pendingAuthError = error ?? null;
+  }
+}
+
+// Estrae il deep-link `votoplus://...` dagli argomenti di avvio (Windows).
+function extractDeepLinkFromArgv(argv: string[]): string | null {
+  return argv.find((a) => a.startsWith(`${PROTOCOL_SCHEME}://`)) ?? null;
+}
+
 // ===================== AUTO-UPDATER =====================
 // Configurazione: legge automaticamente da package.json > build.publish (GitHub).
 // autoDownload false = decidiamo noi quando scaricare (bottone in Impostazioni).
@@ -234,7 +298,49 @@ ipcMain.handle("external:open", (_e, url: string) => {
   }
 });
 
+// ===================== AUTH IPC =====================
+// Il renderer chiama `voto.auth.startGoogleLogin()` per avviare il flusso.
+// Costruiamo l'URL Emergent con `redirect=votoplus://auth` e lo apriamo nel
+// browser di sistema. Il resto è gestito dal deep-link handler.
+ipcMain.handle("auth:startGoogle", () => {
+  const redirect = `${PROTOCOL_SCHEME}://auth`;
+  const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirect)}`;
+  shell.openExternal(authUrl);
+});
+
+// Il renderer chiama questo appena LoginPage monta per "consumare" eventuali
+// deep-link auth arrivati mentre l'app era ancora in avvio (freschi lanciata
+// direttamente da `votoplus://auth?session_id=...`).
+ipcMain.handle("auth:consumePending", () => {
+  const payload = { session_id: pendingAuthSessionId, error: pendingAuthError };
+  pendingAuthSessionId = null;
+  pendingAuthError = null;
+  return payload;
+});
+
 // ===================== APP LIFECYCLE =====================
+// Registra il custom URL scheme `votoplus://` come default handler per questa
+// app. Deve essere fatto PRIMA di app.whenReady() per essere efficace su tutte
+// le piattaforme.
+if (process.defaultApp) {
+  // In dev, con `electron .` bisogna passare argv[1] per registrare correttamente.
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient(PROTOCOL_SCHEME, process.execPath, [
+      path.resolve(process.argv[1]),
+    ]);
+  }
+} else {
+  app.setAsDefaultProtocolClient(PROTOCOL_SCHEME);
+}
+
+// macOS: quando l'app è già aperta e riceve un deep-link `votoplus://...`,
+// il SO emette l'evento `open-url`. Su Windows/Linux invece arriva come
+// argomento della second-instance (gestito sotto in `second-instance`).
+app.on("open-url", (event, url) => {
+  event.preventDefault();
+  handleAuthDeepLink(url);
+});
+
 // Single-instance lock — impedisce di aprire più finestre di Voto+ Desktop
 // contemporaneamente. Se una seconda istanza viene lanciata (es. l'utente
 // clicca di nuovo sull'icona), quit immediato e focus alla finestra
@@ -243,15 +349,28 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
+  app.on("second-instance", (_event, argv) => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();
       mainWindow.focus();
     }
+    // Windows: il deep-link arriva come uno degli argomenti di avvio.
+    const deepLink = extractDeepLinkFromArgv(argv);
+    if (deepLink) handleAuthDeepLink(deepLink);
   });
 
   app.whenReady().then(async () => {
+    // Se l'app è stata avviata direttamente dal deep-link (freschi lanciata),
+    // il link è tra gli argomenti di avvio. Lo memorizziamo per essere
+    // consumato quando il renderer sarà pronto (LoginPage montata).
+    const initialDeepLink = extractDeepLinkFromArgv(process.argv);
+    if (initialDeepLink) {
+      const { session_id, error } = parseAuthDeepLink(initialDeepLink);
+      pendingAuthSessionId = session_id ?? null;
+      pendingAuthError = error ?? null;
+    }
+
     // MACOS: Chiediamo il permesso microfono al sistema UNA volta all'avvio.
     // Il consenso viene memorizzato in TCC.db così le successive
     // getUserMedia non triggerano nuove richieste. `askForMediaAccess`

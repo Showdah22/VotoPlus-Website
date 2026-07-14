@@ -43,4 +43,29 @@ contextBridge.exposeInMainWorld("voto", {
 
   // External links
   openExternal: (url: string) => ipcRenderer.invoke("external:open", url),
+
+  // ─── AUTH: Google via Emergent hosted OAuth ───
+  // Uso dal renderer:
+  //   voto.auth.startGoogleLogin();      // apre browser di sistema
+  //   voto.auth.consumePending();        // recupera session_id se già arrivato
+  //   const off = voto.auth.onGoogleCallback((payload) => { ... });
+  //   // off() per disiscriversi
+  auth: {
+    startGoogleLogin: () => ipcRenderer.invoke("auth:startGoogle"),
+    consumePending: () =>
+      ipcRenderer.invoke("auth:consumePending") as Promise<{
+        session_id: string | null;
+        error: string | null;
+      }>,
+    onGoogleCallback: (
+      cb: (payload: { session_id?: string; error?: string }) => void,
+    ) => {
+      const handler = (
+        _e: unknown,
+        payload: { session_id?: string; error?: string },
+      ) => cb(payload);
+      ipcRenderer.on("auth:googleCallback", handler);
+      return () => ipcRenderer.removeListener("auth:googleCallback", handler);
+    },
+  },
 });

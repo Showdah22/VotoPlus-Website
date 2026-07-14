@@ -22,6 +22,16 @@ declare global {
         onStatus: (cb: (status: UpdaterState) => void) => () => void;
       };
       openExternal: (url: string) => Promise<void>;
+      auth: {
+        startGoogleLogin: () => Promise<void>;
+        consumePending: () => Promise<{
+          session_id: string | null;
+          error: string | null;
+        }>;
+        onGoogleCallback: (
+          cb: (payload: { session_id?: string; error?: string }) => void,
+        ) => () => void;
+      };
     };
   }
 }

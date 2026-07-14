@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.9.2",
+    date: "2026-07-14",
+    title: "🔐 Accesso con Google (Apple in arrivo)",
+    emoji: "✨",
+    highlights: [
+      { icon: "google", title: "✨ Continua con Google", body: "Ora puoi accedere a Voto+ Desktop con il tuo account Google in un click. Il login apre il browser di sistema (per motivi di sicurezza), completi il login su Google, e sei riportato in-app automaticamente. Nessuna password da ricordare. Funziona sia in Registrazione che in Accesso." },
+      { icon: "shield", title: "🛡️ Custom protocol votoplus://", body: "Voto+ Desktop registra un URL scheme sicuro (`votoplus://`) per ricevere il callback di login dal browser. Zero copy-paste, zero attesa. Se avvii l'app cliccando un link Voto+ da fuori (email, chat) apri direttamente la sezione giusta." },
+      { icon: "apple", title: "🍎 Continua con Apple — in arrivo", body: "Il tasto 'Continua con Apple' è già visibile ma per ora disabilitato. Attivazione prevista appena completiamo la configurazione Services ID lato Apple Developer. Nel frattempo gli utenti Apple possono accedere con email/password o Google — le credenziali funzionano su tutte le piattaforme." },
+    ],
+  },
+  {
     version: "0.9.1",
     date: "2026-07-14",
     title: "🐛 Fix critico: tema chiaro ora funziona su tutte le pagine",

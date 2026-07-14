@@ -119,6 +119,16 @@ export const api = {
   login: (body: { email: string; password: string }) =>
     request<{ access_token: string; user: any }>("/api/auth/login", { method: "POST", body }),
 
+  // Google Auth via Emergent hosted OAuth. Il session_id ricevuto dal
+  // deep-link `votoplus://auth?session_id=...` viene passato al backend
+  // come `session_token`. Il backend lo scambia una-tantum con Emergent
+  // (`session-data` endpoint) e restituisce JWT + user. Vedi routes/auth.py.
+  googleAuth: (session_id: string) =>
+    request<{ access_token: string; user: any }>("/api/auth/google", {
+      method: "POST",
+      body: { session_token: session_id },
+    }),
+
   me: (token: string) => request<any>("/api/auth/me", { token }),
 
   // Verifica email OTP (auto-inviata al signup, si può richiedere di nuovo)

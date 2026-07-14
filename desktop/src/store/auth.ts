@@ -29,6 +29,7 @@ type AuthState = {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (session_id: string) => Promise<void>;
   signup: (email: string, username: string, password: string) => Promise<void>;
   setSession: (token: string, user: any) => void;
   logout: () => void;
@@ -52,6 +53,20 @@ export const useAuth = create<AuthState>()(
           set({
             loading: false,
             error: err?.message ?? "Errore di accesso",
+          });
+          throw err;
+        }
+      },
+
+      loginWithGoogle: async (session_id: string) => {
+        set({ loading: true, error: null });
+        try {
+          const res = await api.googleAuth(session_id);
+          set({ token: res.access_token, user: res.user, loading: false });
+        } catch (err: any) {
+          set({
+            loading: false,
+            error: err?.message ?? "Errore accesso con Google",
           });
           throw err;
         }
