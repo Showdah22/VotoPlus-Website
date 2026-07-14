@@ -53,8 +53,20 @@ export const LIGHT_COLORS = {
   red: "#dc2626",
 };
 
-// Alias backward-compat: dark è il default corrente.
-export const colors = DARK_COLORS;
+// Alias backward-compat MUTABILE: molti componenti importano ancora `colors`
+// direttamente. Per far reagire l'app al cambio tema senza refactorare 20 file,
+// ThemeProvider muta questo oggetto tramite `applyColorsMode(effective)` prima
+// del render. Tutti gli usi di `colors.bg`, `colors.textPrimary`, ecc. dentro
+// function bodies (che vengono ricalcolati ad ogni render) leggeranno i nuovi
+// valori. Attenzione: costanti a livello di modulo (es. `const x = { color:
+// colors.textMuted }`) NON reagiscono — vanno spostate dentro la funzione o
+// riscritte come factory.
+export const colors: typeof DARK_COLORS = { ...DARK_COLORS };
+
+export function applyColorsMode(mode: "light" | "dark") {
+  const target = mode === "light" ? LIGHT_COLORS : DARK_COLORS;
+  Object.assign(colors, target);
+}
 
 export function getColors(mode: "light" | "dark") {
   return mode === "light" ? LIGHT_COLORS : DARK_COLORS;

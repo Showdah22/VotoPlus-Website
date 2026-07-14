@@ -44,7 +44,7 @@ const PLANS: Plan[] = [
     name: "Free",
     price: "Gratis",
     period: "sempre",
-    color: colors.textMuted,
+    color: "#71717a", // colors.textMuted (dark palette) — accent card
     Icon: Info,
     description: "Piano gratuito per iniziare. Nessun addebito, funzionalità di base sempre disponibili.",
     perks: ["Analisi di base", "Matematica base", "Materie illimitate"],
@@ -54,7 +54,7 @@ const PLANS: Plan[] = [
     name: "Premium Individual",
     price: "€4,99",
     period: "al mese",
-    color: colors.purple,
+    color: "#a855f7", // colors.purple — accent card
     featured: true,
     Icon: Crown,
     description: "Tutte le funzioni Voto+ senza limiti, per un solo studente.",
@@ -71,7 +71,7 @@ const PLANS: Plan[] = [
     name: "Premium Family",
     price: "€8,99",
     period: "al mese",
-    color: colors.blue,
+    color: "#3b82f6", // colors.blue — accent card
     Icon: Users,
     description: "Tutte le funzioni Premium condivise fino a 3 persone, un solo pagamento.",
     perks: ["Tutto Premium per 3 persone", "Cronologia indipendente", "Risparmi il 41%"],
@@ -81,7 +81,7 @@ const PLANS: Plan[] = [
     name: "Premium Annuale",
     price: "€34,99",
     period: "all'anno",
-    color: colors.orange,
+    color: "#f59e0b", // colors.orange — accent card
     Icon: Sparkles,
     description: "Copre l'anno scolastico + i mesi estivi, per un solo studente.",
     perks: [
@@ -96,7 +96,7 @@ const PLANS: Plan[] = [
     name: "Pacchetto Maturità",
     price: "€7,49",
     period: "una tantum",
-    color: colors.green,
+    color: "#10b981", // colors.green — accent card
     Icon: GraduationCap,
     description: "Preparazione mirata all'Esame di Stato: radar, simulazioni, colloquio.",
     perks: [

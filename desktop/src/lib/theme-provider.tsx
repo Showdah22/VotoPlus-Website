@@ -9,7 +9,7 @@
 // Vedi `/app/memory/THEME_SYSTEM_ROADMAP_1.2.1.md`.
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-import { DARK_COLORS, LIGHT_COLORS, getColors } from "../theme";
+import { DARK_COLORS, LIGHT_COLORS, applyColorsMode, getColors } from "../theme";
 
 const STORAGE_KEY = "theme_mode_v1";
 
@@ -60,6 +60,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const effective: EffectiveTheme = mode === "auto" ? systemScheme : mode;
+
+  // Muta l'alias `colors` esportato da theme.ts *durante* il render, così tutti
+  // i componenti che importano `colors` staticamente (senza useTheme) leggono
+  // i valori giusti al re-render. Necessario per Sidebar/RightPanel/AppShell/
+  // TitleBar/Modal/ecc. che non sono ancora migrati a useTheme.
+  applyColorsMode(effective);
+
+  // Sincronizza attributo `data-theme` sul <html> per gli stili globali (CSS
+  // vars in global.css) e per il color-scheme nativo (calendar picker, etc.)
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.dataset.theme = effective;
+    document.documentElement.style.colorScheme = effective;
+  }, [effective]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({ mode, effective, colors: getColors(effective), setMode }),

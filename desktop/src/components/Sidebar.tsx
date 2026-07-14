@@ -471,7 +471,7 @@ const sectionTitle: React.CSSProperties = {
   fontWeight: 900,
   letterSpacing: 1.2,
   textTransform: "uppercase",
-  color: colors.textMuted,
+  color: "var(--text-muted)",
   marginBottom: 8,
   marginLeft: 4,
 };

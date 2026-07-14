@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.9.1",
+    date: "2026-07-14",
+    title: "🐛 Fix critico: tema chiaro ora funziona su tutte le pagine",
+    emoji: "🐛",
+    highlights: [
+      { icon: "bug", title: "🐛 Tema chiaro visibile ovunque", body: "In v0.9.0 il tema chiaro non veniva applicato a Sidebar, RightPanel, TitleBar, Modal e ad alcuni componenti condivisi: il risultato era testi neri su sfondo nero (invisibili). Ora il tema chiaro passa ovunque correttamente." },
+      { icon: "layers", title: "🎨 Sfondi & scrollbar seguono il tema", body: "L'intero shell dell'app (sidebar sinistra, pannello destro con calendario, barra titolo, modali) risponde al cambio tema. Anche gli scrollbar e i colori dei calendar picker nativi si adattano." },
+      { icon: "check", title: "✅ Nessun refactor visibile all'utente", body: "Il fix è a livello di infrastruttura tema: nessuna nuova feature, ma finalmente il tema chiaro è utilizzabile." },
+    ],
+  },
+  {
     version: "0.9.0",
     date: "2026-07-14",
     title: "🌗 Tema chiaro/scuro/automatico + registrazione da desktop",

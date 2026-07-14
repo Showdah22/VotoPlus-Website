@@ -18,6 +18,35 @@
   --text-sub: #a1a1aa;
   --text-muted: #71717a;
   --text-dim: #52525b;
+
+  --scrollbar-thumb: rgba(255, 255, 255, 0.08);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.18);
+}
+
+/* Tema chiaro — attivato da ThemeProvider via data-theme sul <html>. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-elevated: #f8fafc;
+  --bg-glass: rgba(0, 0, 0, 0.035);
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.14);
+
+  --purple: #9333ea;
+  --cyan: #0891b2;
+  --pink: #db2777;
+  --orange: #d97706;
+  --green: #059669;
+  --red: #dc2626;
+  --blue: #2563eb;
+
+  --text-primary: #0f172a;
+  --text-sub: #475569;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.28);
 }
 
 * {
@@ -69,19 +98,27 @@ a {
   text-decoration: none;
 }
 
-/* Force dark theme on any native input (date/time/etc.) */
+/* Force color-scheme sui native input in base al tema attivo (gestito da :root
+   via data-theme). Il calendar picker Chromium eredita da color-scheme. */
 input,
 textarea,
 select {
-  color-scheme: dark;
+  color-scheme: inherit;
 }
-/* Windows Chromium: try to make the date-picker calendar icon visible in dark */
+/* Windows Chromium: icona calendar visibile su entrambi i temi */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.8) brightness(1.2);
   opacity: 0.7;
   cursor: pointer;
+}
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+:root[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator,
+:root[data-theme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+:root:not([data-theme]) input[type="date"]::-webkit-calendar-picker-indicator,
+:root:not([data-theme]) input[type="time"]::-webkit-calendar-picker-indicator,
+:root:not([data-theme]) input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) brightness(1.2);
 }
 
 ::-webkit-scrollbar {
@@ -92,11 +129,11 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--scrollbar-thumb);
   border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--scrollbar-thumb-hover);
 }
 
 :focus-visible {

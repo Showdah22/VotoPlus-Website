@@ -90,15 +90,15 @@ const toastStyle: React.CSSProperties = {
   display: "flex",
   gap: 10,
   alignItems: "flex-start",
-  background: colors.bgElevated,
-  border: `1px solid ${colors.borderStrong}`,
+  background: "var(--bg-elevated)",
+  border: `1px solid var(--border-strong)`,
   borderRadius: radius.md,
   boxShadow: "0 12px 40px rgba(0,0,0,0.55)",
   zIndex: 9999,
 };
 const progressBg: React.CSSProperties = {
   height: 4,
-  background: "rgba(255,255,255,0.08)",
+  background: "var(--bg-glass)",
   borderRadius: 999,
   marginTop: 6,
   overflow: "hidden",
@@ -115,14 +115,14 @@ const ctaPrimary: React.CSSProperties = {
   fontSize: 12,
   fontWeight: 800,
   background: "linear-gradient(135deg, #a855f7, #3b82f6)",
-  color: colors.textPrimary,
+  color: "#ffffff",
 };
 const ctaGhost: React.CSSProperties = {
   padding: "7px 14px",
   borderRadius: 8,
   fontSize: 12,
   fontWeight: 700,
-  color: colors.textSub,
-  background: colors.bgGlass,
-  border: `1px solid ${colors.border}`,
+  color: "var(--text-sub)",
+  background: "var(--bg-glass)",
+  border: `1px solid var(--border)`,
 };

@@ -443,7 +443,7 @@ const btnPrimary: React.CSSProperties = {
   padding: "10px 18px",
   borderRadius: radius.sm,
   background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)",
-  color: colors.textPrimary,
+  color: "#ffffff",
   fontSize: 13,
   fontWeight: 800,
   border: "none",
