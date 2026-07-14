@@ -477,7 +477,7 @@ export function OraleVoiceMode() {
         >
           <Sparkles size={16} color={colors.cyan} style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ fontSize: 12, color: colors.textSub, lineHeight: 1.6 }}>
-            <strong style={{ color: "#fff" }}>Modalità Voce Realtime.</strong> Parla naturalmente — il prof
+            <strong style={{ color: colors.textPrimary }}>Modalità Voce Realtime.</strong> Parla naturalmente — il prof
             ti ascolta in tempo reale e risponde con voce naturale italiana. Nessun bottone da premere,
             puoi anche interromperlo. Assicurati che mic e speaker siano configurati in{" "}
             <em>Impostazioni → Audio</em>.
@@ -721,7 +721,7 @@ export function OraleVoiceMode() {
         >
           Interrogazione conclusa
         </div>
-        <div style={{ fontSize: 48, fontWeight: 900, marginTop: 8, color: "#fff" }}>
+        <div style={{ fontSize: 48, fontWeight: 900, marginTop: 8, color: colors.textPrimary }}>
           {g != null ? g.toFixed(1) : "—"}
           <span style={{ fontSize: 22, color: colors.textMuted }}>/10</span>
         </div>

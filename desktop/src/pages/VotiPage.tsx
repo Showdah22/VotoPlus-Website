@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { BarChart3, TrendingUp, TrendingDown, Minus, Plus } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { Modal, labelStyle, inputStyle, primaryBtn } from "../components/Modal";
 import { Select } from "../components/Select";
 
+import { useTheme } from "../lib/theme-provider";
 type SubjectStat = {
   subject: string;
   avg: number;
@@ -21,6 +22,7 @@ type StatsResp = {
 };
 
 export function VotiPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
   const [stats, setStats] = useState<StatsResp | null>(null);
@@ -109,11 +111,11 @@ export function VotiPage() {
       <section>
         <h2 style={{ margin: "0 0 12px 0", fontSize: 18, fontWeight: 800 }}>Medie per materia</h2>
         {loading ? (
-          <div style={placeholder}>Caricamento medie…</div>
+          <div style={getPlaceholder(colors)}>Caricamento medie…</div>
         ) : error ? (
-          <div style={{ ...placeholder, color: colors.red }}>{error}</div>
+          <div style={{ ...getPlaceholder(colors), color: colors.red }}>{error}</div>
         ) : displayAvgs.length === 0 ? (
-          <div style={placeholder}>
+          <div style={getPlaceholder(colors)}>
             Nessun voto ancora. Aggiungi voti dall'app mobile o fai un'interrogazione simulata.
           </div>
         ) : (
@@ -138,6 +140,7 @@ export function VotiPage() {
 function AddGradeModal({
   open, onClose, onAdded, subjects,
 }: { open: boolean; onClose: () => void; onAdded: () => void; subjects: string[] }) {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const [subject, setSubject] = useState(subjects[0] || "");
   const [value, setValue] = useState("");
@@ -199,6 +202,7 @@ function AddGradeModal({
 }
 
 function SubjectAvgCard({ data }: { data: SubjectStat }) {
+  const { colors } = useTheme();
   const color = colorForGrade(data.avg);
   const trendIcon =
     data.trend > 0.1 ? TrendingUp : data.trend < -0.1 ? TrendingDown : Minus;
@@ -249,6 +253,7 @@ function SubjectAvgCard({ data }: { data: SubjectStat }) {
 }
 
 function colorForGrade(g: number | null): string {
+  const { colors } = useTheme();
   if (g == null) return colors.textMuted;
   if (g >= 8) return colors.green;
   if (g >= 6) return colors.cyan;
@@ -262,7 +267,7 @@ function messageForGrade(g: number): string {
   return "C'è ancora margine di miglioramento";
 }
 
-const placeholder: React.CSSProperties = {
+const getPlaceholder = (colors: any): React.CSSProperties => ({
   padding: 24,
   borderRadius: radius.md,
   background: colors.bgGlass,
@@ -270,7 +275,7 @@ const placeholder: React.CSSProperties = {
   color: colors.textMuted,
   fontSize: 13,
   textAlign: "center",
-};
+});
 
 function iconWrapStyle(color: string): React.CSSProperties {
   return {

@@ -129,10 +129,10 @@ export function MathGraphSVG({ graph, width = 640 }: { graph: MathGraphData; wid
         {/* Griglia */}
         <g>
           {xTicks.map((v) => (
-            <line key={`vg-${v}`} x1={sx(v)} y1={PADDING.top} x2={sx(v)} y2={HEIGHT - PADDING.bottom} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
+            <line key={`vg-${v}`} x1={sx(v)} y1={PADDING.top} x2={sx(v)} y2={HEIGHT - PADDING.bottom} stroke={colors.border} strokeWidth={1} />
           ))}
           {yTicks.map((v) => (
-            <line key={`hg-${v}`} x1={PADDING.left} y1={sy(v)} x2={width - PADDING.right} y2={sy(v)} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
+            <line key={`hg-${v}`} x1={PADDING.left} y1={sy(v)} x2={width - PADDING.right} y2={sy(v)} stroke={colors.border} strokeWidth={1} />
           ))}
         </g>
 

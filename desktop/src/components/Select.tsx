@@ -168,7 +168,7 @@ export function Select({
                   }}
                   onMouseEnter={(e) => {
                     if (o.disabled || selected) return;
-                    e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                    e.currentTarget.style.background = colors.bgGlass;
                   }}
                   onMouseLeave={(e) => {
                     if (o.disabled || selected) return;

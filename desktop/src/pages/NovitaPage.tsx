@@ -30,9 +30,10 @@ import {
   FileType2,
   type LucideIcon,
 } from "lucide-react";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { DESKTOP_CHANGELOG, type DesktopRelease, type DesktopHighlight } from "../lib/desktopChangelog";
 
+import { useTheme } from "../lib/theme-provider";
 // Mappa icon-string → componente Lucide. Le stringhe le decidiamo noi nel
 // file desktopChangelog.ts quindi \u00e8 controllato al 100%.
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -67,6 +68,7 @@ function iconFor(name: string): LucideIcon {
 }
 
 export function NovitaPage() {
+  const { colors } = useTheme();
   const [installed, setInstalled] = useState<string | null>(null);
 
   useEffect(() => {
@@ -115,6 +117,7 @@ export function NovitaPage() {
 }
 
 function ReleaseCard({ release, latest, current }: { release: DesktopRelease; latest: boolean; current: boolean }) {
+  const { colors } = useTheme();
   const highlight = latest || current;
   return (
     <article
@@ -165,6 +168,7 @@ function ReleaseCard({ release, latest, current }: { release: DesktopRelease; la
 }
 
 function HighlightRow({ h }: { h: DesktopHighlight }) {
+  const { colors } = useTheme();
   const Icon = iconFor(h.icon);
   return (
     <li style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>

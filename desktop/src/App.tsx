@@ -6,6 +6,9 @@ import { UpdateToast } from "./components/UpdateToast";
 import { CommandPalette } from "./components/CommandPalette";
 import { SplashScreen } from "./components/SplashScreen";
 import { LoginPage } from "./pages/LoginPage";
+import { SignupPage } from "./pages/SignupPage";
+import { VerifyEmailPage } from "./pages/VerifyEmailPage";
+import { ProfileSetupPage } from "./pages/ProfileSetupPage";
 import { HomePage } from "./pages/HomePage";
 import { ScannerPage } from "./pages/ScannerPage";
 import { MathPage } from "./pages/MathPage";
@@ -25,7 +28,7 @@ import { MindmapPage } from "./pages/MindmapPage";
 import { RadarPage } from "./pages/RadarPage";
 import { useAuth } from "./store/auth";
 import { subscribeUpdaterEvents } from "./store/updater";
-import { colors } from "./theme";
+import { ThemeProvider, useTheme } from "./lib/theme-provider";
 
 function Protected({ children }: { children: JSX.Element }) {
   const token = useAuth((s) => s.token);
@@ -33,7 +36,8 @@ function Protected({ children }: { children: JSX.Element }) {
   return children;
 }
 
-export default function App() {
+function AppInner() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const refreshUser = useAuth((s) => s.refreshUser);
   const [splashVisible, setSplashVisible] = useState(true);
@@ -63,6 +67,9 @@ export default function App() {
           <CommandPalette />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/profile-setup" element={<ProfileSetupPage />} />
             <Route
               path="/"
               element={
@@ -96,5 +103,13 @@ export default function App() {
       </div>
       {splashVisible && <SplashScreen onDismiss={() => setSplashVisible(false)} />}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   );
 }

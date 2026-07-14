@@ -210,7 +210,7 @@ function WinCtrl({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: hover ? (danger ? "#e81123" : "rgba(255,255,255,0.06)") : "transparent",
+        background: hover ? (danger ? "#e81123" : colors.bgGlass) : "transparent",
         color: hover && danger ? "#fff" : colors.textSub,
         transition: "background 120ms ease",
         border: "none",

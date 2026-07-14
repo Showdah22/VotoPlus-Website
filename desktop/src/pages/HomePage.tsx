@@ -26,11 +26,13 @@ import {
 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 
+import { useTheme } from "../lib/theme-provider";
 type SubjectStat = { subject: string; avg: number; count: number };
 
 export function HomePage() {
+  const { colors } = useTheme();
   const user = useAuth((s) => s.user);
   const token = useAuth((s) => s.token);
   const navigate = useNavigate();
@@ -139,9 +141,9 @@ export function HomePage() {
         </div>
 
         {loading ? (
-          <div style={placeholder}>Caricamento…</div>
+          <div style={getPlaceholder(colors)}>Caricamento…</div>
         ) : subjects.length === 0 ? (
-          <div style={placeholder}>Configura le tue materie dall'app mobile.</div>
+          <div style={getPlaceholder(colors)}>Configura le tue materie dall'app mobile.</div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
             {subjects.map((s) => {
@@ -150,7 +152,7 @@ export function HomePage() {
               const count = recentStudies.filter((r) => r.subject === s).length;
               const meta = subjectMeta(s);
               const SubjIcon = meta.icon;
-              const gradeColor = colorForGrade(avg);
+              const gradeColor = colorForGrade(avg, colors);
               return (
                 <button
                   key={s}
@@ -210,9 +212,9 @@ export function HomePage() {
       <section>
         <h2 style={{ margin: "0 0 12px 0", fontSize: 18, fontWeight: 800 }}>Continua a studiare</h2>
         {loading ? (
-          <div style={placeholder}>Caricamento…</div>
+          <div style={getPlaceholder(colors)}>Caricamento…</div>
         ) : recentStudies.length === 0 ? (
-          <div style={placeholder}>
+          <div style={getPlaceholder(colors)}>
             <div style={{ fontWeight: 700, color: colors.textPrimary, marginBottom: 4 }}>Nessun materiale ancora</div>
             <div style={{ fontSize: 12 }}>Clicca Scannerizza per iniziare il tuo primo studio.</div>
           </div>
@@ -269,36 +271,35 @@ function greeting() {
 }
 
 // Mappa materia → icona + colore, allineata 1:1 con /app/frontend/app/(tabs)/index.tsx (SUBJECT_META).
-// Fallback su Bookmark viola come nel mobile.
+// Fallback su Bookmark viola come nel mobile. Colori hex fissi che restano leggibili su light/dark.
 const SUBJECT_META: Record<string, { icon: LucideIcon; color: string }> = {
-  Matematica: { icon: Calculator, color: colors.cyan },
-  Storia: { icon: BookOpen, color: colors.orange },
-  Filosofia: { icon: InfinityIcon, color: colors.purple },
-  Fisica: { icon: Zap, color: colors.blue },
-  Italiano: { icon: Languages, color: colors.pink },
-  Inglese: { icon: Globe, color: colors.green },
-  Latino: { icon: GraduationCap, color: colors.purple },
-  Greco: { icon: Library, color: colors.orange },
-  Scienze: { icon: Leaf, color: colors.green },
-  Chimica: { icon: FlaskConical, color: colors.pink },
-  Biologia: { icon: Leaf, color: colors.green },
-  Arte: { icon: Palette, color: colors.pink },
-  // Aggiunte utili non presenti su mobile ma comuni: fallback graziosi
-  "Storia dell'arte": { icon: Palette, color: colors.pink },
-  Geografia: { icon: Globe, color: colors.cyan },
-  Diritto: { icon: Landmark, color: colors.blue },
-  Economia: { icon: Landmark, color: colors.orange },
-  Musica: { icon: Music, color: colors.pink },
-  "Scienze motorie": { icon: Dumbbell, color: colors.green },
-  Informatica: { icon: Cpu, color: colors.cyan },
-  Algebra: { icon: Sigma, color: colors.cyan },
-  Geometria: { icon: Sigma, color: colors.cyan },
+  Matematica: { icon: Calculator, color: "#06b6d4" },
+  Storia: { icon: BookOpen, color: "#f59e0b" },
+  Filosofia: { icon: InfinityIcon, color: "#a855f7" },
+  Fisica: { icon: Zap, color: "#3b82f6" },
+  Italiano: { icon: Languages, color: "#ec4899" },
+  Inglese: { icon: Globe, color: "#10b981" },
+  Latino: { icon: GraduationCap, color: "#a855f7" },
+  Greco: { icon: Library, color: "#f59e0b" },
+  Scienze: { icon: Leaf, color: "#10b981" },
+  Chimica: { icon: FlaskConical, color: "#ec4899" },
+  Biologia: { icon: Leaf, color: "#10b981" },
+  Arte: { icon: Palette, color: "#ec4899" },
+  "Storia dell'arte": { icon: Palette, color: "#ec4899" },
+  Geografia: { icon: Globe, color: "#06b6d4" },
+  Diritto: { icon: Landmark, color: "#3b82f6" },
+  Economia: { icon: Landmark, color: "#f59e0b" },
+  Musica: { icon: Music, color: "#ec4899" },
+  "Scienze motorie": { icon: Dumbbell, color: "#10b981" },
+  Informatica: { icon: Cpu, color: "#06b6d4" },
+  Algebra: { icon: Sigma, color: "#06b6d4" },
+  Geometria: { icon: Sigma, color: "#06b6d4" },
 };
 
 function subjectMeta(s: string): { icon: LucideIcon; color: string } {
-  return SUBJECT_META[s] || { icon: Bookmark, color: colors.purple };
+  return SUBJECT_META[s] || { icon: Bookmark, color: "#a855f7" };
 }
-function colorForGrade(g: number | null): string {
+function colorForGrade(g: number | null, colors: any): string {
   if (g == null) return colors.textMuted;
   if (g >= 8) return colors.green;
   if (g >= 6) return colors.cyan;
@@ -312,6 +313,7 @@ function colorForGrade(g: number | null): string {
 //   - unlocked (verde/ciano) → "I temi più probabili dell'anno" → apre /radar
 //   - lockato (arancio/viola) → "Sblocca il Radar Maturità" → apre /impostazioni
 function MaturitaBanner({ unlocked, onClick }: { unlocked: boolean; onClick: () => void }) {
+  const { colors } = useTheme();
   const primary = unlocked ? colors.green : colors.orange;
   const secondary = unlocked ? colors.cyan : colors.purple;
   return (
@@ -355,7 +357,7 @@ function MaturitaBanner({ unlocked, onClick }: { unlocked: boolean; onClick: () 
           Maturità Radar
           {!unlocked && <Lock size={11} color={primary} />}
         </div>
-        <div style={{ fontSize: 17, fontWeight: 800, marginTop: 4, color: "#fff" }}>
+        <div style={{ fontSize: 17, fontWeight: 800, marginTop: 4, color: colors.textPrimary }}>
           {unlocked ? "I temi più probabili dell'anno" : "Sblocca il Radar Maturità"}
         </div>
         <div style={{ fontSize: 12, color: colors.textSub, marginTop: 4, lineHeight: 1.5 }}>
@@ -383,6 +385,7 @@ function BigCard({
   onClick: () => void;
   decoration?: React.ReactNode;
 }) {
+  const { colors } = useTheme();
   return (
     <button
       onClick={onClick}
@@ -568,11 +571,11 @@ function MathDecoration({ tint }: { tint: string }) {
   );
 }
 
-const placeholder: React.CSSProperties = {
+const getPlaceholder = (colors: any): React.CSSProperties => ({
   padding: 20,
   borderRadius: radius.md,
   background: colors.bgGlass,
   border: `1px dashed ${colors.border}`,
   color: colors.textSub,
   fontSize: 13,
-};
+});

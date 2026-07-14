@@ -98,7 +98,7 @@ export const primaryBtn: React.CSSProperties = {
   padding: "12px 20px",
   borderRadius: radius.md,
   background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)",
-  color: "#fff",
+  color: colors.textPrimary,
   fontWeight: 800,
   fontSize: 14,
   boxShadow: "0 6px 20px rgba(168,85,247,0.32)",

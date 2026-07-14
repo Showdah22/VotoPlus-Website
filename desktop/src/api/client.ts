@@ -113,10 +113,40 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 }
 
 export const api = {
+  signup: (body: { email: string; username: string; password: string }) =>
+    request<{ access_token: string; user: any }>("/api/auth/signup", { method: "POST", body }),
+
   login: (body: { email: string; password: string }) =>
     request<{ access_token: string; user: any }>("/api/auth/login", { method: "POST", body }),
 
   me: (token: string) => request<any>("/api/auth/me", { token }),
+
+  // Verifica email OTP (auto-inviata al signup, si può richiedere di nuovo)
+  emailSendOtp: (token: string) =>
+    request<{ sent: boolean; expires_in_seconds?: number }>(
+      "/api/auth/email/send-otp",
+      { method: "POST", token },
+    ),
+  emailResendOtp: (token: string) =>
+    request<{ sent: boolean; expires_in_seconds?: number }>(
+      "/api/auth/email/resend-otp",
+      { method: "POST", token },
+    ),
+  emailVerifyOtp: (code: string, token: string) =>
+    request<any>("/api/auth/email/verify-otp", {
+      method: "POST",
+      body: { code },
+      token,
+    }),
+  emailStatus: (token: string) =>
+    request<{ verified: boolean; email: string }>("/api/auth/email/status", { token }),
+
+  // Wizard di setup profilo (una volta soltanto, come mobile)
+  profileSetup: (
+    body: { school_year: number; school_type: string; subjects: string[] },
+    token: string,
+  ) =>
+    request<any>("/api/auth/profile-setup", { method: "POST", body, token }),
 
   dashboard: (token: string) => request<any>("/api/dashboard", { token }),
 
@@ -188,7 +218,7 @@ export const api = {
   gamificationProgress: (token: string) => request<any>("/api/gamification/progress", { token }),
 
   // Changelog
-  appChangelog: (installed?: string, platform: "android" | "ios" | "web" = "web") => {
+  appChangelog: (installed?: string, platform: "android" | "ios" | "web" | "desktop" = "desktop") => {
     const params = new URLSearchParams({ platform });
     if (installed) params.set("installed", installed);
     return request<{ releases: any[] }>(`/api/app/changelog?${params.toString()}`);

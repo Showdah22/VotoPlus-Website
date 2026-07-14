@@ -264,7 +264,7 @@ export function AudioSettings() {
               borderRadius: radius.md,
               background: testing ? `${colors.red}22` : `linear-gradient(135deg, ${colors.purple} 0%, ${colors.blue} 100%)`,
               border: testing ? `1px solid ${colors.red}55` : "none",
-              color: "#fff",
+              color: colors.textPrimary,
               fontWeight: 800,
               fontSize: 13,
               cursor: "pointer",

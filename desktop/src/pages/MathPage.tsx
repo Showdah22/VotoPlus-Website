@@ -12,9 +12,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { MathGraphSVG, type MathGraphData } from "../components/MathGraphSVG";
 
+import { useTheme } from "../lib/theme-provider";
 type Difficulty = "base" | "standard" | "avanzato" | "maturita";
 
 const QUICK: string[] = [
@@ -44,6 +45,7 @@ const FORMULA_KEYS: Array<{ label: string; insert: string; wide?: boolean }> = [
 ];
 
 export function MathPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
   const maturitaAllowed = !!(user?.maturita_unlocked);
@@ -173,7 +175,7 @@ export function MathPage() {
               transition: "border-color 120ms, background 120ms",
             }}
           >
-            <label style={labelStyle}>Problema</label>
+            <label style={getLabelStyle(colors)}>Problema</label>
             <textarea
               ref={inputRef}
               value={problem}
@@ -205,7 +207,7 @@ export function MathPage() {
                     width: 30, height: 30, borderRadius: 999,
                     background: "rgba(0,0,0,0.75)",
                     border: `1px solid ${colors.borderStrong}`,
-                    color: "#fff", cursor: "pointer",
+                    color: colors.textPrimary, cursor: "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}
                   title="Rimuovi immagine"
@@ -293,7 +295,7 @@ export function MathPage() {
 
           {/* Difficoltà */}
           <div>
-            <label style={{ ...labelStyle, marginBottom: 8 }}>Difficoltà</label>
+            <label style={{ ...getLabelStyle(colors), marginBottom: 8 }}>Difficoltà</label>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <DiffChip active={difficulty === "base"} onClick={() => setDifficulty("base")} label="Base" color={colors.green} />
               <DiffChip active={difficulty === "standard"} onClick={() => setDifficulty("standard")} label="Medio" color={colors.cyan} />
@@ -350,7 +352,7 @@ export function MathPage() {
             </div>
           </div>
 
-          {error && <div style={errorStyle}>{error}</div>}
+          {error && <div style={getErrorStyle(colors)}>{error}</div>}
 
           <button
             onClick={onSolve}
@@ -359,7 +361,7 @@ export function MathPage() {
               padding: "14px 20px",
               borderRadius: radius.md,
               background: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
-              color: "#fff",
+              color: colors.textPrimary,
               fontWeight: 800,
               fontSize: 15,
               display: "flex",
@@ -421,6 +423,7 @@ export function MathPage() {
  * step numerati con formula monospace + esercizi simili clicabili.
  */
 function MathResult({ result, title }: { result: any; title?: string }) {
+  const { colors } = useTheme();
   const r = result?.result || result || {};
   const finalAnswer: string = r.result || r.result_latex || "";
   const steps: Array<{ title?: string; explanation?: string; math?: string }> = Array.isArray(r.steps) ? r.steps : [];
@@ -481,7 +484,7 @@ function MathResult({ result, title }: { result: any; title?: string }) {
           <div style={{
             fontSize: 22, fontWeight: 900,
             fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
-            color: "#fff", letterSpacing: -0.2,
+            color: colors.textPrimary, letterSpacing: -0.2,
           }}>
             {finalAnswer}
           </div>
@@ -526,7 +529,7 @@ function MathResult({ result, title }: { result: any; title?: string }) {
                   flexShrink: 0,
                 }}>{i + 1}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  {s.title && <div style={{ fontSize: 14, fontWeight: 800, color: "#fff", marginBottom: 4 }}>{s.title}</div>}
+                  {s.title && <div style={{ fontSize: 14, fontWeight: 800, color: colors.textPrimary, marginBottom: 4 }}>{s.title}</div>}
                   {s.explanation && <div style={{ fontSize: 13, color: colors.textSub, lineHeight: 1.6, marginBottom: s.math ? 6 : 0 }}>{s.explanation}</div>}
                   {s.math && (
                     <div style={{
@@ -604,6 +607,7 @@ function Chip({ color, children }: { color: string; children: React.ReactNode })
 function DiffChip({ active, onClick, label, color, locked, lockLabel }: {
   active: boolean; onClick: () => void; label: string; color: string; locked?: boolean; lockLabel?: string;
 }) {
+  const { colors } = useTheme();
   return (
     <button
       onClick={locked ? undefined : onClick}
@@ -646,13 +650,13 @@ function iconWrap(c: string): React.CSSProperties {
     display: "flex", alignItems: "center", justifyContent: "center",
   };
 }
-const labelStyle: React.CSSProperties = {
+const getLabelStyle = (colors: any): React.CSSProperties => ({
   display: "flex", flexDirection: "column", gap: 6,
   fontSize: 11, fontWeight: 800, color: colors.textMuted,
-  textTransform: "uppercase", letterSpacing: 0.8,
-};
-const errorStyle: React.CSSProperties = {
+  textTransform: "uppercase", letterSpacing: 0.6,
+});
+const getErrorStyle = (colors: any): React.CSSProperties => ({
   padding: 12, borderRadius: radius.sm,
   background: `${colors.red}1a`, border: `1px solid ${colors.red}55`,
   color: colors.red, fontSize: 13, fontWeight: 600,
-};
+});

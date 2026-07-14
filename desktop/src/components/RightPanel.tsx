@@ -90,7 +90,7 @@ export function RightPanel() {
             <span style={{
               position: "absolute", top: -4, right: -4,
               width: 18, height: 18, borderRadius: 9,
-              background: colors.pink, color: "#fff",
+              background: colors.pink, color: colors.textPrimary,
               fontSize: 10, fontWeight: 900,
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>{events.length}</span>

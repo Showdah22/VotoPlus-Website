@@ -13,10 +13,14 @@ type User = {
   plan: string;
   profile_picture?: string | null;
   school_year?: number | null;
+  school_type?: string | null;
+  subjects?: string[];
   maturita_unlocked?: boolean;
   is_admin?: boolean;
   family_role?: string;
   email_is_relay?: boolean;
+  email_verified?: boolean;
+  profile_completed?: boolean;
 } | null;
 
 type AuthState = {
@@ -25,6 +29,8 @@ type AuthState = {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, username: string, password: string) => Promise<void>;
+  setSession: (token: string, user: any) => void;
   logout: () => void;
   refreshUser: () => Promise<void>;
 };
@@ -49,6 +55,24 @@ export const useAuth = create<AuthState>()(
           });
           throw err;
         }
+      },
+
+      signup: async (email, username, password) => {
+        set({ loading: true, error: null });
+        try {
+          const res = await api.signup({ email, username, password });
+          set({ token: res.access_token, user: res.user, loading: false });
+        } catch (err: any) {
+          set({
+            loading: false,
+            error: err?.message ?? "Errore in fase di registrazione",
+          });
+          throw err;
+        }
+      },
+
+      setSession: (token, user) => {
+        set({ token, user, error: null });
       },
 
       logout: () => {

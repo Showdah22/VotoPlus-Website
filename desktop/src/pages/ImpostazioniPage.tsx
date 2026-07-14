@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, Download, RefreshCw, AlertCircle, ExternalLink, Headphones, Crown } from "lucide-react";
+import { CheckCircle2, Download, RefreshCw, AlertCircle, ExternalLink, Headphones, Crown, Sun, Moon, Monitor } from "lucide-react";
 import { colors, radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { useUpdater } from "../store/updater";
+import { useTheme, ThemeMode } from "../lib/theme-provider";
 import { AudioSettings } from "../components/AudioSettings";
 import { PianiSection } from "../components/PianiSection";
 
 export function ImpostazioniPage() {
+  const { colors } = useTheme();
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
   const status = useUpdater((s) => s.status);
+  const { mode: themeMode, setMode: setThemeMode, colors: themeColors } = useTheme();
 
   const [appVersion, setAppVersion] = useState<string>("–");
   const [platform, setPlatform] = useState<string>("");
@@ -41,7 +44,7 @@ export function ImpostazioniPage() {
       </h1>
 
       {/* Account */}
-      <section style={sectionStyle}>
+      <section style={getSectionStyle(themeColors)}>
         <SectionHeader title="Account" />
         <Row label="Utente" value={user?.username || "—"} />
         <Row label="Email" value={user?.email_is_relay ? "Accesso via Apple" : user?.email || "—"} />
@@ -65,7 +68,7 @@ export function ImpostazioniPage() {
       </section>
 
       {/* Audio — entrata/uscita + test microfono */}
-      <section style={sectionStyle}>
+      <section style={getSectionStyle(themeColors)}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <Headphones size={16} color={colors.purple} />
           <h2 style={{
@@ -80,8 +83,68 @@ export function ImpostazioniPage() {
         <AudioSettings />
       </section>
 
+      {/* Aspetto — tema chiaro/scuro/automatico (1.2.1) */}
+      <section style={getSectionStyle(themeColors)}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <Sun size={16} color={themeColors.purple} />
+          <h2 style={{
+            margin: 0,
+            fontSize: 15,
+            fontWeight: 800,
+            textTransform: "uppercase",
+            letterSpacing: 0.8,
+            color: colors.textMuted,
+          }}>Aspetto</h2>
+        </div>
+        <div style={{ fontSize: 13, color: colors.textSub, marginBottom: 10 }}>
+          Scegli come vuoi vedere Voto+. La modalità automatica segue il tema del sistema operativo.
+        </div>
+        <div
+          style={{
+            display: "flex",
+            gap: 6,
+            padding: 4,
+            borderRadius: radius.md,
+            background: themeColors.bgGlass,
+            border: `1px solid ${themeColors.border}`,
+          }}
+        >
+          {(["light", "dark", "auto"] as ThemeMode[]).map((m) => {
+            const active = themeMode === m;
+            const Icon = m === "light" ? Sun : m === "dark" ? Moon : Monitor;
+            const label = m === "light" ? "Chiaro" : m === "dark" ? "Scuro" : "Automatico";
+            return (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setThemeMode(m)}
+                style={{
+                  flex: 1,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: "10px 12px",
+                  borderRadius: radius.sm,
+                  border: "none",
+                  background: active ? themeColors.purple : "transparent",
+                  color: active ? "#fff" : themeColors.textPrimary,
+                  fontWeight: 700,
+                  fontSize: 13.5,
+                  cursor: "pointer",
+                  transition: "background 160ms, color 160ms",
+                }}
+              >
+                <Icon size={16} />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Piani &amp; utilizzo — parity mobile */}
-      <section style={sectionStyle}>
+      <section style={getSectionStyle(themeColors)}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Crown size={16} color={colors.purple} />
           <h2 style={{
@@ -97,7 +160,7 @@ export function ImpostazioniPage() {
       </section>
 
       {/* Aggiornamenti — la pièce de résistance */}
-      <section style={sectionStyle}>
+      <section style={getSectionStyle(themeColors)}>
         <SectionHeader title="Aggiornamenti" />        <Row label="Versione installata" value={`v${appVersion}`} />
         <Row label="Piattaforma" value={platform || "—"} />
 
@@ -107,8 +170,8 @@ export function ImpostazioniPage() {
             marginTop: 8,
             padding: 16,
             borderRadius: radius.md,
-            background: statusBg(status.state),
-            border: `1px solid ${statusBorder(status.state)}`,
+            background: statusBg(status.state, themeColors),
+            border: `1px solid ${statusBorder(status.state, themeColors)}`,
             display: "flex",
             gap: 12,
             alignItems: "center",
@@ -160,7 +223,7 @@ export function ImpostazioniPage() {
               e.preventDefault();
               window.voto?.openExternal("https://votoplus.it/desktop.html");
             }}
-            style={btnGhost}
+            style={getBtnGhost(themeColors)}
           >
             <ExternalLink size={14} /> Note di rilascio
           </a>
@@ -172,7 +235,7 @@ export function ImpostazioniPage() {
       </section>
 
       {/* Info */}
-      <section style={sectionStyle}>
+      <section style={getSectionStyle(themeColors)}>
         <SectionHeader title="Informazioni" />
         <LinkRow label="Sito web Voto+" href="https://votoplus.it" />
         <LinkRow label="Privacy Policy" href="https://votoplus.it/privacy.html" />
@@ -186,17 +249,18 @@ export function ImpostazioniPage() {
 
 /* ============================ helpers ============================ */
 
-const sectionStyle: React.CSSProperties = {
+const getSectionStyle = (colors: any): React.CSSProperties => ({
   padding: 20,
   borderRadius: radius.lg,
   background: colors.bgGlass,
-  border: `1px solid ${colors.border}`,
+  border: `1px solid ${colors.borderStrong}`,
   display: "flex",
   flexDirection: "column",
   gap: 6,
-};
+});
 
 function SectionHeader({ title }: { title: string }) {
+  const { colors } = useTheme();
   return (
     <h2
       style={{
@@ -214,6 +278,7 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
   return (
     <div
       style={{
@@ -226,12 +291,13 @@ function Row({ label, value }: { label: string; value: string }) {
       }}
     >
       <span style={{ color: colors.textSub }}>{label}</span>
-      <span style={{ fontWeight: 700 }}>{value}</span>
+      <span style={{ fontWeight: 700, color: colors.textPrimary }}>{value}</span>
     </div>
   );
 }
 
 function LinkRow({ label, href }: { label: string; href: string }) {
+  const { colors } = useTheme();
   return (
     <a
       href={href}
@@ -259,6 +325,7 @@ function LinkRow({ label, href }: { label: string; href: string }) {
 }
 
 function StatusIcon({ state }: { state: string }) {
+  const { colors } = useTheme();
   const size = 22;
   switch (state) {
     case "checking":
@@ -332,7 +399,7 @@ function friendlyError(msg: string | undefined): string {
   const firstLine = (msg || "").split(/\n|\r/)[0].split("http")[0].trim();
   return firstLine.length > 180 ? firstLine.slice(0, 180) + "…" : (firstLine || "Errore sconosciuto. Riprova più tardi.");
 }
-function statusBg(state: string): string {
+function statusBg(state: string, colors: any): string {
   switch (state) {
     case "up-to-date":
     case "downloaded":
@@ -343,10 +410,10 @@ function statusBg(state: string): string {
     case "error":
       return `${colors.red}12`;
     default:
-      return "rgba(255,255,255,0.02)";
+      return colors.bgGlass;
   }
 }
-function statusBorder(state: string): string {
+function statusBorder(state: string, colors: any): string {
   switch (state) {
     case "up-to-date":
     case "downloaded":
@@ -376,23 +443,23 @@ const btnPrimary: React.CSSProperties = {
   padding: "10px 18px",
   borderRadius: radius.sm,
   background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)",
-  color: "#fff",
+  color: colors.textPrimary,
   fontSize: 13,
   fontWeight: 800,
   border: "none",
   boxShadow: "0 6px 20px rgba(168,85,247,0.32)",
   cursor: "pointer",
 };
-const btnGhost: React.CSSProperties = {
+const getBtnGhost = (colors: any): React.CSSProperties => ({
   display: "inline-flex",
   alignItems: "center",
   gap: 6,
   padding: "10px 14px",
   borderRadius: radius.sm,
   background: colors.bgGlass,
-  border: `1px solid ${colors.border}`,
+  border: `1px solid ${colors.borderStrong}`,
   color: colors.textSub,
   fontSize: 12.5,
   fontWeight: 700,
   textDecoration: "none",
-};
+});

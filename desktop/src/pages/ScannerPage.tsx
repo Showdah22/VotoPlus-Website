@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { ScanLine, Upload, Loader2, FileText, Sparkles, Image as ImageIcon, Link as LinkIcon, Youtube, FileType2, ClipboardPaste, type LucideIcon } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { Select } from "../components/Select";
 
+import { useTheme } from "../lib/theme-provider";
 type Source = "image" | "text" | "url" | "youtube" | "pdf";
 
 export function ScannerPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
   const [source, setSource] = useState<Source>("image");
@@ -166,11 +168,11 @@ export function ScannerPage() {
       {!result && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <label style={labelStyle}>
+            <label style={getLabelStyle(colors)}>
               Titolo (opzionale)
-              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="es. Riassunto Storia cap. 5" style={inputStyle} />
+              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="es. Riassunto Storia cap. 5" style={getInputStyle(colors)} />
             </label>
-            <label style={labelStyle}>
+            <label style={getLabelStyle(colors)}>
               Materia
               <Select
                 value={subject}
@@ -236,14 +238,14 @@ export function ScannerPage() {
 
           {/* Panel: Testo */}
           {source === "text" && (
-            <label style={labelStyle}>
+            <label style={getLabelStyle(colors)}>
               Incolla il testo da riassumere
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Incolla qui il testo (appunti, capitolo, articolo)…"
                 rows={10}
-                style={{ ...inputStyle, height: "auto", padding: 12, resize: "vertical", fontFamily: "inherit" }}
+                style={{ ...getInputStyle(colors), height: "auto", padding: 12, resize: "vertical", fontFamily: "inherit" }}
               />
             </label>
           )}
@@ -251,14 +253,14 @@ export function ScannerPage() {
           {/* Panel: URL */}
           {source === "url" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <label style={labelStyle}>
+              <label style={getLabelStyle(colors)}>
                 URL della pagina
                 <div style={{ display: "flex", gap: 8 }}>
                   <input
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
                     placeholder="https://…"
-                    style={{ ...inputStyle, flex: 1 }}
+                    style={{ ...getInputStyle(colors), flex: 1 }}
                   />
                   <button
                     onClick={doExtractUrl}
@@ -283,14 +285,14 @@ export function ScannerPage() {
           {/* Panel: YouTube */}
           {source === "youtube" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <label style={labelStyle}>
+              <label style={getLabelStyle(colors)}>
                 URL video YouTube
                 <div style={{ display: "flex", gap: 8 }}>
                   <input
                     value={ytInput}
                     onChange={(e) => setYtInput(e.target.value)}
                     placeholder="https://youtu.be/… o https://youtube.com/watch?v=…"
-                    style={{ ...inputStyle, flex: 1 }}
+                    style={{ ...getInputStyle(colors), flex: 1 }}
                   />
                   <button
                     onClick={doExtractYoutube}
@@ -368,7 +370,7 @@ export function ScannerPage() {
             </div>
           )}
 
-          {error && <div style={errorStyle}>{error}</div>}
+          {error && <div style={getErrorStyle(colors)}>{error}</div>}
 
           <button
             onClick={onSubmit}
@@ -377,7 +379,7 @@ export function ScannerPage() {
               padding: "14px 20px",
               borderRadius: radius.md,
               background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)",
-              color: "#fff",
+              color: colors.textPrimary,
               fontWeight: 800,
               fontSize: 15,
               display: "flex",
@@ -453,6 +455,7 @@ function SourceTab({
   icon: LucideIcon;
   label: string; color: string;
 }) {
+  const { colors } = useTheme();
   return (
     <button
       onClick={onClick}
@@ -481,6 +484,7 @@ function SourceTab({
 }
 
 function ExtractedPreview({ text }: { text: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{
       padding: 12,
@@ -507,20 +511,18 @@ function iconWrap(c: string): React.CSSProperties {
     display: "flex", alignItems: "center", justifyContent: "center",
   };
 }
-const labelStyle: React.CSSProperties = {
+const getLabelStyle = (colors: any): React.CSSProperties => ({
   display: "flex", flexDirection: "column", gap: 6,
-  fontSize: 12, fontWeight: 700, color: colors.textSub,
-  textTransform: "uppercase", letterSpacing: 0.6,
-};
-const inputStyle: React.CSSProperties = {
+  fontSize: 12, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.5,
+});
+const getInputStyle = (colors: any): React.CSSProperties => ({
   height: 42, padding: "0 14px",
   borderRadius: radius.md,
   background: colors.bgGlass, border: `1px solid ${colors.border}`,
-  color: colors.textPrimary, fontSize: 14, fontWeight: 500,
-  outline: "none",
-};
-const errorStyle: React.CSSProperties = {
+  color: colors.textPrimary, fontSize: 14, fontWeight: 500, outline: "none",
+});
+const getErrorStyle = (colors: any): React.CSSProperties => ({
   padding: 12, borderRadius: radius.sm,
   background: `${colors.red}1a`, border: `1px solid ${colors.red}55`,
   color: colors.red, fontSize: 13, fontWeight: 600,
-};
+});

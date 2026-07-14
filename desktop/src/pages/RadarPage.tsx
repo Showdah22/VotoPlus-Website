@@ -17,9 +17,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { RadarChart } from "../components/RadarChart";
 
+import { useTheme } from "../lib/theme-provider";
 // Pagina Maturità Radar per desktop — porting completo del /radar mobile.
 // Gestisce 3 stati:
 //  1) Utente NON al 5° anno → NotEligible (informativo, senza CTA acquisto)
@@ -63,6 +64,7 @@ function yearsUntilFifth(user: any): number {
 }
 
 export function RadarPage() {
+  const { colors } = useTheme();
   const navigate = useNavigate();
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
@@ -204,6 +206,7 @@ export function RadarPage() {
 // GATE 1: utente non al 5° anno
 // =================================================================================
 function NotEligibleScreen({ years }: { years: number }) {
+  const { colors } = useTheme();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <header style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -242,7 +245,7 @@ function NotEligibleScreen({ years }: { years: number }) {
       </section>
 
       <section style={cardStyle({ padding: 20 })}>
-        <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, marginBottom: 12 }}>
+        <div style={{ color: colors.textPrimary, fontWeight: 800, fontSize: 15, marginBottom: 12 }}>
           Cosa fa il Radar?
         </div>
         <FeatureRow icon={<TrendingUp size={16} color={colors.purple} />} text="Analizza le tracce della Maturità degli ultimi anni" />
@@ -263,6 +266,7 @@ function NotEligibleScreen({ years }: { years: number }) {
 }
 
 function FeatureRow({ icon, text }: { icon: React.ReactNode; text: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "6px 0" }}>
       <div style={{
@@ -281,6 +285,7 @@ function FeatureRow({ icon, text }: { icon: React.ReactNode; text: string }) {
 // GATE 2: off-season (estate)
 // =================================================================================
 function OffSeasonScreen({ season, onGoHome }: { season: Season; onGoHome: () => void }) {
+  const { colors } = useTheme();
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60 * 1000);
@@ -366,9 +371,10 @@ function OffSeasonScreen({ season, onGoHome }: { season: Season; onGoHome: () =>
 }
 
 function CountCell({ num, label }: { num: number; label: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{ textAlign: "center", minWidth: 72 }}>
-      <div style={{ color: "#fff", fontSize: 38, fontWeight: 900, letterSpacing: -1, lineHeight: 1 }}>{num}</div>
+      <div style={{ color: colors.textPrimary, fontSize: 38, fontWeight: 900, letterSpacing: -1, lineHeight: 1 }}>{num}</div>
       <div style={{ color: colors.textMuted, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginTop: 4 }}>
         {label}
       </div>
@@ -380,6 +386,7 @@ function CountCell({ num, label }: { num: number; label: string }) {
 // LOCKED (Pacchetto Maturità paywall)
 // =================================================================================
 function LockedPaywall({ onUpgrade }: { onUpgrade: () => void }) {
+  const { colors } = useTheme();
   return (
     <section style={{
       padding: 32,
@@ -403,7 +410,7 @@ function LockedPaywall({ onUpgrade }: { onUpgrade: () => void }) {
       <button onClick={onUpgrade} style={{
         padding: "12px 22px", borderRadius: radius.md,
         background: `linear-gradient(135deg, ${colors.orange} 0%, ${colors.purple} 100%)`,
-        color: "#fff", fontWeight: 900, fontSize: 14, border: "none", cursor: "pointer",
+        color: colors.textPrimary, fontWeight: 900, fontSize: 14, border: "none", cursor: "pointer",
         display: "inline-flex", alignItems: "center", gap: 6,
       }}>
         <Sparkles size={16} /> Vai alla Maturità
@@ -416,6 +423,7 @@ function LockedPaywall({ onUpgrade }: { onUpgrade: () => void }) {
 // TAB VIEWS
 // =================================================================================
 function LoadingCard() {
+  const { colors } = useTheme();
   return (
     <section style={cardStyle({ padding: 40, alignItems: "center", justifyContent: "center", gap: 12 })}>
       <Loader2 size={26} color={colors.green} className="spin" />
@@ -425,6 +433,7 @@ function LoadingCard() {
 }
 
 function Disclaimer({ text }: { text?: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: 6,
@@ -440,6 +449,7 @@ function Disclaimer({ text }: { text?: string }) {
 }
 
 function TrendView({ data, year }: { data: any; year: number }) {
+  const { colors } = useTheme();
   return (
     <>
       <section style={cardStyle({
@@ -448,7 +458,7 @@ function TrendView({ data, year }: { data: any; year: number }) {
         border: `1px solid ${colors.green}44`,
         background: `linear-gradient(135deg, ${colors.green}0d 0%, ${colors.cyan}05 100%)`,
       })}>
-        <div style={{ color: "#fff", fontWeight: 900, fontSize: 20 }}>I temi più probabili</div>
+        <div style={{ color: colors.textPrimary, fontWeight: 900, fontSize: 20 }}>I temi più probabili</div>
         <div style={{ color: colors.textSub, fontSize: 12, marginTop: 4, textAlign: "center" }}>
           Analisi basata su tracce passate, eventi e attualità
         </div>
@@ -470,7 +480,7 @@ function TrendView({ data, year }: { data: any; year: number }) {
           <div style={{ color: colors.green, fontWeight: 900, fontSize: 11, letterSpacing: 1.2 }}>
             FOCUS DEL MESE
           </div>
-          <div style={{ color: "#fff", fontWeight: 800, fontSize: 17, marginTop: 6 }}>{data.focus_month.title}</div>
+          <div style={{ color: colors.textPrimary, fontWeight: 800, fontSize: 17, marginTop: 6 }}>{data.focus_month.title}</div>
           <div style={{ color: colors.textSub, fontSize: 13, marginTop: 4, lineHeight: 1.5 }}>
             {data.focus_month.detail}
           </div>
@@ -481,6 +491,7 @@ function TrendView({ data, year }: { data: any; year: number }) {
 }
 
 function TopicRow({ item }: { item: any }) {
+  const { colors } = useTheme();
   const p = Number(item.probability) || 0;
   const c = p >= 80 ? colors.green : p >= 70 ? colors.cyan : p >= 60 ? colors.purple : colors.orange;
   const TrendIcon = item.trend === "up" ? TrendingUp : item.trend === "down" ? TrendingDown : Minus;
@@ -496,7 +507,7 @@ function TopicRow({ item }: { item: any }) {
           <span style={{ color: c, fontWeight: 900, fontSize: 15 }}>{item.rank}</span>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: "#fff", fontWeight: 800, fontSize: 15 }}>{item.topic}</div>
+          <div style={{ color: colors.textPrimary, fontWeight: 800, fontSize: 15 }}>{item.topic}</div>
           <div style={{ color: colors.textSub, fontSize: 11, marginTop: 2 }}>
             {(item.subjects || []).join(" • ")}
           </div>
@@ -527,6 +538,7 @@ function TopicRow({ item }: { item: any }) {
 }
 
 function SubjectView({ data }: { data: any }) {
+  const { colors } = useTheme();
   return (
     <>
       <Disclaimer text={data?.disclaimer} />
@@ -534,7 +546,7 @@ function SubjectView({ data }: { data: any }) {
         {(data?.topics || []).map((t: any, i: number) => (
           <div key={i} style={cardStyle({ padding: 14, gap: 8 })}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-              <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, flex: 1 }}>{t.topic}</div>
+              <div style={{ color: colors.textPrimary, fontWeight: 800, fontSize: 15, flex: 1 }}>{t.topic}</div>
               <div style={{
                 padding: "4px 12px", borderRadius: 999,
                 background: `${colors.purple}22`, border: `1px solid ${colors.purple}77`,
@@ -555,6 +567,7 @@ function SubjectView({ data }: { data: any }) {
 }
 
 function ActualityView({ data }: { data: any }) {
+  const { colors } = useTheme();
   return (
     <>
       <Disclaimer text={data?.disclaimer} />
@@ -562,7 +575,7 @@ function ActualityView({ data }: { data: any }) {
         {(data?.topics || []).map((t: any, i: number) => (
           <div key={i} style={cardStyle({ padding: 14, gap: 8 })}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-              <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, flex: 1 }}>{t.topic}</div>
+              <div style={{ color: colors.textPrimary, fontWeight: 800, fontSize: 15, flex: 1 }}>{t.topic}</div>
               <div style={{ color: colors.orange, fontWeight: 900, fontSize: 17 }}>{t.probability}%</div>
             </div>
             <div style={{ color: colors.textSub, fontSize: 11 }}>{(t.subjects || []).join(" • ")}</div>
@@ -576,6 +589,7 @@ function ActualityView({ data }: { data: any }) {
 }
 
 function ConnectionsView({ data }: { data: any }) {
+  const { colors } = useTheme();
   return (
     <>
       <Disclaimer text={data?.disclaimer} />
@@ -587,7 +601,7 @@ function ConnectionsView({ data }: { data: any }) {
                 width: 10, height: 10, borderRadius: 5,
                 background: `linear-gradient(135deg, ${colors.cyan} 0%, ${colors.purple} 100%)`,
               }} />
-              <div style={{ color: "#fff", fontWeight: 800, fontSize: 15 }}>{c.theme}</div>
+              <div style={{ color: colors.textPrimary, fontWeight: 800, fontSize: 15 }}>{c.theme}</div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {(c.links || []).map((l: any, j: number) => (
@@ -621,6 +635,7 @@ function iconWrap(color: string): React.CSSProperties {
 }
 
 function cardStyle(extra: React.CSSProperties = {}): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     padding: 18,
     borderRadius: radius.lg,
@@ -634,6 +649,7 @@ function cardStyle(extra: React.CSSProperties = {}): React.CSSProperties {
 }
 
 function pillBtn(active: boolean, color: string): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     padding: "8px 16px",
     borderRadius: 999,

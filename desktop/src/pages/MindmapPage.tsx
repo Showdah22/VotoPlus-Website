@@ -5,9 +5,10 @@ import { jsPDF } from "jspdf";
 import { svg2pdf } from "svg2pdf.js";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { Select } from "../components/Select";
 
+import { useTheme } from "../lib/theme-provider";
 type MapNode = {
   label: string;
   color?: string;
@@ -33,11 +34,12 @@ const DEPTHS = [
 ];
 
 const COLOR_MAP: Record<string, string> = {
-  purple: colors.purple, cyan: colors.cyan, green: colors.green,
-  orange: colors.orange, pink: colors.pink, red: colors.red, blue: colors.blue,
+  purple: "#a855f7", cyan: "#06b6d4", green: "#10b981",
+  orange: "#f59e0b", pink: "#ec4899", red: "#ef4444", blue: "#3b82f6",
 };
 
 export function MindmapPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
   const subjects: string[] = (user as any)?.subjects || [];
@@ -358,6 +360,7 @@ function wrapText(text: string, maxChars: number, maxLines: number): string[] {
 }
 
 function SvgMindmap({ root, title }: { root: MapNode; title: string }) {
+  const { colors } = useTheme();
   const { positions, width, height } = computeLayout(root);
   const rootColor = COLOR_MAP[root.color || ""] || colors.purple;
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -632,6 +635,7 @@ function SvgMindmap({ root, title }: { root: MapNode; title: string }) {
 }
 
 function toolbarBtn(): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     display: "flex",
     alignItems: "center",
@@ -648,6 +652,7 @@ function toolbarBtn(): React.CSSProperties {
 }
 
 function FieldLabel({ label, children }: { label: string; children: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <span style={{ fontSize: 11, fontWeight: 800, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8 }}>{label}</span>
@@ -659,15 +664,19 @@ function iconWrap(color: string): React.CSSProperties {
   return { width: 44, height: 44, borderRadius: 14, background: `${color}1a`, border: `1px solid ${color}55`, display: "flex", alignItems: "center", justifyContent: "center" };
 }
 function cardStyle(extra: React.CSSProperties = {}): React.CSSProperties {
+  const { colors } = useTheme();
   return { padding: 18, borderRadius: radius.lg, background: colors.bgGlass, border: `1px solid ${colors.border}`, display: "flex", flexDirection: "column", gap: 14, ...extra };
 }
 function txtInput(): React.CSSProperties {
+  const { colors } = useTheme();
   return { height: 42, padding: "0 14px", borderRadius: radius.md, background: colors.bgGlass, border: `1px solid ${colors.border}`, color: colors.textPrimary, fontSize: 14, outline: "none", fontFamily: "inherit" };
 }
 function txtArea(): React.CSSProperties {
+  const { colors } = useTheme();
   return { padding: "12px 14px", borderRadius: radius.md, background: colors.bgGlass, border: `1px solid ${colors.border}`, color: colors.textPrimary, fontSize: 14, outline: "none", resize: "vertical", fontFamily: "inherit" };
 }
 function primaryBtn(disabled: boolean): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     padding: "12px 18px", borderRadius: radius.md,
     background: disabled ? colors.bgGlass : `linear-gradient(135deg, ${colors.purple} 0%, ${colors.blue} 100%)`,
@@ -680,6 +689,7 @@ function pill(color: string): React.CSSProperties {
   return { fontSize: 10, fontWeight: 900, letterSpacing: 0.8, color, background: `${color}15`, border: `1px solid ${color}55`, padding: "3px 10px", borderRadius: 999, textTransform: "uppercase" };
 }
 function ErrorBox({ msg }: { msg: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{ padding: 10, borderRadius: radius.sm, background: `${colors.red}15`, border: `1px solid ${colors.red}55`, color: colors.red, fontSize: 12, fontWeight: 700 }}>{msg}</div>
   );

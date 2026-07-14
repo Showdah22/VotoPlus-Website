@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Timer, Play, Clock, CheckCircle2, XCircle, ChevronRight, RefreshCw, Loader2 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { Select } from "../components/Select";
 
+import { useTheme } from "../lib/theme-provider";
 type ClassworkItem = {
   kind: "math" | "open" | "multiple";
   q: string;
@@ -38,6 +39,7 @@ const DIFFICULTIES = [
 ];
 
 export function CompitoPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
   const subjects: string[] = (user as any)?.subjects || [];
@@ -244,6 +246,7 @@ export function CompitoPage() {
 }
 
 function ItemCard({ idx, item, value, onChange }: { idx: number; item: ClassworkItem; value: string; onChange: (v: string) => void }) {
+  const { colors } = useTheme();
   return (
     <div style={{
       padding: 16,
@@ -309,6 +312,7 @@ function formatTime(sec: number): string {
   return `${m}:${r.toString().padStart(2, "0")}`;
 }
 function gradeColor(g: number): string {
+  const { colors } = useTheme();
   if (g >= 8) return colors.green;
   if (g >= 6) return colors.cyan;
   if (g >= 5) return colors.orange;
@@ -316,6 +320,7 @@ function gradeColor(g: number): string {
 }
 
 function FieldLabel({ label, children }: { label: string; children: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <span style={{ fontSize: 11, fontWeight: 800, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8 }}>{label}</span>
@@ -327,9 +332,11 @@ function iconWrap(color: string): React.CSSProperties {
   return { width: 44, height: 44, borderRadius: 14, background: `${color}1a`, border: `1px solid ${color}55`, display: "flex", alignItems: "center", justifyContent: "center" };
 }
 function cardStyle(extra: React.CSSProperties = {}): React.CSSProperties {
+  const { colors } = useTheme();
   return { padding: 18, borderRadius: radius.lg, background: colors.bgGlass, border: `1px solid ${colors.border}`, display: "flex", flexDirection: "column", gap: 14, ...extra };
 }
-function primaryBtn(disabled: boolean, cA = colors.purple, cB = colors.blue): React.CSSProperties {
+function primaryBtn(disabled: boolean, cA = "#a855f7", cB = "#3b82f6"): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     padding: "12px 18px", borderRadius: radius.md,
     background: disabled ? colors.bgGlass : `linear-gradient(135deg, ${cA} 0%, ${cB} 100%)`,
@@ -339,6 +346,7 @@ function primaryBtn(disabled: boolean, cA = colors.purple, cB = colors.blue): Re
   };
 }
 function secondaryBtn(): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     padding: "12px 18px", borderRadius: radius.md,
     background: colors.bgGlass, border: `1px solid ${colors.border}`,
@@ -347,6 +355,7 @@ function secondaryBtn(): React.CSSProperties {
   };
 }
 function ErrorBox({ msg }: { msg: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{ padding: 10, borderRadius: radius.sm, background: `${colors.red}15`, border: `1px solid ${colors.red}55`, color: colors.red, fontSize: 12, fontWeight: 700 }}>{msg}</div>
   );

@@ -115,7 +115,7 @@ const ctaPrimary: React.CSSProperties = {
   fontSize: 12,
   fontWeight: 800,
   background: "linear-gradient(135deg, #a855f7, #3b82f6)",
-  color: "#fff",
+  color: colors.textPrimary,
 };
 const ctaGhost: React.CSSProperties = {
   padding: "7px 14px",
@@ -123,6 +123,6 @@ const ctaGhost: React.CSSProperties = {
   fontSize: 12,
   fontWeight: 700,
   color: colors.textSub,
-  background: "rgba(255,255,255,0.05)",
+  background: colors.bgGlass,
   border: `1px solid ${colors.border}`,
 };

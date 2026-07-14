@@ -1,6 +1,7 @@
 import { Sparkles, Smartphone } from "lucide-react";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 
+import { useTheme } from "../lib/theme-provider";
 /**
  * Pagina "in arrivo" polished — usata come landing per QuickAction non ancora
  * portate sul desktop (Interrogazione orale, Tema, Compito). Non è un semplice
@@ -17,6 +18,7 @@ export function ComingSoonPage({
   body: string;
   tint?: "purple" | "cyan" | "green" | "orange" | "pink" | "blue";
 }) {
+  const { colors } = useTheme();
   const color =
     tint === "cyan" ? colors.cyan
     : tint === "green" ? colors.green

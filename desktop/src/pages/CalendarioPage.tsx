@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Calendar, GraduationCap, Sparkles, TrendingUp, Bookmark, Plus } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { Modal, labelStyle, inputStyle, primaryBtn } from "../components/Modal";
 import { Select } from "../components/Select";
 
+import { useTheme } from "../lib/theme-provider";
 type EventItem = {
   id: string;
   type: "interrogazione" | "verifica" | "esame" | string;
@@ -17,12 +18,12 @@ type EventItem = {
 
 const eventMeta = (t: string) =>
   t === "interrogazione"
-    ? { icon: GraduationCap, color: colors.pink, label: "Interrogazione" }
+    ? { icon: GraduationCap, color: "#ec4899", label: "Interrogazione" }
     : t === "verifica"
-    ? { icon: Sparkles, color: colors.cyan, label: "Verifica" }
+    ? { icon: Sparkles, color: "#06b6d4", label: "Verifica" }
     : t === "esame"
-    ? { icon: TrendingUp, color: colors.orange, label: "Esame" }
-    : { icon: Bookmark, color: colors.purple, label: "Evento" };
+    ? { icon: TrendingUp, color: "#f59e0b", label: "Esame" }
+    : { icon: Bookmark, color: "#a855f7", label: "Evento" };
 
 const daysUntil = (iso: string) => {
   const t = new Date();
@@ -33,6 +34,7 @@ const daysUntil = (iso: string) => {
 };
 
 export function CalendarioPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -93,9 +95,9 @@ export function CalendarioPage() {
       </div>
 
       {loading ? (
-        <div style={placeholder}>Caricamento eventi…</div>
+        <div style={getPlaceholder(colors)}>Caricamento eventi…</div>
       ) : events.length === 0 ? (
-        <div style={placeholder}>
+        <div style={getPlaceholder(colors)}>
           Nessun evento in calendario. Aggiungi verifiche e interrogazioni dall'app mobile per pianificare lo studio.
         </div>
       ) : (
@@ -153,6 +155,7 @@ export function CalendarioPage() {
 function AddEventModal({
   open, onClose, onAdded, subjects,
 }: { open: boolean; onClose: () => void; onAdded: () => void; subjects: string[] }) {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const [type, setType] = useState<"verifica" | "interrogazione" | "esame">("verifica");
   const [subject, setSubject] = useState(subjects[0] || "");
@@ -265,6 +268,7 @@ function Section({
 }
 
 function EventCard({ ev, muted = false }: { ev: EventItem; muted?: boolean }) {
+  const { colors } = useTheme();
   const m = eventMeta(ev.type);
   const dleft = daysUntil(ev.date);
   const urgency = dleft <= 2 ? colors.red : dleft <= 5 ? colors.orange : colors.cyan;
@@ -353,15 +357,15 @@ function EventCard({ ev, muted = false }: { ev: EventItem; muted?: boolean }) {
   );
 }
 
-const placeholder: React.CSSProperties = {
+const getPlaceholder = (colors: any): React.CSSProperties => ({
   padding: 24,
   borderRadius: radius.md,
   background: colors.bgGlass,
-  border: `1px dashed ${colors.border}`,
+  border: `1px dashed ${colors.borderStrong}`,
   color: colors.textMuted,
   fontSize: 13,
   textAlign: "center",
-};
+});
 
 function iconWrapStyle(color: string): React.CSSProperties {
   return {

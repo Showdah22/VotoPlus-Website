@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Search, Trash2, Sparkles, Book, ChevronRight, Loader2 } from "lucide-react";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 
+import { useTheme } from "../lib/theme-provider";
 type VocabEntry = {
   id?: string;
   word: string;
@@ -30,6 +31,7 @@ const LANGS = [
 ];
 
 export function VocabolarioPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const [word, setWord] = useState("");
   const [lang, setLang] = useState("italiano");
@@ -151,7 +153,7 @@ export function VocabolarioPage() {
               borderRadius: radius.md,
               background: `linear-gradient(135deg, ${colors.purple} 0%, ${colors.blue} 100%)`,
               border: "none",
-              color: "#fff",
+              color: colors.textPrimary,
               fontWeight: 800,
               fontSize: 13,
               cursor: loading || !word.trim() ? "not-allowed" : "pointer",
@@ -266,6 +268,7 @@ export function VocabolarioPage() {
 }
 
 function VocabCard({ entry }: { entry: VocabEntry }) {
+  const { colors } = useTheme();
   const diffColor =
     entry.difficulty === "avanzato" ? colors.red
     : entry.difficulty === "intermedio" ? colors.orange
@@ -343,6 +346,7 @@ function VocabCard({ entry }: { entry: VocabEntry }) {
 }
 
 function Chips({ label, items, color }: { label: string; items: string[]; color: string }) {
+  const { colors } = useTheme();
   return (
     <div>
       <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 0.8, color: colors.textMuted, textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
@@ -364,6 +368,7 @@ function Chips({ label, items, color }: { label: string; items: string[]; color:
 }
 
 function Placeholder({ label }: { label: string }) {
+  const { colors } = useTheme();
   return (
     <div
       style={{

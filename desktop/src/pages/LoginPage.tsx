@@ -1,11 +1,15 @@
 import { FormEvent, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { colors, radius } from "../theme";
+import { Navigate, useNavigate } from "react-router-dom";
+import { radius } from "../theme";
+import { useTheme } from "../lib/theme-provider";
 import { useAuth } from "../store/auth";
 import votoIcon from "../assets/voto-icon.png";
 
 export function LoginPage() {
+  const { colors } = useTheme();
+  const navigate = useNavigate();
   const token = useAuth((s) => s.token);
+  const user = useAuth((s) => s.user);
   const login = useAuth((s) => s.login);
   const loading = useAuth((s) => s.loading);
   const error = useAuth((s) => s.error);
@@ -13,7 +17,11 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  if (token) return <Navigate to="/" replace />;
+  if (token && user) {
+    if (!user.email_verified) return <Navigate to="/verify-email" replace />;
+    if (!user.profile_completed) return <Navigate to="/profile-setup" replace />;
+    return <Navigate to="/" replace />;
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -32,7 +40,7 @@ export function LoginPage() {
         alignItems: "center",
         justifyContent: "center",
         padding: 32,
-        background: `radial-gradient(circle at 30% 20%, rgba(168,85,247,0.20), transparent 55%), radial-gradient(circle at 80% 80%, rgba(6,182,212,0.16), transparent 60%), ${colors.bg}`,
+        background: `radial-gradient(circle at 30% 20%, ${colors.purple}22, transparent 55%), radial-gradient(circle at 80% 80%, ${colors.cyan}20, transparent 60%), ${colors.bg}`,
       }}
     >
       <form
@@ -57,10 +65,10 @@ export function LoginPage() {
               width: 72,
               height: 72,
               objectFit: "contain",
-              filter: "drop-shadow(0 0 24px rgba(168,85,247,0.55))",
+              filter: `drop-shadow(0 0 24px ${colors.purple}88)`,
             }}
           />
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, letterSpacing: -0.4 }}>
+          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, letterSpacing: -0.4, color: colors.textPrimary }}>
             Bentornato
           </h1>
           <p style={{ margin: 0, fontSize: 13, color: colors.textSub }}>
@@ -68,7 +76,7 @@ export function LoginPage() {
           </p>
         </div>
 
-        <label style={labelStyle}>
+        <label style={labelStyle(colors)}>
           Email
           <input
             type="email"
@@ -76,19 +84,19 @@ export function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoFocus
-            style={inputStyle}
+            style={inputStyle(colors)}
             placeholder="nome@esempio.it"
           />
         </label>
 
-        <label style={labelStyle}>
+        <label style={labelStyle(colors)}>
           Password
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={inputStyle}
+            style={inputStyle(colors)}
             placeholder="••••••••"
           />
         </label>
@@ -116,21 +124,32 @@ export function LoginPage() {
             marginTop: 4,
             height: 48,
             borderRadius: radius.md,
-            background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)",
-            color: "#fff",
+            border: "none",
+            background: `linear-gradient(135deg, ${colors.purple} 0%, ${colors.blue} 100%)`,
+            color: colors.textPrimary,
             fontWeight: 800,
             fontSize: 15,
             letterSpacing: 0.2,
             opacity: loading || !email || !password ? 0.55 : 1,
             cursor: loading || !email || !password ? "not-allowed" : "pointer",
-            boxShadow: "0 6px 24px rgba(168,85,247,0.35)",
+            boxShadow: `0 6px 24px ${colors.purple}55`,
           }}
         >
           {loading ? "Accesso in corso…" : "Accedi"}
         </button>
 
-        <div style={{ fontSize: 11, color: colors.textMuted, textAlign: "center", marginTop: 4 }}>
-          Registrazioni e ripristino password disponibili sull&apos;app mobile.
+        <div style={{ fontSize: 12, color: colors.textMuted, textAlign: "center", marginTop: 4 }}>
+          Non hai un account?{" "}
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/signup");
+            }}
+            style={{ color: colors.purple, fontWeight: 700, textDecoration: "none" }}
+          >
+            Registrati
+          </a>
           <br />
           <a
             href="#"
@@ -138,7 +157,7 @@ export function LoginPage() {
               e.preventDefault();
               window.voto?.openExternal("https://votoplus.it");
             }}
-            style={{ color: colors.purple, fontWeight: 700 }}
+            style={{ color: colors.purple, fontWeight: 700, fontSize: 11, marginTop: 4, display: "inline-block" }}
           >
             Scopri Voto+ →
           </a>
@@ -148,7 +167,7 @@ export function LoginPage() {
   );
 }
 
-const labelStyle: React.CSSProperties = {
+const labelStyle = (colors: any): React.CSSProperties => ({
   display: "flex",
   flexDirection: "column",
   gap: 6,
@@ -157,16 +176,16 @@ const labelStyle: React.CSSProperties = {
   color: colors.textSub,
   textTransform: "uppercase",
   letterSpacing: 0.6,
-};
-const inputStyle: React.CSSProperties = {
+});
+const inputStyle = (colors: any): React.CSSProperties => ({
   height: 44,
   padding: "0 14px",
   borderRadius: radius.md,
-  background: "rgba(255,255,255,0.04)",
+  background: colors.bgGlass,
   border: `1px solid ${colors.border}`,
   color: colors.textPrimary,
   fontSize: 14,
   fontWeight: 500,
   outline: "none",
   transition: "border-color 120ms ease",
-};
+});

@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Clock, BookOpen, ChevronRight, Mic, Calculator } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 
+import { useTheme } from "../lib/theme-provider";
 type FilterKey = "all" | "study" | "oral" | "math";
 
 type Row = {
@@ -22,6 +23,7 @@ type Row = {
 // così l'utente ritrova tutte le sue attività a prescindere dal dispositivo.
 // Le voci sono ordinate per data (più recenti prima) e filtrabili per tipo.
 export function CronologiaPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
@@ -115,9 +117,9 @@ export function CronologiaPage() {
       </div>
 
       {loading ? (
-        <div style={placeholder}>Caricamento cronologia…</div>
+        <div style={getPlaceholder(colors)}>Caricamento cronologia…</div>
       ) : filtered.length === 0 ? (
-        <div style={placeholder}>
+        <div style={getPlaceholder(colors)}>
           <div style={{ fontWeight: 700, color: colors.textPrimary, marginBottom: 4 }}>
             {filter === "all" ? "Nessuna attività ancora" : "Nessun risultato per questo filtro"}
           </div>
@@ -198,6 +200,7 @@ function FilterChip({
 }: {
   label: string; count: number; active: boolean; onClick: () => void; color: string; icon?: React.ReactNode;
 }) {
+  const { colors } = useTheme();
   return (
     <button
       onClick={onClick}
@@ -225,6 +228,7 @@ function FilterChip({
 }
 
 function typeStyle(t: Row["type"]) {
+  const { colors } = useTheme();
   switch (t) {
     case "oral": return { icon: Mic, color: colors.pink };
     case "math": return { icon: Calculator, color: colors.cyan };
@@ -234,6 +238,7 @@ function typeStyle(t: Row["type"]) {
 }
 
 function gradeC(g: number): string {
+  const { colors } = useTheme();
   if (g >= 8) return colors.green;
   if (g >= 6) return colors.cyan;
   if (g >= 5) return colors.orange;
@@ -256,8 +261,8 @@ function formatDate(iso: string): string {
 function iconWrap(c: string): React.CSSProperties {
   return { width: 44, height: 44, borderRadius: 14, background: `${c}1a`, border: `1px solid ${c}55`, display: "flex", alignItems: "center", justifyContent: "center" };
 }
-const placeholder: React.CSSProperties = {
+const getPlaceholder = (colors: any): React.CSSProperties => ({
   padding: 24, borderRadius: radius.md,
-  background: colors.bgGlass, border: `1px dashed ${colors.border}`,
+  background: colors.bgGlass, border: `1px dashed ${colors.borderStrong}`,
   color: colors.textMuted, fontSize: 13, textAlign: "center",
-};
+});

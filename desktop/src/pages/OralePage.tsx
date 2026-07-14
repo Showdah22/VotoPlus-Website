@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Mic, Play, ChevronRight, GraduationCap, Sparkles, Star, RefreshCw, Loader2, MessageSquare, Volume2 } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { Select } from "../components/Select";
 import { OraleVoiceMode } from "../components/OraleVoiceMode";
 
+import { useTheme } from "../lib/theme-provider";
 type OralAttempt = {
   id: string;
   subject: string;
@@ -36,6 +37,7 @@ const SEVERITIES = [
 ];
 
 export function OralePage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const user = useAuth((s) => s.user);
   const subjects: string[] = (user as any)?.subjects || [];
@@ -460,6 +462,7 @@ export function OralePage() {
 }
 
 function PastEval({ evals, full = false }: { evals: Evaluation[]; full?: boolean }) {
+  const { colors } = useTheme();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
       {evals.map((e, i) => (
@@ -513,6 +516,7 @@ function PastEval({ evals, full = false }: { evals: Evaluation[]; full?: boolean
 }
 
 function ChipList({ label, items, color }: { label: string; items: string[]; color: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{ marginBottom: 6 }}>
       <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 0.8, color: colors.textMuted, textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
@@ -534,6 +538,7 @@ function ChipList({ label, items, color }: { label: string; items: string[]; col
 }
 
 function gradeColor(g: number): string {
+  const { colors } = useTheme();
   if (g >= 8) return colors.green;
   if (g >= 6) return colors.cyan;
   if (g >= 5) return colors.orange;
@@ -557,6 +562,7 @@ function formatOralDate(iso: string): string {
 }
 
 function DifficultyBadge({ diff }: { diff: string }) {
+  const { colors } = useTheme();
   const c = diff === "difficile" ? colors.red : diff === "facile" ? colors.green : colors.cyan;
   return (
     <span style={{
@@ -574,6 +580,7 @@ function DifficultyBadge({ diff }: { diff: string }) {
 }
 
 function StatPill({ label, value, color }: { label: string; value: string; color: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{
       display: "flex",
@@ -592,6 +599,7 @@ function StatPill({ label, value, color }: { label: string; value: string; color
 }
 
 function FieldLabel({ label, children }: { label: string; children: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <span style={{ fontSize: 11, fontWeight: 800, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8 }}>{label}</span>
@@ -608,6 +616,7 @@ function iconWrap(color: string): React.CSSProperties {
   };
 }
 function cardStyle(extra: React.CSSProperties = {}): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     padding: 18,
     borderRadius: radius.lg,
@@ -620,6 +629,7 @@ function cardStyle(extra: React.CSSProperties = {}): React.CSSProperties {
   };
 }
 function txtInput(): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     height: 42, padding: "0 14px",
     borderRadius: radius.md, background: colors.bgGlass,
@@ -629,6 +639,7 @@ function txtInput(): React.CSSProperties {
   };
 }
 function txtArea(): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     padding: "12px 14px",
     borderRadius: radius.md, background: colors.bgGlass,
@@ -639,6 +650,7 @@ function txtArea(): React.CSSProperties {
   };
 }
 function primaryBtn(disabled: boolean): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     padding: "12px 18px",
     borderRadius: radius.md,
@@ -655,6 +667,7 @@ function primaryBtn(disabled: boolean): React.CSSProperties {
   };
 }
 function secondaryBtn(): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     padding: "12px 18px",
     borderRadius: radius.md,
@@ -671,6 +684,7 @@ function secondaryBtn(): React.CSSProperties {
   };
 }
 function ErrorBox({ msg }: { msg: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{
       padding: 10,

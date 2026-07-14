@@ -641,7 +641,7 @@ function QuotaBar({ label, used, limit }: { label: string; used: number; limit: 
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
         <span style={{ fontSize: 12, color: colors.textSub, fontWeight: 700 }}>{label}</span>
-        <span style={{ fontSize: 12, color: "#fff", fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>
+        <span style={{ fontSize: 12, color: colors.textPrimary, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>
           {used}
           <span style={{ color: colors.textMuted, fontWeight: 600 }}>
             {" / "}{unlimited ? "∞" : limit}

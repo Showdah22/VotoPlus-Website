@@ -141,7 +141,7 @@ export function Sidebar() {
                   justifyContent: "center",
                   fontSize: collapsed ? 14 : 24,
                   fontWeight: 900,
-                  color: "#fff",
+                  color: colors.textPrimary,
                   boxSizing: "border-box",
                   flexShrink: 0,
                 }}

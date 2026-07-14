@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { Plus, Trash2, RotateCw, ChevronLeft, ChevronRight, Sparkles, Layers } from "lucide-react";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 import { Modal } from "../components/Modal";
 
+import { useTheme } from "../lib/theme-provider";
 type Card = {
   id: string;
   front: string;
@@ -14,6 +15,7 @@ type Card = {
 };
 
 export function FlashcardsPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
@@ -306,7 +308,7 @@ export function FlashcardsPage() {
               borderRadius: radius.md,
               background: `linear-gradient(135deg, ${colors.purple} 0%, ${colors.blue} 100%)`,
               border: "none",
-              color: "#fff",
+              color: colors.textPrimary,
               fontWeight: 800,
               fontSize: 14,
               cursor: saving ? "not-allowed" : "pointer",
@@ -322,6 +324,7 @@ export function FlashcardsPage() {
 }
 
 function FilterChip({ active, onClick, label, color }: { active: boolean; onClick: () => void; label: string; color: string }) {
+  const { colors } = useTheme();
   return (
     <button
       onClick={onClick}
@@ -342,6 +345,7 @@ function FilterChip({ active, onClick, label, color }: { active: boolean; onClic
 }
 
 function Placeholder({ label }: { label: string }) {
+  const { colors } = useTheme();
   return (
     <div
       style={{
@@ -365,6 +369,7 @@ function Placeholder({ label }: { label: string }) {
 }
 
 function TextField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const { colors } = useTheme();
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <span style={{ fontSize: 11, fontWeight: 800, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8 }}>{label}</span>
@@ -386,6 +391,7 @@ function TextField({ label, value, onChange, placeholder }: { label: string; val
   );
 }
 function TextArea({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const { colors } = useTheme();
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <span style={{ fontSize: 11, fontWeight: 800, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8 }}>{label}</span>
@@ -411,6 +417,7 @@ function TextArea({ label, value, onChange, placeholder }: { label: string; valu
 }
 
 function navBtn(disabled: boolean): React.CSSProperties {
+  const { colors } = useTheme();
   return {
     flex: 1,
     padding: "10px 14px",

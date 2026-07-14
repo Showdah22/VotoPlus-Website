@@ -16,6 +16,19 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.9.0",
+    date: "2026-07-14",
+    title: "🌗 Tema chiaro/scuro/automatico + registrazione da desktop",
+    emoji: "✨",
+    highlights: [
+      { icon: "sun-moon", title: "✨ Tema chiaro, scuro o automatico", body: "Ora puoi scegliere se usare Voto+ Desktop in modalità chiara, scura o farla adattare al tema del sistema operativo. Impostalo dal wizard iniziale oppure in qualsiasi momento da Impostazioni → Aspetto. La scelta viene ricordata in locale e applicata a TUTTE le pagine (home, materie, scanner, math, interrogazione, radar, impostazioni, ecc.), splash iniziale compreso." },
+      { icon: "user-plus", title: "✨ Registrati direttamente dal desktop", body: "Non serve più creare l'account su mobile e poi accedere dal computer: adesso da Voto+ Desktop puoi registrarti direttamente. Flusso identico al mobile: email + username + password → verifica email con codice a 6 cifre → wizard 4 step (anno di scuola, tipo di scuola, materie, tema)." },
+      { icon: "sparkles", title: "✨ Wizard di benvenuto in 4 passi", body: "Il primo accesso ora ti guida in 4 step: (1) in che anno sei, (2) che scuola frequenti, (3) quali materie studi, (4) scegli il tuo tema preferito. Le materie sono pre-selezionate in base al tipo di scuola, tu devi solo confermare o aggiungerne di custom." },
+      { icon: "layout", title: "✨ Splash iniziale allineato al tema", body: "Anche lo splash che vedi mentre l'app si avvia rispetta ora il tema scelto: niente più flash scuro se preferisci il tema chiaro." },
+      { icon: "palette", title: "🎨 Contrasto ottimizzato in light mode", body: "Bordi rinforzati sui riquadri (aggiornamenti, sezioni Impostazioni, card Piani, calendario, materia detail) e badge di stato con colori WCAG-AA garantiti sia in light sia in dark. Nessun testo bianco su bianco, nessun elemento invisibile." },
+    ],
+  },
+  {
     version: "0.8.9",
     date: "2026-07-13",
     title: "🪟 Correzione: icona V+ Windows soltanto",

@@ -3,9 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { BookOpen, ArrowLeft, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 
+import { useTheme } from "../lib/theme-provider";
 export function MateriaDetailPage() {
+  const { colors } = useTheme();
   const { name } = useParams<{ name: string }>();
   const subject = decodeURIComponent(name || "");
   const navigate = useNavigate();
@@ -39,7 +41,7 @@ export function MateriaDetailPage() {
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
-      <button onClick={() => navigate(-1)} style={backBtn}>
+      <button onClick={() => navigate(-1)} style={getBackBtn(colors)}>
         <ArrowLeft size={14} /> Indietro
       </button>
 
@@ -85,8 +87,8 @@ export function MateriaDetailPage() {
       {/* Voti list */}
       <section>
         <h2 style={sectionTitle}>Voti recenti</h2>
-        {loading ? <div style={placeholder}>Caricamento…</div> :
-         grades.length === 0 ? <div style={placeholder}>Nessun voto ancora in {subject}</div> :
+        {loading ? <div style={getPlaceholder(colors)}>Caricamento…</div> :
+         grades.length === 0 ? <div style={getPlaceholder(colors)}>Nessun voto ancora in {subject}</div> :
          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", gap: 8 }}>
            {grades.slice(0, 12).map((g) => (
              <div key={g.id} style={{
@@ -106,8 +108,8 @@ export function MateriaDetailPage() {
       {/* Studies list */}
       <section>
         <h2 style={sectionTitle}>Studi & riassunti</h2>
-        {loading ? <div style={placeholder}>Caricamento…</div> :
-         studies.length === 0 ? <div style={placeholder}>Nessun riassunto ancora per {subject}</div> :
+        {loading ? <div style={getPlaceholder(colors)}>Caricamento…</div> :
+         studies.length === 0 ? <div style={getPlaceholder(colors)}>Nessun riassunto ancora per {subject}</div> :
          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
            {studies.map((s) => (
              <div key={s.id} style={{ padding: 14, borderRadius: radius.md, background: colors.bgGlass, border: `1px solid ${colors.border}` }}>
@@ -124,6 +126,7 @@ export function MateriaDetailPage() {
 }
 
 function colorForGrade(g: number | null): string {
+  const { colors } = useTheme();
   if (g == null) return colors.textMuted;
   if (g >= 8) return colors.green;
   if (g >= 6) return colors.cyan;
@@ -131,6 +134,7 @@ function colorForGrade(g: number | null): string {
   return colors.red;
 }
 function trendColor(t: number): string {
+  const { colors } = useTheme();
   if (t > 0.1) return colors.green;
   if (t < -0.1) return colors.red;
   return colors.textMuted;
@@ -138,17 +142,17 @@ function trendColor(t: number): string {
 function iconWrap(c: string): React.CSSProperties {
   return { width: 44, height: 44, borderRadius: 14, background: `${c}1a`, border: `1px solid ${c}55`, display: "flex", alignItems: "center", justifyContent: "center" };
 }
-const backBtn: React.CSSProperties = {
+const getBackBtn = (colors: any): React.CSSProperties => ({
   display: "inline-flex", alignItems: "center", gap: 6,
   padding: "6px 12px", borderRadius: 999,
   background: colors.bgGlass, border: `1px solid ${colors.border}`,
   color: colors.textSub, fontSize: 12, fontWeight: 700, alignSelf: "flex-start",
-};
+});
 const sectionTitle: React.CSSProperties = {
-  margin: "0 0 12px 0", fontSize: 16, fontWeight: 800,
+  margin: "0 0 12px 0", fontSize: 13, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8,
 };
-const placeholder: React.CSSProperties = {
+const getPlaceholder = (colors: any): React.CSSProperties => ({
   padding: 20, borderRadius: radius.md,
-  background: colors.bgGlass, border: `1px dashed ${colors.border}`,
+  background: colors.bgGlass, border: `1px dashed ${colors.borderStrong}`,
   color: colors.textMuted, fontSize: 13, textAlign: "center",
-};
+});

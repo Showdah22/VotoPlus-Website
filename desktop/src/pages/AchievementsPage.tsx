@@ -21,10 +21,11 @@ import {
   AlarmClock,
   type LucideIcon,
 } from "lucide-react";
-import { colors, radius } from "../theme";
+import { radius } from "../theme";
 import { useAuth } from "../store/auth";
 import { api } from "../api/client";
 
+import { useTheme } from "../lib/theme-provider";
 // Mappa nome Ionicon (backend) → componente Lucide (desktop).
 // Il backend usa Ionicons perché il mobile è nativo. Su desktop convertiamo
 // a Lucide per coerenza visiva con il resto della UI.
@@ -73,6 +74,7 @@ type Progress = {
 };
 
 export function AchievementsPage() {
+  const { colors } = useTheme();
   const token = useAuth((s) => s.token);
   const [data, setData] = useState<Progress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -157,6 +159,7 @@ export function AchievementsPage() {
 }
 
 function AchievementCard({ a }: { a: Achievement }) {
+  const { colors } = useTheme();
   const tint = a.unlocked ? a.color : colors.textMuted;
   const IconComp = iconFor(a.icon);
   return (
@@ -215,6 +218,7 @@ function AchievementCard({ a }: { a: Achievement }) {
 }
 
 function ProgressRing({ percent }: { percent: number }) {
+  const { colors } = useTheme();
   const r = 22;
   const c = 2 * Math.PI * r;
   const dash = c * (percent / 100);
@@ -241,6 +245,7 @@ function ProgressRing({ percent }: { percent: number }) {
 }
 
 function FilterChip({ active, onClick, label, color }: { active: boolean; onClick: () => void; label: string; color: string }) {
+  const { colors } = useTheme();
   return (
     <button
       onClick={onClick}
@@ -261,6 +266,7 @@ function FilterChip({ active, onClick, label, color }: { active: boolean; onClic
 }
 
 function Placeholder({ label }: { label: string }) {
+  const { colors } = useTheme();
   return (
     <div style={{
       padding: 30,
