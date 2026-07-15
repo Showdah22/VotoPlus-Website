@@ -16,6 +16,16 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.9.6",
+    date: "2026-07-14",
+    title: "☀️ Maturità Radar in pausa estiva anche in Home",
+    emoji: "☀️",
+    highlights: [
+      { icon: "sun", title: "☀️ Banner Home riflette la pausa estiva", body: "Il banner 'Maturità Radar' sulla Home ora rileva quando il Radar è in pausa estiva (dal 22 giugno al 15 settembre) e mostra chiaramente 'Buona estate! 🌊 Il Radar riposa' con countdown ai giorni al risveglio. Prima diceva sempre 'I temi più probabili dell'anno' anche in luglio, ingannando gli studenti al 5° anno." },
+      { icon: "clock", title: "⏰ Countdown al risveglio", body: "Il banner mostra tra quanti giorni il Radar tornerà attivo (es. 'Torneremo attivi tra 62 giorni'). Il click apre comunque /radar dove trovi la schermata dedicata all'off-season con countdown preciso." },
+    ],
+  },
+  {
     version: "0.9.5",
     date: "2026-07-14",
     title: "🤫 Zero falsi allarmi durante i nuovi rilasci",

@@ -39,6 +39,7 @@ export function HomePage() {
 
   const [dashboard, setDashboard] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
+  const [radarSeason, setRadarSeason] = useState<{ state: "active" | "dormant"; wake_at?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
 
@@ -47,13 +48,18 @@ export function HomePage() {
     (async () => {
       if (!token) return;
       try {
-        const [d, s] = await Promise.allSettled([
+        const [d, s, rs] = await Promise.allSettled([
           api.dashboard(token),
           api.gradesStats(token),
+          // Season del Radar: `dormant` (pausa estiva) o `active`. Usato per
+          // decidere se il banner Maturità in Home dice "temi probabili" o
+          // "in pausa estiva" — evita di ingannare gli utenti al 5° anno.
+          api.radarSeason(token),
         ]);
         if (!alive) return;
         if (d.status === "fulfilled") setDashboard(d.value);
         if (s.status === "fulfilled") setStats(s.value);
+        if (rs.status === "fulfilled") setRadarSeason(rs.value);
       } finally {
         if (alive) setLoading(false);
       }
@@ -114,6 +120,8 @@ export function HomePage() {
       {user?.school_year === 5 && (
         <MaturitaBanner
           unlocked={!!user?.maturita_unlocked}
+          dormant={radarSeason?.state === "dormant"}
+          wakeAt={radarSeason?.wake_at}
           onClick={() => navigate(user?.maturita_unlocked ? "/radar" : "/impostazioni")}
         />
       )}
@@ -309,13 +317,32 @@ function colorForGrade(g: number | null, colors: any): string {
 
 // Banner "Maturità Radar" sulla HomePage — visibile solo per utenti al 5° anno.
 // Design ispirato al banner mobile (`app/(tabs)/index.tsx` — sezione radar shortcut).
-// Due varianti visive:
-//   - unlocked (verde/ciano) → "I temi più probabili dell'anno" → apre /radar
-//   - lockato (arancio/viola) → "Sblocca il Radar Maturità" → apre /impostazioni
-function MaturitaBanner({ unlocked, onClick }: { unlocked: boolean; onClick: () => void }) {
+// Tre varianti visive:
+//   - dormant (blu/ciano) → "In pausa estiva · Torna a settembre" → apre /radar (OffSeason)
+//   - unlocked & active (verde/ciano) → "I temi più probabili dell'anno" → apre /radar
+//   - locked (arancio/viola) → "Sblocca il Radar Maturità" → apre /impostazioni
+function MaturitaBanner({
+  unlocked,
+  dormant,
+  wakeAt,
+  onClick,
+}: {
+  unlocked: boolean;
+  dormant?: boolean;
+  wakeAt?: string;
+  onClick: () => void;
+}) {
   const { colors } = useTheme();
-  const primary = unlocked ? colors.green : colors.orange;
-  const secondary = unlocked ? colors.cyan : colors.purple;
+
+  // Priorità: dormant > unlocked > locked
+  const primary = dormant ? colors.blue : unlocked ? colors.green : colors.orange;
+  const secondary = dormant ? colors.cyan : unlocked ? colors.cyan : colors.purple;
+
+  // Countdown al risveglio in giorni (approssimato per il banner)
+  const daysUntilWake = wakeAt
+    ? Math.max(0, Math.ceil((new Date(wakeAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
+
   return (
     <button
       onClick={onClick}
@@ -347,7 +374,14 @@ function MaturitaBanner({ unlocked, onClick }: { unlocked: boolean; onClick: () 
         background: `${primary}25`, border: `1px solid ${primary}77`,
         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
       }}>
-        {unlocked ? <RadarIcon size={30} color={primary} /> : <Lock size={26} color={primary} />}
+        {/* Emoji sole in dormant (evoca l'estate); Radar attivo in unlocked; Lock se ancora chiuso */}
+        {dormant ? (
+          <span style={{ fontSize: 30 }}>☀️</span>
+        ) : unlocked ? (
+          <RadarIcon size={30} color={primary} />
+        ) : (
+          <Lock size={26} color={primary} />
+        )}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
@@ -355,15 +389,24 @@ function MaturitaBanner({ unlocked, onClick }: { unlocked: boolean; onClick: () 
           display: "flex", alignItems: "center", gap: 6,
         }}>
           Maturità Radar
-          {!unlocked && <Lock size={11} color={primary} />}
+          {dormant && <span style={{ opacity: 0.75, fontWeight: 700, letterSpacing: 0.6 }}>· In pausa estiva</span>}
+          {!dormant && !unlocked && <Lock size={11} color={primary} />}
         </div>
         <div style={{ fontSize: 17, fontWeight: 800, marginTop: 4, color: colors.textPrimary }}>
-          {unlocked ? "I temi più probabili dell'anno" : "Sblocca il Radar Maturità"}
+          {dormant
+            ? "Buona estate! 🌊 Il Radar riposa"
+            : unlocked
+              ? "I temi più probabili dell'anno"
+              : "Sblocca il Radar Maturità"}
         </div>
         <div style={{ fontSize: 12, color: colors.textSub, marginTop: 4, lineHeight: 1.5 }}>
-          {unlocked
-            ? "Trend, attualità, collegamenti interdisciplinari"
-            : "Acquisto una tantum · valido fino al tuo esame"}
+          {dormant
+            ? daysUntilWake && daysUntilWake > 0
+              ? `Torneremo attivi tra ${daysUntilWake} giorni · a settembre per la nuova sessione`
+              : "Torneremo attivi a settembre per la nuova sessione"
+            : unlocked
+              ? "Trend, attualità, collegamenti interdisciplinari"
+              : "Acquisto una tantum · valido fino al tuo esame"}
         </div>
       </div>
     </button>
