@@ -350,11 +350,17 @@ ipcMain.handle("external:open", (_e, url: string) => {
 
 // ===================== AUTH IPC =====================
 // Il renderer chiama `voto.auth.startGoogleLogin()` per avviare il flusso.
-// Costruiamo l'URL Emergent con `redirect=votoplus://auth` e lo apriamo nel
-// browser di sistema. Il resto è gestito dal deep-link handler.
+// Costruiamo l'URL Emergent con redirect a una BRIDGE PAGE HTTPS (che poi
+// invoca il custom protocol) invece di puntare direttamente a
+// `votoplus://auth`. Motivazione:
+//   1. Nel popup "Aprire Voto+ Desktop?" il browser mostra l'origine del
+//      redirect (Emergent), non un URL scheme grezzo → messaggio pulito.
+//   2. Dopo il click l'utente vede una pagina di successo con "Puoi chiudere
+//      questa finestra" invece di rimanere su una pagina bianca Emergent.
+//   3. La bridge page può auto-chiudersi (window.close) e mostrare feedback.
+const AUTH_BRIDGE_URL = "https://votoplus.it/desktop-login.html";
 ipcMain.handle("auth:startGoogle", () => {
-  const redirect = `${PROTOCOL_SCHEME}://auth`;
-  const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirect)}`;
+  const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(AUTH_BRIDGE_URL)}`;
   shell.openExternal(authUrl);
 });
 

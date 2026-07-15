@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.9.4",
+    date: "2026-07-14",
+    title: "🎨 Login con Google più pulito",
+    emoji: "🎨",
+    highlights: [
+      { icon: "google", title: "🎨 Popup Chrome più corto", body: "Il popup di conferma di Chrome quando accedi con Google mostrava un testo lunghissimo troncato tipo 'Aprire Voto+ Desktop —… dal computer?'. Ora è semplicemente 'Voto+ Desktop', molto più leggibile." },
+      { icon: "check", title: "✨ Pagina di conferma", body: "Dopo il login con Google, il browser non resta più bloccato su una pagina vuota. Vedi una pagina di conferma pulita che ti dice 'Accesso completato, puoi chiudere questa finestra' e tenta di chiudersi da sola dopo 5 secondi." },
+      { icon: "shield", title: "🛡️ Ponte HTTPS al posto del custom scheme", body: "Il redirect da Emergent ora passa attraverso votoplus.it/desktop-login (bridge page ufficiale) invece che direttamente al custom scheme votoplus://. Fix di privacy: il session_id resta nel fragment URL e NON viene mai loggato dai server web." },
+    ],
+  },
+  {
     version: "0.9.3",
     date: "2026-07-14",
     title: "⚡ Aggiornamenti automatici all'avvio",
