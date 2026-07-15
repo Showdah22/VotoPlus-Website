@@ -167,10 +167,34 @@ function wireUpdaterEvents(win: BrowserWindow) {
   });
 
   autoUpdater.on("error", (err) => {
-    win.webContents.send("updater:status", {
-      state: "error",
-      message: err?.message ?? String(err),
-    });
+    // Se la release esiste (tag presente su GitHub) ma gli asset non sono
+    // ancora stati caricati (CI in corso), electron-updater fallisce con
+    // HttpError 404 su `latest.yml` / `latest-mac.yml` o sui binari.
+    // Trattiamo questa condizione come "up-to-date temporaneo" invece che
+    // errore visibile all'utente — la prossima passata (periodic o manuale)
+    // troverà la release completa. Evita di spaventare gli utenti che vedono
+    // "impossibile controllare gli aggiornamenti" durante il release freschi.
+    const msg = String(err?.message ?? err ?? "");
+    const isReleaseIncomplete =
+      /404/.test(msg) ||
+      /Not Found/i.test(msg) ||
+      /HttpError/i.test(msg) ||
+      /latest.*\.yml/i.test(msg) ||
+      /ENOTFOUND/i.test(msg);
+
+    if (isReleaseIncomplete) {
+      console.info("[updater] release not yet complete, treating as up-to-date:", msg);
+      win.webContents.send("updater:status", {
+        state: "up-to-date",
+        version: app.getVersion(),
+        releaseIncomplete: true, // hint per la UI se vuole gestirlo diversamente
+      });
+    } else {
+      win.webContents.send("updater:status", {
+        state: "error",
+        message: err?.message ?? String(err),
+      });
+    }
     isStartupAutoUpdate = false;
   });
 }
@@ -324,6 +348,21 @@ ipcMain.handle("updater:check", async () => {
     const result = await autoUpdater.checkForUpdates();
     return { ok: true, updateInfo: result?.updateInfo ?? null };
   } catch (err: any) {
+    // Se la release è incompleta (CI in corso), non è un vero errore.
+    // Il pulsante manuale deve comportarsi come "sei aggiornato" invece che
+    // mostrare l'errore, per non far ricomparire la scritta rossa quando
+    // l'utente clicca "Cerca aggiornamenti" durante un rilascio in corso.
+    const msg = String(err?.message ?? err ?? "");
+    const isReleaseIncomplete =
+      /404/.test(msg) ||
+      /Not Found/i.test(msg) ||
+      /HttpError/i.test(msg) ||
+      /latest.*\.yml/i.test(msg) ||
+      /ENOTFOUND/i.test(msg);
+    if (isReleaseIncomplete) {
+      console.info("[updater:check] release not yet complete:", msg);
+      return { ok: true, updateInfo: null, releaseIncomplete: true };
+    }
     return { ok: false, error: err?.message ?? String(err) };
   }
 });

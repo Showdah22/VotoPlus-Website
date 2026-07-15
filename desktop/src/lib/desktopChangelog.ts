@@ -16,6 +16,16 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.9.5",
+    date: "2026-07-14",
+    title: "🤫 Zero falsi allarmi durante i nuovi rilasci",
+    emoji: "🤫",
+    highlights: [
+      { icon: "shield", title: "🤫 Update check silenzioso quando la CI è in corso", body: "Se cerchi aggiornamenti mentre una nuova versione è in fase di pubblicazione (CI ancora in corso, asset non ancora caricati su GitHub), l'app NON ti mostra più il messaggio rosso 'Impossibile controllare gli aggiornamenti'. Ti dice semplicemente 'Sei aggiornato' e riproverà da sola dopo qualche minuto." },
+      { icon: "check", title: "✨ Rilevamento automatico release incomplete", body: "Il check ora riconosce quando GitHub ha il tag della release ma non ancora gli installer (.exe / .dmg). In quel caso lo tratta come 'aggiornato' invece di errore. Al prossimo check periodico (o al prossimo avvio) troverà la release completa e la scaricherà normalmente." },
+    ],
+  },
+  {
     version: "0.9.4",
     date: "2026-07-14",
     title: "🎨 Login con Google più pulito",
