@@ -79,11 +79,28 @@ function extractDeepLinkFromArgv(argv: string[]): string | null {
 }
 
 // ===================== AUTO-UPDATER =====================
-// Configurazione: legge automaticamente da package.json > build.publish (GitHub).
-// autoDownload false = decidiamo noi quando scaricare (bottone in Impostazioni).
-// autoInstallOnAppQuit true = installa alla chiusura naturale dell'app.
+// Comportamento a due modalità:
+//
+// 1) STARTUP (freschi all'avvio dell'app):
+//    Se il check silenzioso all'apertura trova un update → SCARICHIAMO e
+//    INSTALLIAMO automaticamente, riavviando l'app sulla nuova versione.
+//    L'utente vede solo la progress bar in titlebar per pochi secondi.
+//    Motivazione: quando apri l'app "per iniziare a lavorare" è il momento
+//    meno intrusivo per applicare l'aggiornamento.
+//
+// 2) RUNTIME (app già aperta da tempo):
+//    Se il check periodico (30 min) o quello manuale (Impostazioni) trova
+//    un update → mostriamo il badge nella titlebar e ASPETTIAMO che
+//    l'utente clicchi "Installa e riavvia". Motivazione: mentre l'utente
+//    sta lavorando NON dobbiamo interromperlo con un restart improvviso.
+//
+// Flag `isStartupAutoUpdate`:
+//   - true durante il primo check di avvio (settato in silentStartupCheck())
+//   - false in tutti gli altri check (periodici + manuali)
+//   - resettato dopo update-not-available / error / update-downloaded
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
+let isStartupAutoUpdate = false;
 
 function wireUpdaterEvents(win: BrowserWindow) {
   autoUpdater.on("checking-for-update", () => {
@@ -97,6 +114,14 @@ function wireUpdaterEvents(win: BrowserWindow) {
       releaseNotes: (info as any).releaseNotes ?? null,
       releaseDate: (info as any).releaseDate ?? null,
     });
+    // ⚡ Modalità STARTUP: scarichiamo immediatamente in background.
+    // La UI riceverà eventi "downloading" (con progress) e poi "downloaded".
+    if (isStartupAutoUpdate) {
+      autoUpdater.downloadUpdate().catch((err) => {
+        console.warn("[updater] auto-download at startup failed:", err);
+        isStartupAutoUpdate = false; // reset per non bloccare i check successivi
+      });
+    }
   });
 
   autoUpdater.on("update-not-available", (info) => {
@@ -104,6 +129,7 @@ function wireUpdaterEvents(win: BrowserWindow) {
       state: "up-to-date",
       version: info.version,
     });
+    isStartupAutoUpdate = false; // check iniziale concluso senza update
   });
 
   autoUpdater.on("download-progress", (progress) => {
@@ -121,6 +147,23 @@ function wireUpdaterEvents(win: BrowserWindow) {
       state: "downloaded",
       version: info.version,
     });
+    // ⚡ Modalità STARTUP: installiamo immediatamente e riavviamo sulla
+    // nuova versione. Piccolo delay (800ms) per permettere alla UI di
+    // mostrare lo stato "downloaded" prima del riavvio (feedback visivo).
+    if (isStartupAutoUpdate) {
+      isStartupAutoUpdate = false; // reset — non ripeteremo questo flow
+      setTimeout(() => {
+        // quitAndInstall(isSilent=true, isForceRunAfter=true):
+        // installer NSIS silenzioso su Windows + app riaperta automaticamente.
+        try {
+          autoUpdater.quitAndInstall(true, true);
+        } catch (err) {
+          console.warn("[updater] quitAndInstall failed:", err);
+        }
+      }, 800);
+    }
+    // Runtime: la UI mostra il pulsante "Installa e riavvia" e aspetta il
+    // click dell'utente (via IPC "updater:installNow").
   });
 
   autoUpdater.on("error", (err) => {
@@ -128,16 +171,21 @@ function wireUpdaterEvents(win: BrowserWindow) {
       state: "error",
       message: err?.message ?? String(err),
     });
+    isStartupAutoUpdate = false;
   });
 }
 
 // Silent check all'avvio (Discord-style). Solo in produzione.
+// Attiva la modalità STARTUP → se trova un update lo scarica e installa
+// automaticamente (vedi commento sopra su isStartupAutoUpdate).
 async function silentStartupCheck() {
   if (VITE_DEV_SERVER_URL) return; // skip in dev
   try {
+    isStartupAutoUpdate = true;
     await autoUpdater.checkForUpdates();
   } catch (err) {
     console.warn("[updater] silent check failed:", err);
+    isStartupAutoUpdate = false;
   }
 }
 
@@ -151,6 +199,7 @@ function startPeriodicUpdateCheck() {
   if (periodicTimer) return;
   periodicTimer = setInterval(async () => {
     try {
+      isStartupAutoUpdate = false; // runtime: NON auto-installiamo, aspettiamo click utente
       await autoUpdater.checkForUpdates();
     } catch (err) {
       console.warn("[updater] periodic check failed:", err);
@@ -271,6 +320,7 @@ ipcMain.handle("app:getPlatform", () => process.platform);
 
 ipcMain.handle("updater:check", async () => {
   try {
+    isStartupAutoUpdate = false; // manuale: NON auto-installiamo
     const result = await autoUpdater.checkForUpdates();
     return { ok: true, updateInfo: result?.updateInfo ?? null };
   } catch (err: any) {

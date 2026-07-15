@@ -16,6 +16,17 @@ export type DesktopRelease = {
 
 export const DESKTOP_CHANGELOG: DesktopRelease[] = [
   {
+    version: "0.9.3",
+    date: "2026-07-14",
+    title: "⚡ Aggiornamenti automatici all'avvio",
+    emoji: "⚡",
+    highlights: [
+      { icon: "download", title: "⚡ Auto-update silent all'avvio", body: "Quando apri Voto+ Desktop e c'è un aggiornamento disponibile, l'app lo scarica e installa automaticamente prima che tu abbia il tempo di iniziare a lavorare. Nessun click, nessun popup — solo la progress bar in titlebar per pochi secondi." },
+      { icon: "hand", title: "🤝 Rispetto per il tuo flow", body: "Se invece l'app è aperta da tempo e nel frattempo esce una nuova versione, continueremo a mostrarti il badge \"Installa e riavvia\" e aspetteremo il tuo click, per non interromperti mentre stai lavorando." },
+      { icon: "bug", title: "🐛 Fix update check da menu", body: "Anche quando premi \"Cerca aggiornamenti\" da Impostazioni, ora il flow è coerente: check + attesa del tuo consenso, senza restart improvvisi." },
+    ],
+  },
+  {
     version: "0.9.2",
     date: "2026-07-14",
     title: "🔐 Accesso con Google (Apple in arrivo)",
