@@ -47,6 +47,51 @@ const year = new Date().getFullYear();
     </div>
   </div>
 
+  <div class="footer-social container">
+    <span class="social-label">Seguici</span>
+    <div class="social-links">
+      <a
+        href="https://www.instagram.com/votoplusitalia"
+        target="_blank"
+        rel="noopener"
+        class="social-link"
+        aria-label="Voto+ su Instagram"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+        <span>Instagram</span>
+      </a>
+      <a
+        href="https://www.linkedin.com/in/voto-plus-89723941a/"
+        target="_blank"
+        rel="noopener"
+        class="social-link"
+        aria-label="Voto+ su LinkedIn"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"></path>
+          <rect x="2" y="9" width="4" height="12"></rect>
+          <circle cx="4" cy="4" r="2"></circle>
+        </svg>
+        <span>LinkedIn</span>
+      </a>
+      <a
+        href="mailto:support@votoplus.it"
+        class="social-link"
+        aria-label="Scrivi a supporto Voto+"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+        <span>Email</span>
+      </a>
+    </div>
+  </div>
+
   <div class="footer-bottom container">
     <span>© {year} Voto+ · Tutti i diritti riservati</span>
     <span>Fatta con 💜 in Italia</span>
@@ -117,6 +162,46 @@ const year = new Date().getFullYear();
     color: var(--text-muted);
     font-size: 13px;
   }
+
+  .footer-social {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 32px 24px 0;
+    flex-wrap: wrap;
+  }
+  .social-label {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+  }
+  .social-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--text-sub);
+    font-size: 13.5px;
+    font-weight: 700;
+    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+  .social-link:hover {
+    color: var(--text-primary);
+    border-color: rgba(168, 85, 247, 0.5);
+    background: rgba(168, 85, 247, 0.1);
+    transform: translateY(-2px);
+  }
+  .social-link svg { flex-shrink: 0; }
 
   @media (max-width: 800px) {
     .footer-grid {
