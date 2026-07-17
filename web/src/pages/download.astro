@@ -1,6 +1,23 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import DesktopDownloadButton from "@/components/DesktopDownloadButton.tsx";
+
+// Fetch build-time dell'ultima release GitHub. La pagina renderizzata
+// contiene già i link diretti agli installer, così funziona anche senza
+// JavaScript e senza fetch runtime. Il React island fa poi il re-fetch
+// per catturare eventuali release più recenti pubblicate dopo il build.
+let initialRelease: any = null;
+try {
+  const res = await fetch("https://api.github.com/repos/Showdah22/VotoPlus-Website/releases?per_page=10", {
+    headers: { Accept: "application/vnd.github+json" },
+  });
+  if (res.ok) {
+    const list = await res.json();
+    initialRelease = list.find((r: any) => (r.assets || []).length > 2) || list[0] || null;
+  }
+} catch (e) {
+  console.warn("[download] Build-time GitHub fetch failed");
+}
 ---
 
 <BaseLayout
@@ -15,7 +32,7 @@ import DesktopDownloadButton from "@/components/DesktopDownloadButton.tsx";
         Voto+ Desktop è l'app companion per Windows e macOS. Tutte le funzioni della versione mobile ottimizzate per schermo grande, tastiera e mouse.
       </p>
 
-      <DesktopDownloadButton client:load />
+      <DesktopDownloadButton initialRelease={initialRelease} client:load />
     </div>
   </section>
 

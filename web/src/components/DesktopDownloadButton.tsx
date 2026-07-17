@@ -1,33 +1,37 @@
-// Voto+ Desktop · React Island client-side per detect OS + fetch ultima release GitHub.
+// Voto+ Desktop \u00b7 React Island per download automatico installer.
 //
-// Uso:
-//   <DesktopDownloadButton client:load />
+// Strategia:
+//   1. Astro pre-fetcha al build time l'ultima release GitHub (vedi
+//      download.astro) e la passa come prop `initialRelease`. Cos\u00ec la pagina
+//      renderizzata ha SEMPRE link funzionanti anche senza JavaScript.
+//   2. Al mount, React Island:
+//      - rileva OS (Windows/macOS/Linux)
+//      - ri-fetcha l'API GitHub per catturare eventuali release pi\u00f9 recenti
+//        (rilasciate dopo l'ultimo build del sito ma prima del rebuild)
+//      - se il fetch fallisce, MANTIENE i dati dal build (no fallback rotto)
 //
-// Comportamento:
-//   1. Rileva OS al mount (Windows / macOS / Linux)
-//   2. Fetch GET https://api.github.com/repos/Showdah22/VotoPlus-Website/releases?per_page=10
-//   3. Cerca il primo release con asset .exe (Windows) o .dmg (macOS) validi
-//   4. Mostra pulsante "Scarica per Windows/macOS" col link diretto all'installer
-//   5. Se API GitHub è down o rate-limited, fallback graceful al link /releases
+// Naming asset electron-builder:
+//   - Windows: VotoPlus-Setup-{ver}.exe
+//   - macOS:   VotoPlus-{ver}.dmg
+//   - Linux:   (nessuno per ora, non generato)
 import { useEffect, useState } from "react";
 
 type OS = "windows" | "macos" | "linux" | "unknown";
 
-type ReleaseAsset = {
+export type ReleaseAsset = {
   name: string;
   browser_download_url: string;
   size: number;
 };
 
-type Release = {
+export type Release = {
   tag_name: string;
-  name: string;
+  name?: string;
   published_at: string;
   assets: ReleaseAsset[];
 };
 
 const API_URL = "https://api.github.com/repos/Showdah22/VotoPlus-Website/releases?per_page=10";
-const RELEASES_URL = "https://github.com/Showdah22/VotoPlus-Website/releases";
 
 function detectOS(): OS {
   if (typeof navigator === "undefined") return "unknown";
@@ -39,22 +43,16 @@ function detectOS(): OS {
   return "unknown";
 }
 
-function findAsset(releases: Release[], os: OS): { asset: ReleaseAsset; release: Release } | null {
+function findAsset(release: Release, os: OS): ReleaseAsset | null {
   const isMatch = (name: string) => {
     const lower = name.toLowerCase();
+    if (lower.endsWith(".blockmap") || lower.endsWith(".yml")) return false;
     if (os === "windows") return lower.endsWith(".exe") || lower.endsWith(".msi");
     if (os === "macos") return lower.endsWith(".dmg");
     if (os === "linux") return lower.endsWith(".appimage") || lower.endsWith(".deb");
     return false;
   };
-  for (const r of releases) {
-    // Filtra bozze e prerelease escludendo tag che non iniziano con "v-desktop-"
-    if (!r.tag_name?.startsWith("v-desktop-")) continue;
-    for (const a of r.assets || []) {
-      if (isMatch(a.name)) return { asset: a, release: r };
-    }
-  }
-  return null;
+  return release.assets.find((a) => isMatch(a.name)) || null;
 }
 
 function formatBytes(bytes: number): string {
@@ -72,11 +70,13 @@ function formatDate(iso: string): string {
   }
 }
 
-export default function DesktopDownloadButton() {
+type Props = {
+  initialRelease: Release | null;
+};
+
+export default function DesktopDownloadButton({ initialRelease }: Props) {
   const [os, setOs] = useState<OS>("unknown");
-  const [loading, setLoading] = useState(true);
-  const [result, setResult] = useState<{ asset: ReleaseAsset; release: Release } | null>(null);
-  const [allReleases, setAllReleases] = useState<Release[]>([]);
+  const [release, setRelease] = useState<Release | null>(initialRelease);
 
   useEffect(() => {
     const currentOs = detectOS();
@@ -84,68 +84,75 @@ export default function DesktopDownloadButton() {
 
     (async () => {
       try {
-        const res = await fetch(API_URL, {
-          headers: { Accept: "application/vnd.github+json" },
-        });
-        if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+        const res = await fetch(API_URL, { headers: { Accept: "application/vnd.github+json" } });
+        if (!res.ok) return; // Mantieni initialRelease
         const data: Release[] = await res.json();
-        setAllReleases(data);
-        const found = findAsset(data, currentOs);
-        setResult(found);
-      } catch (err) {
-        console.warn("[desktop-download] GitHub API unavailable:", err);
-      } finally {
-        setLoading(false);
+        // Prendi la prima release valida con assets (ignora bozze / prerelease vuote).
+        const latest = data.find((r) => (r.assets || []).length > 2) || data[0];
+        if (latest) setRelease(latest);
+      } catch {
+        /* Silenzioso, restiamo su initialRelease */
       }
     })();
   }, []);
 
-  const osLabel = os === "windows" ? "Windows" : os === "macos" ? "macOS" : os === "linux" ? "Linux" : "il tuo dispositivo";
+  const osLabel =
+    os === "windows"
+      ? "Windows"
+      : os === "macos"
+      ? "macOS"
+      : os === "linux"
+      ? "Linux"
+      : "il tuo dispositivo";
 
-  // Trova le opzioni per l'altra piattaforma (secondaria)
-  const macAsset = findAsset(allReleases, "macos");
-  const winAsset = findAsset(allReleases, "windows");
+  if (!release) {
+    // Situazione impossibile in pratica (build sempre pre-fetcha), ma safe fallback.
+    return (
+      <a className="btn-mega" href="/download">
+        <span className="btn-mega-title">Ricarica la pagina</span>
+        <span className="btn-mega-sub">Impossibile leggere le release al momento</span>
+      </a>
+    );
+  }
+
+  const mainAsset = findAsset(release, os);
+  const winAsset = findAsset(release, "windows");
+  const macAsset = findAsset(release, "macos");
+
+  // Se il main asset non c'\u00e8 (Linux o OS sconosciuto), fallback a Windows
+  // (l'utente probabilmente sta usando browser desktop generico).
+  const effective = mainAsset || winAsset || macAsset;
+  const effectiveLabel = mainAsset ? osLabel : winAsset ? "Windows" : macAsset ? "macOS" : "desktop";
+  const versionClean = release.tag_name.replace(/^v-?desktop-?/, "").replace(/^v/, "");
 
   return (
     <div className="desktop-cta">
-      {loading ? (
-        <div className="cta-loading">
-          <div className="spinner" aria-hidden />
-          <p>Sto trovando l'ultima versione per te…</p>
-        </div>
-      ) : result ? (
-        <>
-          <a className="btn-mega" href={result.asset.browser_download_url} download>
-            <span className="btn-mega-title">Scarica per {osLabel}</span>
-            <span className="btn-mega-sub">
-              {result.release.tag_name.replace("v-desktop-", "v")} · {formatBytes(result.asset.size)}
-            </span>
+      {effective ? (
+        <a className="btn-mega" href={effective.browser_download_url} download>
+          <span className="btn-mega-title">Scarica per {effectiveLabel}</span>
+          <span className="btn-mega-sub">
+            v{versionClean} \u00b7 {formatBytes(effective.size)}
+          </span>
+        </a>
+      ) : null}
+
+      <p className="cta-meta">
+        Ultima versione: <strong>v{versionClean}</strong>
+        {release.published_at ? ` \u2022 rilasciata il ${formatDate(release.published_at)}` : ""}
+      </p>
+
+      <div className="cta-alt">
+        {os !== "windows" && winAsset && (
+          <a href={winAsset.browser_download_url} download>
+            Scarica per Windows ({formatBytes(winAsset.size)})
           </a>
-          <p className="cta-meta">
-            Ultima versione: <strong>{result.release.tag_name.replace("v-desktop-", "v")}</strong>
-            {result.release.published_at ? ` • rilasciata il ${formatDate(result.release.published_at)}` : ""}
-          </p>
-          <div className="cta-alt">
-            {os !== "windows" && winAsset && (
-              <a href={winAsset.asset.browser_download_url} download>Scarica per Windows ({formatBytes(winAsset.asset.size)})</a>
-            )}
-            {os !== "macos" && macAsset && (
-              <a href={macAsset.asset.browser_download_url} download>Scarica per macOS ({formatBytes(macAsset.asset.size)})</a>
-            )}
-            <a href={RELEASES_URL} target="_blank" rel="noopener">Tutte le versioni →</a>
-          </div>
-        </>
-      ) : (
-        <>
-          <a className="btn-mega" href={RELEASES_URL} target="_blank" rel="noopener">
-            <span className="btn-mega-title">Vedi tutte le versioni</span>
-            <span className="btn-mega-sub">Su GitHub Releases</span>
+        )}
+        {os !== "macos" && macAsset && (
+          <a href={macAsset.browser_download_url} download>
+            Scarica per macOS ({formatBytes(macAsset.size)})
           </a>
-          <p className="cta-meta">
-            Non siamo riusciti a rilevare automaticamente il tuo sistema. Scegli manualmente dalla lista.
-          </p>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

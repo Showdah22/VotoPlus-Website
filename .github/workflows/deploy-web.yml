@@ -9,6 +9,11 @@ on:
     paths:
       - "web/**"
       - ".github/workflows/deploy-web.yml"
+  # Ri-deploy ogni volta che viene pubblicata una nuova release desktop,
+  # cos\u00ec la pagina /download prende automaticamente i link agli installer
+  # dell'ultima versione (fetch build-time in download.astro).
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
