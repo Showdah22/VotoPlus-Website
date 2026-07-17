@@ -68,6 +68,12 @@ const canonicalUrl = canonical ?? new URL(pathname, Astro.site).toString();
     <!-- Feed RSS blog -->
     <link rel="alternate" type="application/rss+xml" title="Voto+ Blog RSS" href="https://votoplus.it/blog/rss.xml" />
 
+    <!-- Analytics tracker (privacy-first, no cookies) -->
+    <script is:inline>
+      window.__VOTOPLUS_API_BASE__ = "https://votop-maturita.emergent.host/api";
+    </script>
+    <script is:inline defer src="/tracker.js"></script>
+
     <!-- Schema.org Organization (globale) -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",

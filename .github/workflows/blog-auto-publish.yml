@@ -1,0 +1,43 @@
+name: Blog Auto-Publish
+
+# Cron: alle 10:00 UTC ogni 3 giorni (10 articoli/mese distribuiti uniformemente).
+# Puo` essere triggerato manualmente dall'admin panel (workflow_dispatch).
+on:
+  schedule:
+    - cron: '0 10 */3 * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (non genera davvero, mostra solo il prossimo topic)"
+        required: false
+        default: "false"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chiama endpoint scheduler tick
+        env:
+          BACKEND_URL: ${{ secrets.BLOG_SCHEDULER_URL }}
+          SCHEDULER_SECRET: ${{ secrets.BLOG_SCHEDULER_SECRET }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          set -e
+          if [ -z "$BACKEND_URL" ] || [ -z "$SCHEDULER_SECRET" ]; then
+            echo "::warning::Missing secret BLOG_SCHEDULER_URL or BLOG_SCHEDULER_SECRET. Skipping."
+            exit 0
+          fi
+          echo "Calling scheduler tick (dry_run=$DRY_RUN)…"
+          RESPONSE=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" \
+            -X POST "$BACKEND_URL/api/admin/blog/scheduler/tick?dry_run=$DRY_RUN" \
+            -H "X-Scheduler-Secret: $SCHEDULER_SECRET" \
+            -H "Content-Type: application/json" \
+            --max-time 180)
+          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
+          BODY=$(echo "$RESPONSE" | sed '/HTTP_STATUS:/d')
+          echo "Response: $BODY"
+          echo "Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ge 400 ]; then
+            echo "::error::Scheduler tick failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi

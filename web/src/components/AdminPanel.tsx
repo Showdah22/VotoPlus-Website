@@ -17,6 +17,8 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { getApiBase } from "@/lib/blogApi";
+import AnalyticsDashboard from "./AnalyticsDashboard";
+import ContentPlanTab from "./ContentPlanTab";
 
 // ============================================================================
 // Types (mirror del backend)
@@ -350,6 +352,7 @@ function ArticlesTab({ onNotify }: { onNotify: (m: string, kind?: "info" | "erro
   const [filterOrigin, setFilterOrigin] = useState<string>("");
   const [editing, setEditing] = useState<AdminArticle | null>(null);
   const [creating, setCreating] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
   const [q, setQ] = useState("");
 
   const load = useCallback(async () => {
@@ -426,7 +429,8 @@ function ArticlesTab({ onNotify }: { onNotify: (m: string, kind?: "info" | "erro
         </select>
         <button style={styles.btnGhost} onClick={load}>Aggiorna</button>
         <div style={{ flex: 1 }} />
-        <button style={styles.btnPrimary} onClick={() => setCreating(true)}>+ Nuovo articolo</button>
+        <button style={styles.btnGhost} onClick={() => setCreating(true)}>+ Nuovo (vuoto)</button>
+        <button style={styles.btnPrimary} onClick={() => setAiGenerating(true)}>🤖 Genera con AI</button>
       </div>
 
       {loading ? (
@@ -492,6 +496,126 @@ function ArticlesTab({ onNotify }: { onNotify: (m: string, kind?: "info" | "erro
           }}
         />
       )}
+      {aiGenerating && (
+        <AIGenerateModal
+          onClose={() => setAiGenerating(false)}
+          onCreated={(a) => {
+            setItems((prev) => [a, ...prev]);
+            setAiGenerating(false);
+            onNotify(`✨ Articolo AI generato: ${a.title}`);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// AI Generate Modal
+// ============================================================================
+function AIGenerateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (a: AdminArticle) => void }) {
+  const [topic, setTopic] = useState("");
+  const [length, setLength] = useState<"short" | "medium" | "long">("medium");
+  const [category, setCategory] = useState("");
+  const [generateImage, setGenerateImage] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [progress, setProgress] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+
+  const save = async () => {
+    setError(null);
+    setSaving(true);
+    setProgress("🧠 Generazione testo in corso… (~30s)");
+    try {
+      const body = {
+        topic,
+        length,
+        category_hint: category || undefined,
+        generate_image: generateImage,
+      };
+      // Aggiorna il progress dopo un po'
+      const t = setTimeout(() => setProgress("🎨 Testo pronto, generazione immagine… (~30s)"), 25000);
+      const article = await api<AdminArticle>("/admin/blog/ai-generate", { method: "POST", body: JSON.stringify(body) });
+      clearTimeout(t);
+      onCreated(article);
+    } catch (err: any) {
+      setError(err?.message || "Generazione fallita");
+    } finally {
+      setSaving(false);
+      setProgress("");
+    }
+  };
+
+  const lengthLabels: Record<string, string> = { short: "Corto · ~500 parole (3 min lettura)", medium: "Medio · ~1000 parole (5-6 min)", long: "Lungo · ~2000 parole (10-12 min)" };
+
+  return (
+    <div style={styles.modalBackdrop} onClick={saving ? undefined : onClose}>
+      <div style={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modalHead}>
+          <h2 style={{ fontSize: 20, fontWeight: 900 }}>🤖 Genera articolo con AI</h2>
+          <button onClick={onClose} style={styles.iconBtn} aria-label="Chiudi" disabled={saving}>✕</button>
+        </div>
+        <div style={styles.modalBody}>
+          <p style={{ color: "#a1a1aa", fontSize: 13, marginBottom: 20 }}>
+            L'AI userà la tua configurazione editoriale (tab Editoriale) come system prompt.
+            Costo indicativo: ~0.25€ per articolo completo con immagine.
+          </p>
+
+          <label style={styles.label}>Tema / argomento *</label>
+          <input
+            style={styles.input}
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="es. Come studiare per la Maturità 2027 senza stress"
+            autoFocus
+            disabled={saving}
+          />
+          <p style={{ color: "#71717a", fontSize: 11, marginTop: 4 }}>Sii specifico: "Metodo Feynman per il liceo classico" funziona meglio di "Come studiare"</p>
+
+          <label style={{ ...styles.label, marginTop: 16 }}>Lunghezza</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {(["short", "medium", "long"] as const).map(l => (
+              <button
+                key={l}
+                onClick={() => setLength(l)}
+                disabled={saving}
+                style={{ ...styles.btnGhost, ...(length === l ? { background: "rgba(168,85,247,0.14)", borderColor: "#a855f7", color: "#fff" } : {}) }}
+              >
+                {lengthLabels[l]}
+              </button>
+            ))}
+          </div>
+
+          <label style={{ ...styles.label, marginTop: 16 }}>Categoria (opzionale)</label>
+          <select style={styles.input} value={category} onChange={(e) => setCategory(e.target.value)} disabled={saving}>
+            <option value="">Lascia scegliere all'AI</option>
+            <option value="Guide">Guide</option>
+            <option value="Metodo di studio">Metodo di studio</option>
+            <option value="Novità Voto+">Novità Voto+</option>
+            <option value="Vita scolastica">Vita scolastica</option>
+          </select>
+
+          <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 20, cursor: "pointer" }}>
+            <input type="checkbox" checked={generateImage} onChange={(e) => setGenerateImage(e.target.checked)} disabled={saving} />
+            <span style={{ fontSize: 14, color: "#fff" }}>Genera anche immagine di copertina</span>
+            <span style={{ fontSize: 11, color: "#71717a" }}>(+30s, ~0.15€)</span>
+          </label>
+
+          {saving && progress && (
+            <div style={{ marginTop: 20, padding: "12px 16px", background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 10, color: "#a855f7", fontSize: 14 }}>
+              {progress}
+            </div>
+          )}
+
+          {error && <div style={styles.errorBox}>{error}</div>}
+        </div>
+        <div style={styles.modalFoot}>
+          <button onClick={onClose} style={styles.btnGhost} disabled={saving}>Annulla</button>
+          <button onClick={save} disabled={saving || topic.trim().length < 5} style={styles.btnPrimary}>
+            {saving ? "Generazione…" : "✨ Genera bozza"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -724,7 +848,7 @@ function EditorialTab({ onNotify }: { onNotify: (m: string, kind?: "info" | "err
 // ============================================================================
 // Main panel
 // ============================================================================
-type Tab = "articles" | "webhook" | "editorial";
+type Tab = "articles" | "plan" | "analytics" | "webhook" | "editorial";
 
 export default function AdminPanel() {
   const [me, setMe] = useState<Me | null>(null);
@@ -787,6 +911,8 @@ export default function AdminPanel() {
           </a>
           <nav style={styles.tabs}>
             <button style={tab === "articles" ? styles.tabActive : styles.tab} onClick={() => setTab("articles")}>Articoli</button>
+            <button style={tab === "plan" ? styles.tabActive : styles.tab} onClick={() => setTab("plan")}>📅 Piano</button>
+            <button style={tab === "analytics" ? styles.tabActive : styles.tab} onClick={() => setTab("analytics")}>📊 Analytics</button>
             <button style={tab === "webhook" ? styles.tabActive : styles.tab} onClick={() => setTab("webhook")}>Webhook</button>
             <button style={tab === "editorial" ? styles.tabActive : styles.tab} onClick={() => setTab("editorial")}>Editoriale</button>
           </nav>
@@ -815,6 +941,8 @@ export default function AdminPanel() {
 
       <main style={styles.mainArea}>
         {tab === "articles" && <ArticlesTab onNotify={notify} />}
+        {tab === "plan" && <ContentPlanTab onNotify={notify} />}
+        {tab === "analytics" && <AnalyticsDashboard onNotify={notify} />}
         {tab === "webhook" && <WebhookTab onNotify={notify} />}
         {tab === "editorial" && <EditorialTab onNotify={notify} />}
       </main>
