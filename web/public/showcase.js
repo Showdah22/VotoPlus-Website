@@ -13,7 +13,9 @@
 (function () {
   "use strict";
 
-  var BASE = "./assets/screens/";
+  // Path root-assoluto per funzionare da qualsiasi pagina (es. /download/,
+  // /blog/xxx/). Astro deploya il contenuto di /public/ nella root del sito.
+  var BASE = "/assets/screens/";
   var SLIDES = [
     { file: "voto-desktop-home-demo.png", label: "Home — la tua dashboard di studio" },
     { file: "voto-desktop-azione-interrogazione-demo.png", label: "Interrogazione con l'AI Professore" },
