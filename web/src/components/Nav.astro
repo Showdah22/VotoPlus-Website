@@ -9,6 +9,9 @@ const navLinks = [
   { href: "/overview", label: "Overview" },
   { href: "/prezzi", label: "Prezzi" },
   { href: "/blog", label: "Blog" },
+  { href: "/roadmap", label: "Roadmap" },
+  { href: "/testimonianze", label: "Recensioni" },
+  { href: "/faq", label: "FAQ" },
   { href: "/download", label: "Download" },
 ];
 
@@ -93,12 +96,13 @@ function isActive(href: string): boolean {
     margin-right: 20px;
   }
   .nav-link {
-    padding: 8px 14px;
+    padding: 8px 12px;
     border-radius: 999px;
     color: var(--text-sub);
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13.5px;
     transition: color 0.15s ease, background 0.15s ease;
+    white-space: nowrap;
   }
   .nav-link:hover {
     color: var(--text-primary);
@@ -147,7 +151,7 @@ function isActive(href: string): boolean {
     width: 100%;
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 960px) {
     .nav-links,
     .nav-cta {
       display: none;

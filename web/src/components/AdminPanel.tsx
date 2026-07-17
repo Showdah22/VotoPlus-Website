@@ -19,6 +19,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { getApiBase } from "@/lib/blogApi";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import ContentPlanTab from "./ContentPlanTab";
+import TestimonialsTab from "./TestimonialsTab";
 
 // ============================================================================
 // Types (mirror del backend)
@@ -848,7 +849,7 @@ function EditorialTab({ onNotify }: { onNotify: (m: string, kind?: "info" | "err
 // ============================================================================
 // Main panel
 // ============================================================================
-type Tab = "articles" | "plan" | "analytics" | "webhook" | "editorial";
+type Tab = "articles" | "plan" | "analytics" | "testimonials" | "webhook" | "editorial";
 
 export default function AdminPanel() {
   const [me, setMe] = useState<Me | null>(null);
@@ -913,6 +914,7 @@ export default function AdminPanel() {
             <button style={tab === "articles" ? styles.tabActive : styles.tab} onClick={() => setTab("articles")}>Articoli</button>
             <button style={tab === "plan" ? styles.tabActive : styles.tab} onClick={() => setTab("plan")}>📅 Piano</button>
             <button style={tab === "analytics" ? styles.tabActive : styles.tab} onClick={() => setTab("analytics")}>📊 Analytics</button>
+            <button style={tab === "testimonials" ? styles.tabActive : styles.tab} onClick={() => setTab("testimonials")}>💬 Recensioni</button>
             <button style={tab === "webhook" ? styles.tabActive : styles.tab} onClick={() => setTab("webhook")}>Webhook</button>
             <button style={tab === "editorial" ? styles.tabActive : styles.tab} onClick={() => setTab("editorial")}>Editoriale</button>
           </nav>
@@ -943,6 +945,7 @@ export default function AdminPanel() {
         {tab === "articles" && <ArticlesTab onNotify={notify} />}
         {tab === "plan" && <ContentPlanTab onNotify={notify} />}
         {tab === "analytics" && <AnalyticsDashboard onNotify={notify} />}
+        {tab === "testimonials" && <TestimonialsTab onNotify={notify} />}
         {tab === "webhook" && <WebhookTab onNotify={notify} />}
         {tab === "editorial" && <EditorialTab onNotify={notify} />}
       </main>

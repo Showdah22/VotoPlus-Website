@@ -1,0 +1,393 @@
+---
+// Voto+ website · /roadmap
+//
+// Timeline pubblica del prodotto. Mostra cosa è già rilasciato, cosa stiamo
+// costruendo e cosa arriverà. Marketing-friendly: nessun bug fix o dettaglio
+// tecnico, solo valore percepito dallo studente/genitore.
+//
+// Contenuto statico (aggiornato manualmente ad ogni major release). In
+// futuro può diventare data-driven da Mongo se serve.
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+type Status = "done" | "in_progress" | "planned";
+
+interface RoadmapItem {
+  title: string;
+  description: string;
+  emoji: string;
+  quarter?: string; // es. "Q3 2026" - opzionale solo per planned
+}
+
+const releasedItems: RoadmapItem[] = [
+  {
+    emoji: "🎤",
+    title: "Interrogazioni vocali con l'AI",
+    description: "Parla con un professore virtuale in tempo reale. Voto motivato, spiegazioni chiare e difficoltà personalizzabile fino al livello Maturità.",
+  },
+  {
+    emoji: "📚",
+    title: "Riassunti automatici da PDF, foto e testo",
+    description: "OCR intelligente + struttura per titoli, parole chiave e domande di autoverifica. Materiale di studio pronto in secondi.",
+  },
+  {
+    emoji: "🎯",
+    title: "Quiz e flashcard generati dall'AI",
+    description: "Ripasso attivo con quiz a scelta multipla e flashcard basate sui tuoi argomenti. Spiegazione degli errori inclusa.",
+  },
+  {
+    emoji: "📊",
+    title: "Registro voti con media pesata e proiezioni",
+    description: "Ogni voto, ogni materia, media reale e stima di fine periodo. Grafici di andamento e proiezione fine anno.",
+  },
+  {
+    emoji: "🧮",
+    title: "Matematica passo passo",
+    description: "Risolvi esercizi di matematica con spiegazioni dettagliate, ogni step commentato. Ideale per capire dove sbagli.",
+  },
+  {
+    emoji: "💻",
+    title: "App Desktop Voto+ (Windows + macOS)",
+    description: "Companion desktop nativa, sincronizzata via cloud con l'app mobile. Studio comodo anche dal computer.",
+  },
+  {
+    emoji: "👨‍👩‍👧",
+    title: "Piano Famiglia (fino a 3 persone)",
+    description: "Un unico abbonamento per genitori e figli. Ogni membro ha il proprio account personale, i dati restano privati.",
+  },
+  {
+    emoji: "🎓",
+    title: "Radar Maturità (per 5° anno)",
+    description: "Preparazione mirata all'esame di Stato: simulazioni, ripasso guidato e strategia di studio personalizzata.",
+  },
+];
+
+const inProgressItems: RoadmapItem[] = [
+  {
+    emoji: "🌟",
+    title: "Dante — il tuo assistente di studio personale",
+    description: "Un mentore AI con personalità che ricorda i tuoi punti deboli, ti dà consigli di studio e ti motiva quando cala l'attenzione. In arrivo nella prossima major.",
+  },
+  {
+    emoji: "✨",
+    title: "Onboarding con demo AI immediata",
+    description: "3 step, poi vedi subito Voto+ lavorare su un esempio reale. Vogliamo che tu capisca il valore prima ancora di aver finito la registrazione.",
+  },
+  {
+    emoji: "🔥",
+    title: "Modalità Ripasso Intensivo pre-verifica",
+    description: "Sessioni brevi ad alta intensità nei 2-3 giorni prima di una verifica: quiz mirati, flashcard di rinforzo, interrogazioni simulate sul programma esatto.",
+  },
+];
+
+const plannedItems: RoadmapItem[] = [
+  {
+    emoji: "📖",
+    title: "Libreria Voto+",
+    description: "Salva libri e materiali di studio dentro l'app, annotali, evidenzia i passaggi importanti e ripassa direttamente sul testo.",
+    quarter: "Settembre 2026",
+  },
+  {
+    emoji: "🎒",
+    title: "Sezione Scuole Medie",
+    description: "Voto+ ottimizzato anche per gli studenti delle medie: materie diverse, difficoltà calibrata, comunicazione con i genitori.",
+    quarter: "Settembre 2026",
+  },
+  {
+    emoji: "👪",
+    title: "Piano Famiglia Annuale",
+    description: "Un unico rinnovo l'anno per tutta la famiglia. Prezzo bloccato e nessun pensiero durante l'anno scolastico.",
+    quarter: "Q3 2026",
+  },
+];
+
+const groups = [
+  {
+    id: "released",
+    status: "done" as Status,
+    tint: "var(--green)",
+    label: "Già rilasciato",
+    caption: "Tutto ciò che puoi usare oggi su Voto+",
+    items: releasedItems,
+  },
+  {
+    id: "in-progress",
+    status: "in_progress" as Status,
+    tint: "var(--orange)",
+    label: "In sviluppo",
+    caption: "Ci stiamo lavorando adesso. Arriva presto.",
+    items: inProgressItems,
+  },
+  {
+    id: "planned",
+    status: "planned" as Status,
+    tint: "var(--purple)",
+    label: "In arrivo",
+    caption: "Sul tavolo del team. Le date possono variare.",
+    items: plannedItems,
+  },
+];
+---
+
+<BaseLayout
+  title="Roadmap · Cosa costruiamo su Voto+"
+  description="Scopri cosa è già disponibile in Voto+, cosa stiamo sviluppando e cosa arriverà nei prossimi mesi. La roadmap pubblica dell'app AI per studenti italiani."
+>
+  <!-- HERO -->
+  <section class="roadmap-hero">
+    <div class="container hero-inner">
+      <span class="eyebrow">Roadmap pubblica</span>
+      <h1 class="hero-title">Cosa <span class="gradient-text">stiamo costruendo</span> per te</h1>
+      <p class="hero-lead">
+        Voto+ evolve ogni settimana. Qui trovi cosa puoi già usare, cosa stiamo lavorando e cosa arriverà.
+        Aggiornata a mano ogni volta che pubblichiamo qualcosa di grosso.
+      </p>
+      <div class="hero-legend">
+        <span class="legend-item"><span class="dot dot-done"></span> Rilasciato</span>
+        <span class="legend-item"><span class="dot dot-progress"></span> In sviluppo</span>
+        <span class="legend-item"><span class="dot dot-planned"></span> Prossimamente</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE GROUPS -->
+  <section class="section">
+    <div class="container">
+      {groups.map((g) => (
+        <div class="rm-group" id={g.id} style={`--group-tint: ${g.tint}`}>
+          <div class="rm-group-head">
+            <div class="rm-group-badge">
+              <span class="rm-dot"></span>
+              {g.label}
+            </div>
+            <p class="rm-group-caption">{g.caption}</p>
+          </div>
+
+          <ul class="rm-list">
+            {g.items.map((it) => (
+              <li class="rm-item">
+                <div class="rm-item-icon" aria-hidden="true">{it.emoji}</div>
+                <div class="rm-item-body">
+                  <div class="rm-item-title-row">
+                    <h3 class="rm-item-title">{it.title}</h3>
+                    {it.quarter && <span class="rm-quarter">{it.quarter}</span>}
+                  </div>
+                  <p class="rm-item-desc">{it.description}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- CTA FINALE -->
+  <section class="section rm-cta">
+    <div class="container rm-cta-inner">
+      <h2 class="rm-cta-title">Hai un'idea o una funzione che vorresti?</h2>
+      <p class="rm-cta-lead">
+        Ci scriviamo con gli utenti di Voto+ ogni settimana. Se hai un feedback, una richiesta o hai
+        trovato qualcosa da migliorare, scrivici — sceglieremo cosa costruire dopo insieme a te.
+      </p>
+      <div class="rm-cta-row">
+        <a class="btn btn-primary" href="mailto:support@votoplus.it?subject=Idea%20per%20Voto%2B">
+          ✉️ Proponi un'idea
+        </a>
+        <a class="btn btn-ghost" href="/testimonianze">Leggi le recensioni</a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .roadmap-hero {
+      padding: 100px 24px 40px;
+      text-align: center;
+      background:
+        radial-gradient(ellipse at top, rgba(168, 85, 247, 0.18), transparent 55%),
+        radial-gradient(ellipse at bottom, rgba(16, 185, 129, 0.08), transparent 60%);
+    }
+    .hero-inner { max-width: 780px; margin: 0 auto; }
+    .hero-title {
+      font-size: clamp(34px, 5vw, 56px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+    }
+    .hero-lead {
+      color: var(--text-sub);
+      font-size: 18px;
+      max-width: 620px;
+      margin: 0 auto 28px;
+    }
+    .hero-legend {
+      display: inline-flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 10px 18px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .dot-done { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .dot-progress { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+    .dot-planned { background: var(--purple); box-shadow: 0 0 8px var(--purple); }
+
+    .rm-group {
+      margin-bottom: 60px;
+    }
+    .rm-group-head {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .rm-group-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--group-tint), transparent 88%);
+      border: 1px solid color-mix(in srgb, var(--group-tint), transparent 55%);
+      color: var(--group-tint);
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+    }
+    .rm-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--group-tint);
+      box-shadow: 0 0 10px var(--group-tint);
+    }
+    .rm-group-caption {
+      color: var(--text-sub);
+      font-size: 15px;
+    }
+    .rm-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      padding: 0;
+    }
+    .rm-item {
+      display: flex;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .rm-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--group-tint);
+      opacity: 0.6;
+    }
+    .rm-item:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--group-tint), transparent 45%);
+      box-shadow: 0 12px 32px color-mix(in srgb, var(--group-tint), transparent 82%);
+    }
+    .rm-item-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--group-tint), transparent 85%);
+      border: 1px solid color-mix(in srgb, var(--group-tint), transparent 60%);
+      font-size: 24px;
+    }
+    .rm-item-body { flex: 1; }
+    .rm-item-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .rm-item-title {
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: -0.2px;
+      color: var(--text-primary);
+    }
+    .rm-quarter {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--group-tint), transparent 82%);
+      color: var(--group-tint);
+    }
+    .rm-item-desc {
+      color: var(--text-sub);
+      font-size: 14.5px;
+      line-height: 1.55;
+    }
+
+    .rm-cta {
+      padding: 60px 24px 80px;
+    }
+    .rm-cta-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 44px 32px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.14), rgba(236, 72, 153, 0.10));
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-radius: var(--radius-xl);
+    }
+    .rm-cta-title {
+      font-size: clamp(24px, 3vw, 32px);
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .rm-cta-lead {
+      color: var(--text-sub);
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .rm-cta-row {
+      display: inline-flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  </style>
+</BaseLayout>
