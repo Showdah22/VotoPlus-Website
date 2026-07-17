@@ -25,7 +25,7 @@ const {
   title,
   description,
   canonical,
-  ogImage = "https://votoplus.it/voto-icon-512.png",
+  ogImage = "https://votoplus.it/og-default.jpg",
   noindex = false,
 } = Astro.props;
 
@@ -52,6 +52,9 @@ const canonicalUrl = canonical ?? new URL(pathname, Astro.site).toString();
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Voto+ · Il tuo studio. Organizzato. Potenziato. Tuo." />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content="Voto+" />
     <meta property="og:locale" content="it_IT" />
@@ -61,6 +64,7 @@ const canonicalUrl = canonical ?? new URL(pathname, Astro.site).toString();
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="Voto+ · Il tuo studio. Organizzato. Potenziato. Tuo." />
 
     <!-- Theme -->
     <meta name="theme-color" content="#0a0a0f" />
