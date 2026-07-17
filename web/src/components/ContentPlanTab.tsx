@@ -172,11 +172,25 @@ export default function ContentPlanTab({ onNotify }: { onNotify: (m: string, k?:
   };
 
   const runTickNow = async () => {
-    if (!confirm("Vuoi generare + pubblicare SUBITO il prossimo articolo del piano? (Ci vorrà ~1 minuto)")) return;
+    if (!confirm("Vuoi generare + pubblicare SUBITO il prossimo articolo del piano?\n\nCi vorrà ~1 minuto (GPT-5.2 testo + GPT Image 1). L'articolo verrà pubblicato automaticamente e ti arriverà email di conferma.")) return;
+    onNotify("🧠 Generazione in corso… (~1 min, non chiudere questa pagina)");
     try {
-      // Chiamiamo il tick con force=true; usa l'endpoint pubblico (auth via secret) — l'admin lo triggera dal pannello via endpoint dedicato usando il proprio JWT
-      onNotify("Esecuzione manuale non ancora esposta via UI — vai su GitHub Actions → 'Blog Auto-Publish' → Run workflow, oppure attendi il prossimo cron", "info");
-    } catch (err: any) { onNotify(err?.message || "Errore", "error"); }
+      const res = await api<any>("/admin/blog/scheduler/run-now", { method: "POST" });
+      if (res.status === "published") {
+        onNotify(`✅ Articolo pubblicato: ${res.title}`);
+        load();
+      } else if (res.status === "no_active_plan") {
+        onNotify("Nessun piano attivo. Approva il piano prima.", "error");
+      } else if (res.status === "plan_completed") {
+        onNotify("Il piano corrente è completato. Genera un nuovo piano per il mese successivo.");
+      } else if (res.status === "paused") {
+        onNotify("Automazione in pausa. Riattivala prima di generare.", "error");
+      } else {
+        onNotify(`Stato: ${res.status}`);
+      }
+    } catch (err: any) {
+      onNotify(err?.message || "Errore generazione", "error");
+    }
   };
 
   if (loading) return <div style={{ padding: 60, textAlign: "center", color: "#a1a1aa" }}>Caricamento…</div>;
