@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voto+ · Cancella account</title>
+<meta name="description" content="Richiedi la cancellazione del tuo account Voto+ in conformità GDPR.">
+<style>
+  :root { --bg:#0a0a0f; --card:#15171c; --border:#2a2d33; --text:#fff; --muted:#aaa; --purple:#a855f7; --red:#ef4444; --green:#22c55e; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+  .container { max-width: 640px; margin: 0 auto; padding: 32px 20px 60px; }
+  .logo { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+  .logo .pill { width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#a855f7,#06b6d4); }
+  .logo h1 { font-size:22px; margin:0; font-weight:800; }
+  .crumbs a { color:var(--purple); text-decoration:none; font-size:13px; }
+  h2 { font-size:24px; margin-top:24px; }
+  p { color:#d4d4d8; line-height: 1.6; font-size:15px; }
+  .card { background:var(--card); border:1px solid var(--border); padding:24px; border-radius:18px; margin-top:18px; }
+  .warning { background: rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; padding:14px; border-radius:12px; font-size:13px; line-height:1.6; }
+  ul { color:#d4d4d8; line-height: 1.9; }
+  ul li b { color:#fff; }
+  label { display:block; color:#aaa; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:14px; margin-bottom:6px; }
+  input, textarea { width:100%; background:#1a1c22; border:1px solid var(--border); color:#fff; padding:12px 14px; border-radius:10px; font-size:14px; font-family:inherit; }
+  textarea { min-height:80px; resize:vertical; }
+  button { background:var(--red); color:#fff; border:none; padding:14px 24px; border-radius:12px; font-weight:700; font-size:15px; margin-top:18px; cursor:pointer; width:100%; }
+  button:hover { opacity:0.9; }
+  button:disabled { opacity:0.5; cursor:not-allowed; }
+  .response { margin-top:18px; padding:14px; border-radius:10px; font-size:14px; display:none; }
+  .response.ok { background: rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:#86efac; display:block; }
+  .response.err { background: rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; display:block; }
+  .footer { margin-top:40px; padding-top:24px; border-top:1px solid var(--border); color:var(--muted); font-size:12px; }
+  .step { display:flex; gap:14px; align-items:flex-start; margin:14px 0; }
+  .step .num { background:var(--purple); color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; flex-shrink:0; }
+  .step .body { flex:1; }
+  .step .body b { color:#fff; }
+  .step .body p { margin:2px 0 0 0; color:#bbb; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">
+    <div class="pill"></div>
+    <h1>Voto+</h1>
+  </div>
+  <div class="crumbs"><a href="./">← Torna al sito</a></div>
+
+  <h2>🗑️ Cancella il tuo account</h2>
+  <p>Hai due modi per richiedere la cancellazione del tuo account Voto+ e di tutti i dati associati (riassunti, voti, interrogazioni, eventi del calendario, piano premium, file audio).</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Opzione 1 — Dall'app (consigliato)</h3>
+    <div class="step"><div class="num">1</div><div class="body"><b>Apri l'app Voto+</b><p>Su iOS o Android</p></div></div>
+    <div class="step"><div class="num">2</div><div class="body"><b>Vai su Profilo</b><p>Tab in basso a destra</p></div></div>
+    <div class="step"><div class="num">3</div><div class="body"><b>Scorri fino in fondo → Elimina account</b><p>Conferma per cancellare definitivamente</p></div></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Opzione 2 — Da questa pagina (senza login)</h3>
+    <p style="font-size:13px;color:#bbb;margin-top:0;">Inserisci la mail con cui ti sei registrato. Ti invieremo un link di conferma valido 24 ore.</p>
+
+    <div class="warning">
+      ⚠️ <b>Attenzione</b>: la cancellazione è <b>irreversibile</b>. Tutti i tuoi dati saranno eliminati definitivamente:
+      <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;color:#fca5a5;">
+        <li>Riassunti, esercizi, interrogazioni</li>
+        <li>Voti reali e simulazioni</li>
+        <li>Eventi del calendario e flashcard</li>
+        <li>Piano premium e cronologia pagamenti</li>
+      </ul>
+    </div>
+
+    <form id="delForm">
+      <label for="email">Email dell'account</label>
+      <input type="email" id="email" name="email" required placeholder="nome@scuola.it">
+      <label for="reason">Motivo (opzionale)</label>
+      <textarea id="reason" name="reason" maxlength="500" placeholder="Aiutaci a migliorare: perché cancelli l'account?"></textarea>
+      <button type="submit" id="submitBtn">Invia richiesta di cancellazione</button>
+    </form>
+    <div id="response" class="response"></div>
+  </div>
+
+  <div class="footer">
+    <p><b>Conformità GDPR (UE 2016/679)</b><br>
+    In base all'articolo 17 del Regolamento Generale sulla Protezione dei Dati, hai diritto alla cancellazione dei tuoi dati personali. Voto+ rispetta questo diritto e fornisce strumenti per esercitarlo in modo immediato e gratuito.</p>
+    <p>Per assistenza: <a href="mailto:info@votoplus.it" style="color:var(--purple);">info@votoplus.it</a></p>
+    <p style="margin-top:24px;">© 2026 Voto+ · <a href="./privacy.html" style="color:var(--purple);">Privacy</a> · <a href="./terms.html" style="color:var(--purple);">Termini</a></p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const form = document.getElementById('delForm');
+  const btn = document.getElementById('submitBtn');
+  const resp = document.getElementById('response');
+  // L'API è sotto lo stesso dominio dietro /api/ se servíto da Render/Backend.
+  // Per il sito GitHub Pages serve URL completo. Configurato qui:
+  const API_BASE = window.VOTOPLUS_API_BASE || 'https://api.votoplus.it/api';
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    resp.className = 'response';
+    resp.textContent = '';
+    const email = document.getElementById('email').value.trim();
+    const reason = document.getElementById('reason').value.trim();
+    if (!email) return;
+    btn.disabled = true;
+    btn.textContent = 'Invio in corso…';
+    try {
+      const r = await fetch(API_BASE + '/auth/request-deletion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, reason }),
+      });
+      if (r.ok) {
+        resp.className = 'response ok';
+        resp.innerHTML = '✅ <b>Richiesta inviata!</b><br>Se l\'email è registrata, riceverai entro qualche minuto un link di conferma. Controlla anche lo Spam.';
+        form.reset();
+      } else {
+        const data = await r.json().catch(() => ({}));
+        resp.className = 'response err';
+        resp.textContent = '❌ ' + (data.detail || 'Errore del server. Riprova più tardi.');
+      }
+    } catch (err) {
+      resp.className = 'response err';
+      resp.textContent = '❌ Impossibile contattare il server. Verifica la connessione.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Invia richiesta di cancellazione';
+    }
+  });
+})();
+</script>
+</body>
+</html>

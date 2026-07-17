@@ -1,0 +1,376 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+// Sezioni della pagina Overview — tutte basate su funzionalità realmente
+// disponibili in Voto+ (mobile + desktop). Nessuna promessa fittizia.
+const sections = [
+  {
+    id: "organizzazione",
+    tint: "var(--purple)",
+    emoji: "🗓️",
+    title: "Organizzazione dello studio",
+    body: "Calendario verifiche, materie con voto badge, planner settimanale. Vedi a colpo d'occhio cosa hai in scadenza e cosa ripassare. Sincronizzato tra mobile e desktop.",
+    bullets: [
+      "Materie personalizzabili con colori e icone",
+      "Calendario verifiche/interrogazioni con notifiche in-app",
+      "Achievement e streak per tenere il ritmo",
+    ],
+  },
+  {
+    id: "voti",
+    tint: "var(--orange)",
+    emoji: "📊",
+    title: "Gestione dei voti",
+    body: "Registra ogni voto (scritto, orale, pratico) con peso variabile. Voto+ calcola la media reale e la proiezione di fine periodo, materia per materia.",
+    bullets: [
+      "Media pesata configurabile per materia",
+      "Proiezione fine quadrimestre / anno scolastico",
+      "Grafici di andamento nel tempo",
+    ],
+  },
+  {
+    id: "riassunti",
+    tint: "var(--cyan)",
+    emoji: "📚",
+    title: "Riassunti automatici",
+    body: "Scannerizza pagine di libro, importa PDF o incolla testo. L'AI genera un riassunto strutturato con parole chiave, definizioni e domande di autoverifica. Modificabile e riutilizzabile.",
+    bullets: [
+      "OCR immagini + PDF fino a decine di pagine",
+      "Struttura per titoli / sottotitoli automatica",
+      "Salvataggio in libreria per ripasso futuro",
+    ],
+  },
+  {
+    id: "quiz",
+    tint: "var(--pink)",
+    emoji: "🎯",
+    title: "Quiz & flashcard",
+    body: "Genera quiz a scelta multipla o flashcard da qualsiasi riassunto o argomento. Ripasso attivo, spaced repetition e memoria di lungo termine.",
+    bullets: [
+      "Quiz auto-generati per verifica veloce",
+      "Flashcard con spaced repetition",
+      "Correzione immediata + spiegazione degli errori",
+    ],
+  },
+  {
+    id: "interrogazioni",
+    tint: "var(--purple)",
+    emoji: "🎤",
+    title: "Interrogazioni vocali con l'AI",
+    body: "Parla in tempo reale con un professore virtuale (voce naturale italiana). Ti fa domande sull'argomento che hai scelto, valuta le risposte con un voto motivato e spiega dove hai sbagliato.",
+    bullets: [
+      "Voce Realtime naturale in italiano",
+      "Voto motivato + suggerimenti concreti",
+      "Difficoltà configurabile (base → Maturità)",
+    ],
+  },
+  {
+    id: "ai",
+    tint: "var(--green)",
+    emoji: "🤖",
+    title: "Strumenti basati su AI",
+    body: "Voto+ integra i migliori modelli disponibili (GPT-5, Claude, Gemini) per lavorare sui tuoi materiali di studio. Le AI non sostituiscono lo studio: ti aiutano a organizzarlo, memorizzarlo e verificarlo.",
+    bullets: [
+      "Modelli sempre aggiornati (senza intervento tuo)",
+      "Uso responsabile: verifiche + spiegazioni, non svolgimento compiti",
+      "Nessun tuo contenuto usato per training di modelli esterni",
+    ],
+  },
+  {
+    id: "multipiattaforma",
+    tint: "var(--blue)",
+    emoji: "💻",
+    title: "Multipiattaforma & sincronizzazione",
+    body: "Voto+ disponibile su iOS, Android e Desktop (Windows + macOS). I tuoi voti, materie e riassunti sono sincronizzati automaticamente tra tutti i dispositivi via cloud.",
+    bullets: [
+      "App native per iOS / Android",
+      "App companion desktop per Windows e macOS",
+      "Sync cloud continuo, zero configurazione",
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Overview · Come funziona Voto+"
+  description="Scopri come Voto+ ti aiuta a organizzare lo studio, gestire i voti, creare riassunti, generare quiz e prepararti alle interrogazioni. Panoramica completa di tutte le funzionalità."
+>
+  <!-- HERO -->
+  <section class="overview-hero">
+    <div class="container" style="text-align:center; max-width:780px;">
+      <span class="eyebrow">Overview</span>
+      <h1 class="hero-title">Tutti gli strumenti per <span class="gradient-text">studiare meglio</span></h1>
+      <p class="hero-lead">
+        Voto+ non è un chatbot generico: è pensato specificamente per gli studenti italiani delle superiori.
+        Ecco cosa puoi fare oggi.
+      </p>
+    </div>
+  </section>
+
+  <!-- SEZIONI DETTAGLIATE -->
+  <section class="section">
+    <div class="container">
+      <div class="sections">
+        {sections.map((s, i) => (
+          <article class="section-item" id={s.id} style={`--tint: ${s.tint}`}>
+            <div class="section-item-left">
+              <div class="section-emoji">{s.emoji}</div>
+              <h2 class="section-item-title">{s.title}</h2>
+              <p class="section-item-body">{s.body}</p>
+              <ul class="section-item-bullets">
+                {s.bullets.map((b) => (
+                  <li>
+                    <span class="bullet-icon" aria-hidden="true">✓</span>
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div class="section-item-visual" aria-hidden="true">
+              <div class="visual-orb"></div>
+              <div class="visual-badge">{i + 1}</div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FREE vs PREMIUM -->
+  <section class="section section-dark">
+    <div class="container">
+      <div class="section-head" style="text-align:center;">
+        <span class="eyebrow">Piano gratuito o Premium?</span>
+        <h2 class="section-title">Differenze principali</h2>
+      </div>
+      <div class="compare-grid">
+        <div class="card compare-card">
+          <h3 class="compare-title">Piano gratuito</h3>
+          <p class="compare-lead">Per iniziare, sempre disponibile.</p>
+          <ul class="compare-list">
+            <li>✓ Registrazione voti e materie illimitate</li>
+            <li>✓ Media pesata e proiezioni</li>
+            <li>✓ Calendario verifiche</li>
+            <li>✓ Riassunti (con limite mensile)</li>
+            <li>✓ Quiz (con limite mensile)</li>
+            <li>✗ Interrogazioni AI vocali</li>
+            <li>✗ Radar Maturità</li>
+            <li>✗ Matematica passo passo illimitato</li>
+          </ul>
+          <a class="btn btn-ghost compare-cta" href="/prezzi">Vedi i prezzi</a>
+        </div>
+        <div class="card compare-card compare-highlight">
+          <div class="compare-flag">Consigliato</div>
+          <h3 class="compare-title">Premium</h3>
+          <p class="compare-lead">Tutto Voto+ senza limiti.</p>
+          <ul class="compare-list">
+            <li>✓ Tutto il piano gratuito</li>
+            <li>✓ Interrogazioni AI vocali illimitate</li>
+            <li>✓ Riassunti e quiz illimitati</li>
+            <li>✓ Matematica passo passo illimitato</li>
+            <li>✓ Radar Maturità (per 5° anno)</li>
+            <li>✓ Priorità supporto</li>
+            <li>✓ Piano famiglia fino a 3 persone</li>
+            <li>✓ 7 giorni di prova gratis</li>
+          </ul>
+          <a class="btn btn-primary compare-cta" href="/prezzi">Inizia gratis</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .overview-hero {
+      padding: 100px 24px 40px;
+      text-align: center;
+      background:
+        radial-gradient(ellipse at top, rgba(168, 85, 247, 0.18), transparent 55%),
+        radial-gradient(ellipse at bottom, rgba(6, 182, 212, 0.1), transparent 60%);
+    }
+    .hero-title {
+      font-size: clamp(34px, 5vw, 56px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+    }
+    .hero-lead {
+      color: var(--text-sub);
+      font-size: 18px;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+    .sections {
+      display: flex;
+      flex-direction: column;
+      gap: 60px;
+    }
+    .section-item {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .section-item:nth-child(even) {
+      grid-template-columns: 1fr 1.4fr;
+    }
+    .section-item:nth-child(even) .section-item-visual {
+      order: -1;
+    }
+    @media (max-width: 800px) {
+      .section-item,
+      .section-item:nth-child(even) {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .section-item:nth-child(even) .section-item-visual {
+        order: 0;
+      }
+    }
+    .section-emoji {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--tint), transparent 82%);
+      border: 1px solid color-mix(in srgb, var(--tint), transparent 55%);
+      font-size: 30px;
+      margin-bottom: 16px;
+    }
+    .section-item-title {
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .section-item-body {
+      color: var(--text-sub);
+      font-size: 16px;
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .section-item-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .section-item-bullets li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .bullet-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--tint), transparent 80%);
+      color: var(--tint);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .section-item-visual {
+      position: relative;
+      aspect-ratio: 1;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+    .visual-orb {
+      position: absolute;
+      inset: 10%;
+      background: var(--tint);
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.5;
+    }
+    .visual-badge {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+      font-weight: 900;
+      color: color-mix(in srgb, var(--tint), transparent 55%);
+      text-shadow: 0 0 60px color-mix(in srgb, var(--tint), transparent 30%);
+    }
+
+    .section-dark {
+      background:
+        radial-gradient(ellipse at top left, rgba(168, 85, 247, 0.08), transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(6, 182, 212, 0.06), transparent 50%);
+    }
+    .section-head {
+      margin-bottom: 48px;
+    }
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    @media (max-width: 700px) {
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+    .compare-card {
+      position: relative;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+    }
+    .compare-highlight {
+      border-color: rgba(168, 85, 247, 0.45);
+      background: linear-gradient(155deg, rgba(168, 85, 247, 0.1) 0%, rgba(236, 72, 153, 0.06) 100%);
+    }
+    .compare-flag {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    .compare-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+    .compare-lead {
+      color: var(--text-sub);
+      margin-bottom: 24px;
+    }
+    .compare-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: var(--text-primary);
+      font-size: 14.5px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+      flex: 1;
+    }
+    .compare-cta {
+      justify-content: center;
+      width: 100%;
+    }
+  </style>
+</BaseLayout>

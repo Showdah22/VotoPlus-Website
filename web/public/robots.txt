@@ -1,0 +1,12 @@
+# Voto+ · robots.txt
+User-agent: *
+Allow: /
+
+# Bozze e utility non indicizzabili
+Disallow: /admin/
+Disallow: /desktop-login.html
+Disallow: /desktop-cancel.html
+Disallow: /desktop-success.html
+Disallow: /confirm-deletion.html
+
+Sitemap: https://votoplus.it/sitemap-index.xml

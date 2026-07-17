@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Voto+ · Pagamento annullato</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: #0a0a0f;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 520px;
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 40px 32px;
+      text-align: center;
+    }
+    .icon-badge {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(251,146,60,0.15);
+      border: 1px solid rgba(251,146,60,0.45);
+      display: grid; place-items: center;
+      margin: 0 auto 22px;
+    }
+    .icon-badge svg { width: 32px; height: 32px; color: #fb923c; }
+    h1 {
+      font-size: 26px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      color: #f4f4f5;
+      letter-spacing: -0.3px;
+    }
+    p.lead {
+      font-size: 15px;
+      color: #a1a1aa;
+      line-height: 1.6;
+      margin-bottom: 26px;
+    }
+    .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform 200ms;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #a855f7, #3b82f6);
+      color: #fff;
+    }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-secondary {
+      background: transparent;
+      color: #d4d4d8;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.06); }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="icon-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    </div>
+    <h1>Pagamento annullato</h1>
+    <p class="lead">
+      Non è stato addebitato nulla sulla tua carta. Puoi tornare all'app Voto+
+      e riprovare quando vuoi — il tuo account resta esattamente com'era.
+    </p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/">
+        Torna al sito Voto+
+      </a>
+      <a class="btn btn-secondary" href="https://votoplus.it/support.html">
+        Hai bisogno di aiuto?
+      </a>
+    </div>
+  </main>
+  <script>
+    setTimeout(() => { try { window.close(); } catch (e) {} }, 10000);
+  </script>
+</body>
+</html>

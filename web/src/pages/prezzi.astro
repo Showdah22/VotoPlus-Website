@@ -1,0 +1,445 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+// I prezzi sono precompilati dai piani realmente attivi nel backend Voto+
+// (vedi backend/routes/stripe_billing.py). Sono valori LIVE su Stripe:
+//   - premium mensile
+//   - premium annuale (school_year)
+//   - family mensile
+//   - maturita (una tantum)
+//
+// Update: quando cambiamo i prezzi lato Stripe, aggiornare anche questa
+// costante. In futuro potrà essere fetchata dal backend via API.
+const plans = [
+  {
+    id: "free",
+    name: "Free",
+    price: "Gratis",
+    period: "per sempre",
+    color: "var(--text-muted)",
+    description: "Per iniziare a organizzare lo studio senza pensieri.",
+    features: [
+      "Registrazione voti e materie illimitate",
+      "Media pesata + proiezioni",
+      "Calendario verifiche",
+      "Riassunti (con limite mensile)",
+      "Quiz e flashcard (con limite mensile)",
+      "App per iOS, Android e Desktop",
+    ],
+    cta: { label: "Scarica gratis", href: "/#store", primary: false },
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    price: "€4,99",
+    period: "al mese",
+    color: "var(--purple)",
+    highlight: true,
+    description: "Tutto Voto+ senza limiti. 7 giorni di prova gratis.",
+    features: [
+      "Tutto il piano Free",
+      "Riassunti e quiz illimitati",
+      "Interrogazioni AI vocali illimitate",
+      "Matematica passo passo illimitato",
+      "Radar Maturità (per 5° anno)",
+      "Priorità supporto",
+      "Prova gratuita 7 giorni",
+    ],
+    cta: { label: "Inizia la prova", href: "/#store", primary: true },
+  },
+  {
+    id: "school_year",
+    name: "Premium Annuale",
+    price: "€34,99",
+    period: "all'anno",
+    color: "var(--orange)",
+    description: "Copre l'anno scolastico + estate. Risparmi ~42%.",
+    features: [
+      "Tutto Premium",
+      "9 mesi scolastici + 3 mesi estivi",
+      "Rinnovo automatico annuale",
+      "~€2,92 al mese equivalenti",
+      "Prova gratuita 7 giorni",
+    ],
+    cta: { label: "Attiva annuale", href: "/#store", primary: false },
+  },
+  {
+    id: "family",
+    name: "Family",
+    price: "€8,99",
+    period: "al mese",
+    color: "var(--blue)",
+    description: "Premium per te + fino a 2 fratelli/sorelle. Ogni utente ha il suo account e i suoi voti.",
+    features: [
+      "Tutto Premium per 3 persone",
+      "Ogni utente ha cronologia indipendente",
+      "Un solo pagamento, gestito da un genitore",
+      "Risparmi ~41%",
+      "Prova gratuita 7 giorni",
+    ],
+    cta: { label: "Attiva Family", href: "/#store", primary: false },
+  },
+  {
+    id: "maturita",
+    name: "Pacchetto Maturità",
+    price: "€7,49",
+    period: "una tantum",
+    color: "var(--green)",
+    description: "Sblocca il Radar Maturità fino al tuo esame. Non richiede abbonamento.",
+    features: [
+      "Radar Maturità completo",
+      "Trend + argomenti probabili",
+      "Collegamenti interdisciplinari",
+      "Valido fino al giorno dell'esame",
+      "Compatibile con qualsiasi piano",
+    ],
+    cta: { label: "Sblocca Maturità", href: "/#store", primary: false },
+  },
+];
+
+const faqs = [
+  {
+    q: "Posso provare Premium gratis?",
+    a: "Sì. Ogni piano Premium (mensile, annuale, family) include 7 giorni di prova gratuita. Se disdici entro la settimana non ti addebitiamo nulla.",
+  },
+  {
+    q: "Come funziona il piano Family?",
+    a: "Un genitore paga un solo abbonamento e attiva l'accesso Premium per sé e fino a 2 studenti (es. fratelli/sorelle o cugini). Ogni utente ha un proprio account, voti separati e cronologia indipendente.",
+  },
+  {
+    q: "Posso cambiare piano dopo?",
+    a: "Sì. Puoi passare tra mensile, annuale e family in qualsiasi momento. Le differenze vengono calcolate automaticamente con proration (paghi solo la differenza).",
+  },
+  {
+    q: "Il Pacchetto Maturità è diverso dagli abbonamenti?",
+    a: "Sì. È un acquisto una tantum, non un abbonamento. Sblocca il Radar Maturità fino al giorno del tuo esame. Puoi averlo anche se sei sul piano gratuito o su un altro Premium.",
+  },
+  {
+    q: "Come funziona la cancellazione?",
+    a: "Puoi cancellare in qualsiasi momento dalle impostazioni dell'App Store, Google Play o dalla dashboard Stripe (per Voto+ Desktop). Continui a usare Premium fino alla fine del periodo pagato.",
+  },
+  {
+    q: "I miei dati sono al sicuro?",
+    a: "Sì. Voto+ non condivide i tuoi voti, riassunti o contenuti con terze parti a scopo di addestramento. I dati sono cifrati in transito (HTTPS) e conservati su server europei con provider certificati GDPR.",
+  },
+  {
+    q: "Posso usare Voto+ su più dispositivi?",
+    a: "Sì. Con lo stesso account puoi usare Voto+ su iPhone, iPad, Android, Windows e Mac. Tutto sincronizzato via cloud.",
+  },
+];
+---
+
+<BaseLayout
+  title="Prezzi · Voto+"
+  description="Scopri i piani di Voto+: gratuito per sempre, Premium mensile a €4,99, annuale a €34,99, Family a €8,99. Prova gratuita 7 giorni su tutti i piani Premium."
+>
+  <section class="prezzi-hero">
+    <div class="container" style="text-align:center; max-width:720px;">
+      <span class="eyebrow">Prezzi</span>
+      <h1 class="hero-title">Un piano per <span class="gradient-text">ogni studente</span></h1>
+      <p class="hero-lead">
+        Inizia gratis. Passa a Premium quando vuoi.
+        <strong>7 giorni di prova gratis</strong> su tutti i piani Premium.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="plans-grid">
+        {plans.map((p) => (
+          <article class={`card plan ${p.highlight ? "plan-highlight" : ""}`} style={`--tint: ${p.color}`}>
+            {p.highlight && <div class="plan-flag">Più scelto</div>}
+            <h3 class="plan-name">{p.name}</h3>
+            <div class="plan-price">
+              <span class="plan-price-value">{p.price}</span>
+              <span class="plan-price-period">{p.period}</span>
+            </div>
+            <p class="plan-description">{p.description}</p>
+            <ul class="plan-features">
+              {p.features.map((f) => (
+                <li>
+                  <span class="tick" aria-hidden="true">✓</span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+            <a
+              class={`btn ${p.cta.primary ? "btn-primary" : "btn-ghost"} plan-cta`}
+              href={p.cta.href}
+            >
+              {p.cta.label}
+            </a>
+          </article>
+        ))}
+      </div>
+
+      <div id="store" class="store-note">
+        <p>
+          Gli acquisti avvengono tramite <strong>App Store</strong>, <strong>Google Play</strong> (mobile) o <strong>Stripe</strong> (desktop).
+        </p>
+        <div class="store-links">
+          <a class="store-badge" href="https://apps.apple.com/it/app/voto/id6753294049" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true">
+              <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+            </svg>
+            <span><small>Scarica su</small>App Store</span>
+          </a>
+          <a class="store-badge" href="https://play.google.com/store/apps/details?id=app.voto_plus" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 512 512" aria-hidden="true">
+              <path fill="#EA4335" d="m325.3 234.3l-121.5-70.4l70.6 70.7l50.9-.3z"/>
+              <path fill="#FBBC04" d="m52.6 0C43.7 4.6 38.7 12.1 38.7 22.4v467.2c0 10.3 5 17.7 13.8 22.4l271.9-271.6L52.6 0z"/>
+              <path fill="#4285F4" d="m460.8 235.1l-77.5-45l-53.7 52.9l53.7 52.9l79-45.9c14.3-9.2 14.3-14.2 0-23.4z"/>
+              <path fill="#34A853" d="m52.6 512l271.9-271.6l50.9 50.6L127.4 429L52.6 512z"/>
+            </svg>
+            <span><small>Scarica su</small>Google Play</span>
+          </a>
+          <a class="store-badge" href="https://github.com/Showdah22/VotoPlus-Website/releases/latest" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h6l-1 3H7v2h10v-2h-2l-1-3h6a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H4zm0 2h16v10H4V5z"/></svg>
+            <span><small>Windows + macOS</small>Voto+ Desktop</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-dark">
+    <div class="container" style="max-width: 780px;">
+      <div class="section-head" style="text-align: center;">
+        <span class="eyebrow">Domande frequenti</span>
+        <h2 class="section-title">Le tue domande, le nostre risposte</h2>
+      </div>
+      <div class="faq-list">
+        {faqs.map((f) => (
+          <details class="faq-item">
+            <summary>
+              <span>{f.q}</span>
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div class="faq-answer">{f.a}</div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Schema.org FAQPage per Rich Results Google -->
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    })}
+  />
+
+  <style>
+    .prezzi-hero {
+      padding: 100px 24px 40px;
+      text-align: center;
+      background:
+        radial-gradient(ellipse at 50% 20%, rgba(168, 85, 247, 0.18), transparent 55%),
+        radial-gradient(ellipse at 50% 80%, rgba(6, 182, 212, 0.1), transparent 60%);
+    }
+    .hero-title {
+      font-size: clamp(34px, 5vw, 56px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+    }
+    .hero-lead {
+      color: var(--text-sub);
+      font-size: 18px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 60px;
+    }
+    .plan {
+      position: relative;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+    }
+    .plan-highlight {
+      border-color: color-mix(in srgb, var(--tint), transparent 55%);
+      background: linear-gradient(155deg,
+        color-mix(in srgb, var(--tint), transparent 88%) 0%,
+        color-mix(in srgb, var(--pink), transparent 92%) 100%);
+      transform: scale(1.02);
+    }
+    .plan-flag {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .plan-name {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--tint);
+      letter-spacing: 0.4px;
+      margin-bottom: 6px;
+    }
+    .plan-price {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .plan-price-value {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+    .plan-price-period {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .plan-description {
+      color: var(--text-sub);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      min-height: 42px;
+    }
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.45;
+      margin-bottom: 24px;
+      flex: 1;
+    }
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .tick {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--tint), transparent 80%);
+      color: var(--tint);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 10px;
+      margin-top: 2px;
+    }
+    .plan-cta {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .store-note {
+      text-align: center;
+      color: var(--text-sub);
+      padding: 32px 0;
+    }
+    .store-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .store-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      font-weight: 700;
+      text-align: left;
+      color: var(--text-primary);
+    }
+    .store-badge:hover { background: rgba(255, 255, 255, 0.1); }
+    .store-badge span {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+    .store-badge small {
+      font-size: 10px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .section-dark {
+      background:
+        radial-gradient(ellipse at top left, rgba(168, 85, 247, 0.06), transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(6, 182, 212, 0.06), transparent 50%);
+    }
+    .section-head { margin-bottom: 40px; }
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .faq-item {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color 0.15s ease;
+    }
+    .faq-item[open] { border-color: rgba(168, 85, 247, 0.4); }
+    .faq-item summary {
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 20px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 15.5px;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-chevron {
+      transition: transform 0.2s ease;
+      color: var(--text-sub);
+    }
+    .faq-item[open] .faq-chevron { transform: rotate(180deg); color: var(--purple); }
+    .faq-answer {
+      padding: 0 20px 20px;
+      color: var(--text-sub);
+      font-size: 14.5px;
+      line-height: 1.7;
+    }
+  </style>
+</BaseLayout>

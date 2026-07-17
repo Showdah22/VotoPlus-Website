@@ -1,0 +1,89 @@
+---
+// Voto+ website · Base layout condiviso da TUTTE le pagine pubbliche.
+//
+// Responsabilità:
+//   - <head> SEO (title, description, canonical, OG, Twitter Card)
+//   - Schema.org Organization JSON-LD (una volta sola)
+//   - Nav + Footer
+//   - Import stili globali
+//
+// I singoli page usano `<slot />` per iniettare il proprio contenuto.
+
+import "@/styles/global.css";
+import Nav from "@/components/Nav.astro";
+import Footer from "@/components/Footer.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage = "https://votoplus.it/voto-icon-512.png",
+  noindex = false,
+} = Astro.props;
+
+const pathname = Astro.url.pathname;
+const canonicalUrl = canonical ?? new URL(pathname, Astro.site).toString();
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="Voto+" />
+    <meta property="og:locale" content="it_IT" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#0a0a0f" />
+
+    <!-- Schema.org Organization (globale) -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Voto+",
+      alternateName: "Voto Plus",
+      url: "https://votoplus.it",
+      logo: "https://votoplus.it/voto-icon-512.png",
+      description: "L'app AI per studenti italiani delle scuole superiori. Riassunti, esercizi, interrogazioni vocali simulate.",
+      email: "support@votoplus.it",
+      areaServed: "IT",
+      inLanguage: "it-IT",
+    })} />
+  </head>
+  <body>
+    <Nav currentPath={pathname} />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

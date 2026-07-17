@@ -1,0 +1,52 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Blog · Voto+"
+  description="Guide, metodo di studio, novità di Voto+. La sezione blog è in preparazione e sarà attiva a breve."
+>
+  <section class="blog-placeholder">
+    <div class="container" style="text-align: center; max-width: 640px;">
+      <span class="eyebrow">Blog</span>
+      <h1 class="hero-title"><span class="gradient-text">In preparazione</span></h1>
+      <p class="hero-lead">
+        Stiamo preparando la sezione blog di Voto+ con guide, metodi di studio e novità.<br />
+        Tornaci a breve!
+      </p>
+      <div class="cta-buttons">
+        <a class="btn btn-primary" href="/">Torna alla Home</a>
+        <a class="btn btn-ghost" href="/overview">Scopri Voto+</a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .blog-placeholder {
+      padding: 140px 24px 100px;
+      text-align: center;
+      background:
+        radial-gradient(ellipse at 50% 20%, rgba(168, 85, 247, 0.15), transparent 55%),
+        radial-gradient(ellipse at 50% 80%, rgba(6, 182, 212, 0.08), transparent 60%);
+    }
+    .hero-title {
+      font-size: clamp(38px, 6vw, 64px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+    }
+    .hero-lead {
+      color: var(--text-sub);
+      font-size: 18px;
+      line-height: 1.6;
+      margin: 0 auto 32px;
+    }
+    .cta-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  </style>
+</BaseLayout>

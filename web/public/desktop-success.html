@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Voto+ · Grazie! Il tuo Premium è attivo</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: #0a0a0f;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 560px;
+      width: 100%;
+      background: linear-gradient(135deg, rgba(168,85,247,0.14) 0%, rgba(59,130,246,0.08) 100%);
+      border: 1px solid rgba(168,85,247,0.35);
+      border-radius: 24px;
+      padding: 40px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .container::before {
+      content: "";
+      position: absolute; inset: -100px;
+      background: radial-gradient(circle at 50% 0%, rgba(168,85,247,0.28), transparent 60%);
+      pointer-events: none;
+    }
+    .container > * { position: relative; }
+    .check-badge {
+      width: 84px; height: 84px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 8px 40px -8px rgba(34,197,94,0.6);
+      display: grid; place-items: center;
+      margin: 0 auto 24px;
+      animation: pop 400ms ease-out;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.2); opacity: 0; }
+      70% { transform: scale(1.08); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .check-badge svg { width: 40px; height: 40px; }
+    h1 {
+      font-size: 30px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #a855f7, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    p.lead {
+      font-size: 16px;
+      color: #d4d4d8;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+    .info-box {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 18px 20px;
+      text-align: left;
+      margin-bottom: 26px;
+    }
+    .info-box h3 {
+      font-size: 13px;
+      font-weight: 800;
+      color: #a855f7;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+    }
+    .info-box ol {
+      list-style: none;
+      counter-reset: step;
+    }
+    .info-box ol li {
+      counter-increment: step;
+      padding: 6px 0 6px 34px;
+      position: relative;
+      font-size: 14px;
+      color: #e4e4e7;
+      line-height: 1.5;
+    }
+    .info-box ol li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0; top: 5px;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: rgba(168,85,247,0.22);
+      border: 1px solid rgba(168,85,247,0.55);
+      color: #a855f7;
+      display: grid; place-items: center;
+      font-weight: 800;
+      font-size: 12px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform 200ms, box-shadow 200ms;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #a855f7, #3b82f6);
+      color: #fff;
+      box-shadow: 0 6px 24px -8px rgba(168,85,247,0.6);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px -8px rgba(168,85,247,0.8); }
+    .btn-secondary {
+      background: transparent;
+      color: #d4d4d8;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.06); }
+    .footer-note {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #71717a;
+      line-height: 1.5;
+    }
+    .footer-note strong { color: #a1a1aa; }
+    @media (max-width: 480px) {
+      .container { padding: 32px 22px; }
+      h1 { font-size: 24px; }
+      p.lead { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="check-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <h1>Grazie! Il tuo Premium è attivo 🎉</h1>
+    <p class="lead">
+      Il pagamento è andato a buon fine. Il tuo abbonamento Voto+ è già stato attivato
+      sul tuo account e disponibile su tutti i dispositivi.
+    </p>
+
+    <div class="info-box">
+      <h3>Prossimi passi</h3>
+      <ol>
+        <li><strong>Torna all'app Voto+ Desktop</strong> — chiudi questa scheda o passa alla finestra dell'app.</li>
+        <li><strong>Ricarica la pagina Impostazioni → Piani</strong>: entro 10 secondi vedrai il badge Premium.</li>
+        <li><strong>Anche mobile</strong> (iPhone/Android): apri l'app Voto+ per vedere il Premium sincronizzato al login.</li>
+      </ol>
+    </div>
+
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/" >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12l2-2 7-7 7 7 2 2"></path>
+          <path d="M5 10v10a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1V10"></path>
+        </svg>
+        Vai al sito Voto+
+      </a>
+      <a class="btn btn-secondary" href="https://votoplus.it/support.html">
+        Contatta il supporto
+      </a>
+    </div>
+
+    <p class="footer-note">
+      <strong>Ricevuta e fattura</strong>: Stripe ti ha inviato la ricevuta via email.
+      Puoi scaricare le fatture in qualsiasi momento dall'app Voto+ Desktop →
+      Impostazioni → Piani → <em>Gestisci abbonamento</em>.
+      <br /><br />
+      Se hai bisogno di aiuto o vuoi disattivare l'abbonamento, scrivi a
+      <a href="mailto:support@voto-plus.app" style="color:#a855f7">support@voto-plus.app</a>.
+    </p>
+  </main>
+
+  <script>
+    // Se questa pagina è aperta in un tab del browser dopo Stripe Checkout,
+    // proviamo a chiudere il tab automaticamente dopo 8 secondi (funziona solo
+    // se il tab è stato aperto da window.open dallo stesso origin — nel caso
+    // desktop Electron l'openExternal apre un tab "orfano" che il browser
+    // non ci lascia chiudere per policy di sicurezza).
+    setTimeout(() => {
+      try { window.close(); } catch (e) { /* ignorato */ }
+    }, 8000);
+  </script>
+</body>
+</html>

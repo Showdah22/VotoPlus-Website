@@ -1,0 +1,174 @@
+---
+// Voto+ website · Navbar condivisa (sticky, con logo + link + CTA store)
+interface Props {
+  currentPath?: string;
+}
+const { currentPath = "" } = Astro.props;
+
+const navLinks = [
+  { href: "/overview", label: "Overview" },
+  { href: "/prezzi", label: "Prezzi" },
+  { href: "/blog", label: "Blog" },
+];
+
+function isActive(href: string): boolean {
+  if (href === "/" && (currentPath === "/" || currentPath === "")) return true;
+  if (href !== "/" && currentPath.startsWith(href)) return true;
+  return false;
+}
+---
+
+<header class="navbar">
+  <div class="nav-inner container">
+    <a href="/" class="brand" aria-label="Voto+ Home">
+      <img src="/favicon.png" alt="" width="32" height="32" />
+      <span class="brand-text">Voto+</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Menu principale">
+      {navLinks.map((l) => (
+        <a href={l.href} class={`nav-link ${isActive(l.href) ? "active" : ""}`}>
+          {l.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="nav-cta">
+      <a class="btn btn-primary" href="/prezzi">Inizia gratis</a>
+    </div>
+
+    <button class="mobile-toggle" id="nav-toggle" aria-label="Apri menu" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    {navLinks.map((l) => (
+      <a href={l.href} class={`mobile-link ${isActive(l.href) ? "active" : ""}`}>{l.label}</a>
+    ))}
+    <a class="btn btn-primary mobile-cta" href="/prezzi">Inizia gratis</a>
+  </div>
+</header>
+
+<style>
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    gap: 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 900;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+  }
+  .brand-text {
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    margin-right: 20px;
+  }
+  .nav-link {
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: var(--text-sub);
+    font-weight: 700;
+    font-size: 14px;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  .nav-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-glass);
+  }
+  .nav-link.active {
+    color: var(--text-primary);
+    background: var(--bg-glass);
+  }
+  .mobile-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 8px;
+  }
+  .mobile-menu {
+    display: none;
+    flex-direction: column;
+    padding: 12px 24px 24px;
+    gap: 4px;
+    border-top: 1px solid var(--border);
+  }
+  .mobile-menu[hidden] {
+    display: none;
+  }
+  .mobile-menu:not([hidden]) {
+    display: flex;
+  }
+  .mobile-link {
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: var(--text-sub);
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .mobile-link:hover,
+  .mobile-link.active {
+    color: var(--text-primary);
+    background: var(--bg-glass);
+  }
+  .mobile-cta {
+    margin-top: 8px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  @media (max-width: 720px) {
+    .nav-links,
+    .nav-cta {
+      display: none;
+    }
+    .mobile-toggle {
+      display: flex;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.getElementById("nav-toggle");
+  const menu = document.getElementById("mobile-menu");
+  toggle?.addEventListener("click", () => {
+    const isHidden = menu?.hasAttribute("hidden");
+    if (isHidden) {
+      menu?.removeAttribute("hidden");
+      toggle.setAttribute("aria-expanded", "true");
+    } else {
+      menu?.setAttribute("hidden", "");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+</script>
