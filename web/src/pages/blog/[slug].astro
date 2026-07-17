@@ -56,7 +56,7 @@ const ogImage = article.featured_image_url || undefined;
     </header>
 
     {article.featured_image_url && (
-      <div class="article-cover container narrow">
+      <div class="article-cover container wide">
         <img src={article.featured_image_url} alt={article.featured_image_alt || article.title} />
       </div>
     )}
@@ -150,7 +150,7 @@ const ogImage = article.featured_image_url || undefined;
       background:
         radial-gradient(ellipse at 50% 0%, rgba(168, 85, 247, 0.15), transparent 60%);
     }
-    .narrow { max-width: 760px; }
+    .narrow { max-width: 780px; }
     .article-page .back-link {
       display: inline-flex;
       align-items: center;
@@ -198,10 +198,11 @@ const ogImage = article.featured_image_url || undefined;
     .dot { opacity: 0.5; }
 
     .article-page .article-cover {
-      margin-top: 24px;
-      margin-bottom: 40px;
-      border-radius: var(--radius-lg);
+      max-width: 960px;
+      margin: 32px auto 48px;
+      border-radius: 20px;
       overflow: hidden;
+      box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
     }
     .article-page .article-cover img {
       width: 100%;
@@ -213,7 +214,9 @@ const ogImage = article.featured_image_url || undefined;
       padding: 20px 24px 100px;
       background: #12121a;
     }
-    .article-page .narrow { max-width: 680px; }
+    .article-page .narrow { max-width: 780px; }
+    /* Container "wide" per elementi che devono respirare di più (hero image, video) */
+    .article-page .wide { max-width: 960px; }
 
     /* Prose: rendering editoriale — colori tenui per ridurre affaticamento oculare */
     .article-page .prose {
