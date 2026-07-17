@@ -1,6 +1,6 @@
 // Voto+ website · Public testimonials submission form (React island).
 //
-// Girato come `client:only="react"` sulla pagina /testimonianze. Espone un
+// Girato come `client:only="react"` sulla pagina /recensioni. Espone un
 // form di invio recensione con:
 //   - Nome (2-60 char)
 //   - Tipo scuola (radio select)

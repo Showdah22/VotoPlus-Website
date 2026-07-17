@@ -7,12 +7,12 @@ const { currentPath = "" } = Astro.props;
 
 const navLinks = [
   { href: "/overview", label: "Overview" },
+  { href: "/download", label: "Download" },
   { href: "/prezzi", label: "Prezzi" },
   { href: "/blog", label: "Blog" },
   { href: "/roadmap", label: "Roadmap" },
-  { href: "/testimonianze", label: "Recensioni" },
+  { href: "/recensioni", label: "Recensioni" },
   { href: "/faq", label: "FAQ" },
-  { href: "/download", label: "Download" },
 ];
 
 function isActive(href: string): boolean {

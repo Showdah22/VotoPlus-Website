@@ -1,4 +1,4 @@
-// Voto+ website · Wrapper client-only per la pagina /testimonianze.
+// Voto+ website · Wrapper client-only per la pagina /recensioni.
 //
 // Combina TestimonialsList (lista recensioni approvate) + TestimonialForm
 // (submission form). Il form triggera un refresh della lista dopo un invio

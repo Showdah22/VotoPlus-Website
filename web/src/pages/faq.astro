@@ -8,6 +8,7 @@
 // I singoli <details> sono nativi HTML: accessibili, zero JS, funzionano
 // anche senza JavaScript.
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import ContactRequestCTA from "@/components/ContactRequestCTA";
 
 interface FaqItem {
   q: string;
@@ -232,9 +233,7 @@ const faqJsonLd = {
         Scrivici direttamente: rispondiamo entro un giorno lavorativo e le richieste più frequenti finiscono qui.
       </p>
       <div class="faq-cta-row">
-        <a class="btn btn-primary" href="mailto:support@votoplus.it?subject=Domanda%20su%20Voto%2B">
-          ✉️ Contatta il supporto
-        </a>
+        <ContactRequestCTA type="support" pageSource="/faq" client:load />
         <a class="btn btn-ghost" href="/overview">Vedi le funzioni</a>
       </div>
     </div>

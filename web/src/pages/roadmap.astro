@@ -8,6 +8,7 @@
 // Contenuto statico (aggiornato manualmente ad ogni major release). In
 // futuro può diventare data-driven da Mongo se serve.
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import ContactRequestCTA from "@/components/ContactRequestCTA";
 
 type Status = "done" | "in_progress" | "planned";
 
@@ -190,10 +191,8 @@ const groups = [
         trovato qualcosa da migliorare, scrivici — sceglieremo cosa costruire dopo insieme a te.
       </p>
       <div class="rm-cta-row">
-        <a class="btn btn-primary" href="mailto:support@votoplus.it?subject=Idea%20per%20Voto%2B">
-          ✉️ Proponi un'idea
-        </a>
-        <a class="btn btn-ghost" href="/testimonianze">Leggi le recensioni</a>
+        <ContactRequestCTA type="idea" pageSource="/roadmap" client:load />
+        <a class="btn btn-ghost" href="/recensioni">Leggi le recensioni</a>
       </div>
     </div>
   </section>
