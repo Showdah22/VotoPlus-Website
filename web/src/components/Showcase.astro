@@ -1,0 +1,275 @@
+---
+// Voto+ website · Showcase carousel di screenshot Voto+ Desktop.
+//
+// Riprodotto in stile "software product landing" del vecchio sito HTML:
+//   - Window mockup macOS-style (traffic lights)
+//   - Slides con cross-fade + auto-play 5s (pausa on hover / tab hidden / touch)
+//   - Thumbnails scrollabili sotto
+//   - Freccia prev/next + touch swipe + keyboard arrows
+//
+// La logica di autoplay/nav vive in `/public/showcase.js` (vanilla JS, servito
+// come asset statico). Questo componente contiene solo markup + stili.
+//
+// Le immagini sono in `/public/assets/screens/*.png` e vengono elencate
+// nell'array `SLIDES` dentro `showcase.js`. Per aggiungere/togliere schermate
+// basta modificare quell'array.
+---
+
+<section class="showcase" id="showcase">
+  <div class="showcase-header">
+    <div class="showcase-badge">💻 SU WINDOWS & MACOS</div>
+    <h2 class="showcase-title">Uno studio più intelligente, a portata di click</h2>
+    <p class="showcase-lead">
+      Voto+ Desktop porta tutta la potenza dell'app sul tuo computer, con un'interfaccia
+      pensata per sessioni di studio lunghe. Ecco come si presenta.
+    </p>
+  </div>
+
+  <div class="window-mockup">
+    <div class="window-titlebar" aria-hidden="true">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span class="title">Voto+</span>
+    </div>
+    <div class="slides-container" id="slides">
+      <!-- Slides popolate via /showcase.js -->
+      <button class="slide-arrow prev" id="prev-slide" aria-label="Slide precedente">‹</button>
+      <button class="slide-arrow next" id="next-slide" aria-label="Slide successiva">›</button>
+      <div class="slide-label" id="slide-label"></div>
+    </div>
+  </div>
+
+  <div class="thumbs" id="thumbs" aria-label="Miniature schermate">
+    <!-- Thumbnails via /showcase.js -->
+  </div>
+</section>
+
+<!-- Vanilla JS driver del carousel (defer per non bloccare il rendering). -->
+<script is:inline defer src="/showcase.js"></script>
+
+<style>
+  .showcase {
+    max-width: 1200px;
+    margin: 40px auto 60px;
+    padding: 60px 24px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .showcase::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(ellipse at 30% 40%, rgba(168, 85, 247, 0.14), transparent 55%),
+      radial-gradient(ellipse at 70% 60%, rgba(6, 182, 212, 0.10), transparent 55%);
+    filter: blur(40px);
+    animation: showcase-glow 12s ease-in-out infinite;
+  }
+  @keyframes showcase-glow {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+  }
+
+  .showcase-header { margin-bottom: 36px; }
+  .showcase-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(168, 85, 247, 0.14);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    color: var(--purple);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .showcase-title {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    margin: 0 0 12px;
+    background: linear-gradient(135deg, #06b6d4, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .showcase-lead {
+    color: var(--text-sub);
+    font-size: 16px;
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Window mockup (macOS-style traffic lights) */
+  .window-mockup {
+    position: relative;
+    max-width: 1080px;
+    margin: 0 auto;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow:
+      0 30px 90px -20px rgba(0, 0, 0, 0.7),
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 0 100px -20px rgba(168, 85, 247, 0.35);
+    background: #0a0a0f;
+    transform: perspective(1600px) rotateX(2deg);
+    transition: transform 400ms ease;
+  }
+  .window-mockup:hover {
+    transform: perspective(1600px) rotateX(0deg) translateY(-4px);
+  }
+  .window-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, #1a1a24, #12121a);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .window-titlebar .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .window-titlebar .dot.red { background: #ff5f56; }
+  .window-titlebar .dot.yellow { background: #ffbd2e; }
+  .window-titlebar .dot.green { background: #27c93f; }
+  .window-titlebar .title {
+    flex: 1;
+    text-align: center;
+    color: #666;
+    font-size: 12px;
+    font-weight: 500;
+    margin-right: 60px;
+    letter-spacing: 0.3px;
+  }
+
+  .slides-container {
+    position: relative;
+    aspect-ratio: 1936 / 1048;
+    background: linear-gradient(180deg, #0a0a0f, #0f0f18);
+  }
+  :global(.slide) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(0.98) translateY(10px);
+    transition: opacity 600ms ease, transform 600ms ease;
+    pointer-events: none;
+  }
+  :global(.slide.active) {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+  }
+  :global(.slide img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    background: #0a0a0f;
+  }
+
+  /* Controls */
+  .slide-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 22px;
+    font-weight: 300;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 200ms, transform 200ms;
+  }
+  .slide-arrow:hover {
+    background: rgba(168, 85, 247, 0.4);
+    transform: translateY(-50%) scale(1.1);
+  }
+  .slide-arrow.prev { left: 16px; }
+  .slide-arrow.next { right: 16px; }
+
+  .slide-label {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 18px;
+    border-radius: 24px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(12px);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+    max-width: 90%;
+    text-align: center;
+  }
+
+  /* Thumbnails */
+  .thumbs {
+    margin-top: 32px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 8px 4px;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+  .thumbs::-webkit-scrollbar { display: none; }
+  :global(.thumb) {
+    flex: 0 0 auto;
+    width: 96px;
+    height: 62px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 200ms, transform 200ms, border 200ms, box-shadow 200ms;
+    border: 2px solid transparent;
+    background: #0a0a0f;
+  }
+  :global(.thumb:hover) {
+    opacity: 0.85;
+    transform: translateY(-2px);
+  }
+  :global(.thumb.active) {
+    opacity: 1;
+    border-color: #a855f7;
+    box-shadow: 0 4px 20px -4px rgba(168, 85, 247, 0.5);
+  }
+  :global(.thumb img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    background: #0a0a0f;
+  }
+
+  @media (max-width: 720px) {
+    .showcase { padding: 40px 16px 30px; margin: 20px auto 30px; }
+    .window-mockup { transform: none; border-radius: 10px; }
+    .window-mockup:hover { transform: translateY(-2px); }
+    .slide-arrow { width: 36px; height: 36px; font-size: 18px; }
+    :global(.thumb) { width: 72px; height: 46px; }
+  }
+
+  /* Fallback per utenti che disabilitano JS: mostriamo almeno la prima immagine */
+  @media (prefers-reduced-motion: reduce) {
+    :global(.slide) { transition: none; }
+    .window-mockup { transform: none; }
+    .showcase::before { animation: none; }
+  }
+</style>

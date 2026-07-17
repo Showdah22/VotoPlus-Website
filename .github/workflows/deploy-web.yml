@@ -15,6 +15,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      reason:
+        description: "Motivo del rebuild (opzionale, tracing)"
+        required: false
+        default: "manual"
 
 permissions:
   contents: read
@@ -48,6 +53,11 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build Astro
+        env:
+          # URL del backend FastAPI usato al build per fetchare articoli blog.
+          # Impostare `PUBLIC_BLOG_API_BASE` come repository secret (Settings \u2192 Secrets and variables \u2192 Actions).
+          # Es: https://api.votoplus.it/api  \u2014 se assente, il blog verr\u00e0 buildato vuoto (safe fallback).
+          PUBLIC_BLOG_API_BASE: ${{ secrets.PUBLIC_BLOG_API_BASE }}
         run: yarn build
 
       - name: Upload artifact

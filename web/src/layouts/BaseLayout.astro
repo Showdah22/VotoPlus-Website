@@ -65,6 +65,9 @@ const canonicalUrl = canonical ?? new URL(pathname, Astro.site).toString();
     <!-- Theme -->
     <meta name="theme-color" content="#0a0a0f" />
 
+    <!-- Feed RSS blog -->
+    <link rel="alternate" type="application/rss+xml" title="Voto+ Blog RSS" href="https://votoplus.it/blog/rss.xml" />
+
     <!-- Schema.org Organization (globale) -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",

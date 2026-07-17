@@ -1,0 +1,354 @@
+---
+// Voto+ website · Blog article detail (SSG).
+//
+// getStaticPaths() interroga il backend al build per elencare tutti gli slug
+// pubblicati. Ogni articolo genera una pagina statica /blog/{slug}.
+
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { listAllPublishedSlugs, getArticle, formatDate } from "@/lib/blogApi";
+
+export async function getStaticPaths() {
+  const items = await listAllPublishedSlugs();
+  return items.map((a) => ({ params: { slug: a.slug } }));
+}
+
+const { slug } = Astro.params;
+const data = await getArticle(String(slug));
+
+// Se lo slug non risponde (backend down o articolo rimosso), 404 durante build.
+if (!data) {
+  return Astro.redirect("/blog", 302);
+}
+
+const { article, related } = data;
+const canonicalUrl = article.canonical_url || `https://votoplus.it/blog/${article.slug}`;
+const ogImage = article.featured_image_url || undefined;
+---
+
+<BaseLayout
+  title={article.meta_title || `${article.title} · Voto+`}
+  description={article.meta_description || article.excerpt || ""}
+  canonical={canonicalUrl}
+  ogImage={ogImage}
+>
+  <article class="article-page">
+    <header class="article-header">
+      <div class="container narrow">
+        <a href="/blog" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Torna al blog
+        </a>
+        {article.category_name && (
+          <a href={`/blog/categoria/${article.category_slug}`} class="cat-tag">
+            {article.category_name}
+          </a>
+        )}
+        <h1 class="article-title">{article.title}</h1>
+        {article.excerpt && <p class="article-excerpt">{article.excerpt}</p>}
+        <div class="article-meta">
+          {article.author_name && <span>{article.author_name}</span>}
+          {article.author_name && <span class="dot">·</span>}
+          <span>{formatDate(article.published_at)}</span>
+          <span class="dot">·</span>
+          <span>{article.reading_time_minutes} min di lettura</span>
+        </div>
+      </div>
+    </header>
+
+    {article.featured_image_url && (
+      <div class="article-cover container narrow">
+        <img src={article.featured_image_url} alt={article.featured_image_alt || article.title} />
+      </div>
+    )}
+
+    <div class="article-body container narrow">
+      <div class="prose" set:html={article.content_html || ""} />
+
+      {article.tags && article.tags.length > 0 && (
+        <div class="tags-row">
+          {article.tags.map((t, i) => (
+            <span class="tag">#{t}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  </article>
+
+  {related && related.length > 0 && (
+    <section class="related-section">
+      <div class="container">
+        <h2 class="related-title">Continua a leggere</h2>
+        <div class="related-grid">
+          {related.map((r) => (
+            <a href={`/blog/${r.slug}`} class="related-card">
+              {r.category_name && <span class="rel-cat">{r.category_name}</span>}
+              <h3>{r.title}</h3>
+              <div class="rel-meta">
+                <span>{formatDate(r.published_at)}</span>
+                <span class="dot">·</span>
+                <span>{r.reading_time_minutes} min</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Schema.org Article JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.title,
+    description: article.meta_description || article.excerpt || undefined,
+    image: article.featured_image_url || undefined,
+    datePublished: article.published_at,
+    dateModified: article.published_at,
+    author: article.author_name ? { "@type": "Person", name: article.author_name } : { "@type": "Organization", name: "Voto+" },
+    publisher: {
+      "@type": "Organization",
+      name: "Voto+",
+      logo: { "@type": "ImageObject", url: "https://votoplus.it/voto-icon-512.png" },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
+    articleSection: article.category_name || undefined,
+    keywords: (article.tags || []).join(", ") || undefined,
+    inLanguage: "it-IT",
+  })} />
+
+  <!-- Breadcrumb JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://votoplus.it" },
+      { "@type": "ListItem", position: 2, name: "Blog", item: "https://votoplus.it/blog" },
+      article.category_name
+        ? {
+            "@type": "ListItem",
+            position: 3,
+            name: article.category_name,
+            item: `https://votoplus.it/blog/categoria/${article.category_slug}`,
+          }
+        : null,
+      {
+        "@type": "ListItem",
+        position: article.category_name ? 4 : 3,
+        name: article.title,
+        item: canonicalUrl,
+      },
+    ].filter(Boolean),
+  })} />
+
+  <style>
+    .article-header {
+      padding: 60px 24px 40px;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(168, 85, 247, 0.15), transparent 60%);
+    }
+    .narrow { max-width: 760px; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-sub);
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 24px;
+      transition: color 0.15s ease;
+    }
+    .back-link:hover { color: var(--text-primary); }
+    .cat-tag {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(168, 85, 247, 0.14);
+      color: var(--purple);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .article-title {
+      font-size: clamp(30px, 5vw, 48px);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+    .article-excerpt {
+      font-size: 20px;
+      color: var(--text-sub);
+      line-height: 1.55;
+      margin-bottom: 24px;
+    }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .dot { opacity: 0.5; }
+
+    .article-cover {
+      margin-top: 24px;
+      margin-bottom: 40px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .article-cover img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .article-body { padding: 20px 24px 100px; }
+
+    /* Prose: rendering degli articoli — mimicking editorial magazine tipography. */
+    .prose {
+      font-size: 18px;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+    .prose h2 {
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin: 40px 0 16px;
+    }
+    .prose h3 {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 32px 0 12px;
+    }
+    .prose h4 { font-size: 20px; font-weight: 800; margin: 24px 0 10px; }
+    .prose p { margin-bottom: 18px; color: var(--text-primary); }
+    .prose a {
+      color: var(--purple);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .prose strong { color: var(--text-primary); font-weight: 800; }
+    .prose ul, .prose ol {
+      margin-bottom: 20px;
+      padding-left: 24px;
+    }
+    .prose li { margin-bottom: 8px; }
+    .prose blockquote {
+      border-left: 3px solid var(--purple);
+      padding-left: 18px;
+      color: var(--text-sub);
+      font-style: italic;
+      margin: 24px 0;
+    }
+    .prose img {
+      border-radius: var(--radius-md);
+      margin: 24px 0;
+    }
+    .prose code {
+      background: var(--bg-glass);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 15px;
+    }
+    .prose pre {
+      background: #0f0f14;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      overflow-x: auto;
+      margin: 24px 0;
+    }
+    .prose pre code {
+      background: transparent;
+      padding: 0;
+    }
+    .prose iframe {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-md);
+      border: none;
+      margin: 24px 0;
+    }
+    .prose table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+    }
+    .prose th, .prose td {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+    .prose th {
+      background: var(--bg-glass);
+      font-weight: 800;
+    }
+
+    .tags-row {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--bg-glass);
+      color: var(--text-sub);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .related-section {
+      padding: 60px 24px 100px;
+      border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.03), transparent 40%);
+    }
+    .related-title {
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .related-card {
+      padding: 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+    .related-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    .rel-cat {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--purple);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .related-card h3 {
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.35;
+      margin-bottom: 12px;
+    }
+    .rel-meta { color: var(--text-muted); font-size: 13px; display: flex; gap: 6px; align-items: center; }
+  </style>
+</BaseLayout>

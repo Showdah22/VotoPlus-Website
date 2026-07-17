@@ -1,12 +1,12 @@
-// Voto+ Desktop \u00b7 React Island per download automatico installer.
+// Voto+ Desktop · React Island per download automatico installer.
 //
 // Strategia:
 //   1. Astro pre-fetcha al build time l'ultima release GitHub (vedi
-//      download.astro) e la passa come prop `initialRelease`. Cos\u00ec la pagina
+//      download.astro) e la passa come prop `initialRelease`. Così la pagina
 //      renderizzata ha SEMPRE link funzionanti anche senza JavaScript.
 //   2. Al mount, React Island:
 //      - rileva OS (Windows/macOS/Linux)
-//      - ri-fetcha l'API GitHub per catturare eventuali release pi\u00f9 recenti
+//      - ri-fetcha l'API GitHub per catturare eventuali release più recenti
 //        (rilasciate dopo l'ultimo build del sito ma prima del rebuild)
 //      - se il fetch fallisce, MANTIENE i dati dal build (no fallback rotto)
 //
@@ -119,7 +119,7 @@ export default function DesktopDownloadButton({ initialRelease }: Props) {
   const winAsset = findAsset(release, "windows");
   const macAsset = findAsset(release, "macos");
 
-  // Se il main asset non c'\u00e8 (Linux o OS sconosciuto), fallback a Windows
+  // Se il main asset non c'è (Linux o OS sconosciuto), fallback a Windows
   // (l'utente probabilmente sta usando browser desktop generico).
   const effective = mainAsset || winAsset || macAsset;
   const effectiveLabel = mainAsset ? osLabel : winAsset ? "Windows" : macAsset ? "macOS" : "desktop";
@@ -131,14 +131,14 @@ export default function DesktopDownloadButton({ initialRelease }: Props) {
         <a className="btn-mega" href={effective.browser_download_url} download>
           <span className="btn-mega-title">Scarica per {effectiveLabel}</span>
           <span className="btn-mega-sub">
-            v{versionClean} \u00b7 {formatBytes(effective.size)}
+            v{versionClean} · {formatBytes(effective.size)}
           </span>
         </a>
       ) : null}
 
       <p className="cta-meta">
         Ultima versione: <strong>v{versionClean}</strong>
-        {release.published_at ? ` \u2022 rilasciata il ${formatDate(release.published_at)}` : ""}
+        {release.published_at ? ` • rilasciata il ${formatDate(release.published_at)}` : ""}
       </p>
 
       <div className="cta-alt">

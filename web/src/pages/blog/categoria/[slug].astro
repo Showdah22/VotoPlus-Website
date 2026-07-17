@@ -1,0 +1,134 @@
+---
+// Voto+ website · Blog category page (SSG).
+//
+// getStaticPaths() lista tutte le categorie con almeno un articolo pubblicato.
+
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { listCategories, listArticles, formatDate } from "@/lib/blogApi";
+
+export async function getStaticPaths() {
+  const cats = await listCategories();
+  return cats.map((c) => ({ params: { slug: c.slug }, props: { name: c.name, count: c.count } }));
+}
+
+const { slug } = Astro.params;
+const { name, count } = Astro.props as { name: string; count: number };
+
+const res = await listArticles({ category: String(slug), page: 1, limit: 50 });
+const articles = res.items;
+---
+
+<BaseLayout
+  title={`${name} · Blog Voto+`}
+  description={`Tutti gli articoli della categoria "${name}" del blog di Voto+. Guide, metodo di studio e novità per gli studenti italiani.`}
+>
+  <section class="cat-hero">
+    <div class="container">
+      <a href="/blog" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Tutto il blog
+      </a>
+      <span class="eyebrow">Categoria</span>
+      <h1 class="hero-title">
+        <span class="gradient-text">{name}</span>
+      </h1>
+      <p class="hero-lead">{count} {count === 1 ? "articolo pubblicato" : "articoli pubblicati"} in questa categoria.</p>
+    </div>
+  </section>
+
+  <section class="list-section">
+    <div class="container">
+      {articles.length === 0 ? (
+        <div class="empty">
+          <p>Nessun articolo in questa categoria al momento.</p>
+          <a class="btn btn-primary" href="/blog">Torna al blog</a>
+        </div>
+      ) : (
+        <div class="blog-grid">
+          {articles.map((a) => (
+            <a href={`/blog/${a.slug}`} class="blog-card">
+              {a.featured_image_url && (
+                <div class="card-image">
+                  <img src={a.featured_image_url} alt={a.featured_image_alt || a.title} loading="lazy" />
+                </div>
+              )}
+              <div class="card-body">
+                <h2 class="card-title">{a.title}</h2>
+                {a.excerpt && <p class="card-excerpt">{a.excerpt}</p>}
+                <div class="card-meta">
+                  <span>{formatDate(a.published_at)}</span>
+                  <span class="dot">·</span>
+                  <span>{a.reading_time_minutes} min</span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <style>
+    .cat-hero {
+      padding: 80px 24px 40px;
+      background: radial-gradient(ellipse at 50% 20%, rgba(168, 85, 247, 0.15), transparent 55%);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-sub);
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .eyebrow {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(168, 85, 247, 0.12);
+      color: var(--purple);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      font-size: clamp(34px, 6vw, 56px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.2px;
+      margin-bottom: 12px;
+    }
+    .hero-lead { color: var(--text-sub); font-size: 17px; }
+    .dot { opacity: 0.5; }
+
+    .list-section { padding: 40px 24px 100px; }
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .blog-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .blog-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-strong);
+    }
+    .card-image { aspect-ratio: 16 / 9; overflow: hidden; background: var(--bg-glass); }
+    .card-image img { width: 100%; height: 100%; object-fit: cover; }
+    .card-body { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .card-title { font-size: 20px; font-weight: 800; line-height: 1.3; letter-spacing: -0.4px; }
+    .card-excerpt { color: var(--text-sub); font-size: 14px; line-height: 1.55; }
+    .card-meta { margin-top: auto; color: var(--text-muted); font-size: 13px; display: flex; gap: 6px; align-items: center; }
+    .empty { text-align: center; padding: 60px 20px; color: var(--text-sub); }
+  </style>
+</BaseLayout>

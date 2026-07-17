@@ -1,52 +1,267 @@
 ---
+// Voto+ website · Blog index (SSG).
+//
+// Fetcha al build tutti gli articoli pubblicati. La build è rigenerata automaticamente
+// dall'admin panel via GitHub Actions workflow_dispatch quando un articolo viene
+// pubblicato / modificato / eliminato / spubblicato.
+
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { listArticles, listCategories, formatDate } from "@/lib/blogApi";
+
+const ARTICLES_PER_PAGE = 12;
+
+// Prendiamo la prima pagina di articoli e le categorie.
+const [firstPage, categories] = await Promise.all([
+  listArticles({ page: 1, limit: ARTICLES_PER_PAGE }),
+  listCategories(),
+]);
+
+const articles = firstPage.items;
+const totalPages = Math.max(1, Math.ceil(firstPage.total / ARTICLES_PER_PAGE));
 ---
 
 <BaseLayout
   title="Blog · Voto+"
-  description="Guide, metodo di studio, novità di Voto+. La sezione blog è in preparazione e sarà attiva a breve."
+  description="Guide di studio, metodo, novità di Voto+ e consigli per la scuola superiore e la Maturità. Aggiornato regolarmente dalla redazione Voto+."
 >
-  <section class="blog-placeholder">
-    <div class="container" style="text-align: center; max-width: 640px;">
+  <section class="blog-hero">
+    <div class="container">
       <span class="eyebrow">Blog</span>
-      <h1 class="hero-title"><span class="gradient-text">In preparazione</span></h1>
+      <h1 class="hero-title">
+        Guide, metodo di studio<br />
+        <span class="gradient-text">e novità di Voto+</span>
+      </h1>
       <p class="hero-lead">
-        Stiamo preparando la sezione blog di Voto+ con guide, metodi di studio e novità.<br />
-        Tornaci a breve!
+        Consigli pratici per organizzarti, migliorare i voti e preparare la Maturità con serenità.
       </p>
-      <div class="cta-buttons">
-        <a class="btn btn-primary" href="/">Torna alla Home</a>
-        <a class="btn btn-ghost" href="/overview">Scopri Voto+</a>
-      </div>
     </div>
   </section>
 
+  {categories.length > 0 && (
+    <section class="categories-bar">
+      <div class="container">
+        <div class="cat-scroller">
+          <a href="/blog" class="cat-chip cat-chip-active">Tutti</a>
+          {categories.map((c) => (
+            <a href={`/blog/categoria/${c.slug}`} class="cat-chip">
+              {c.name}
+              <span class="cat-count">{c.count}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="blog-list-section">
+    <div class="container">
+      {articles.length === 0 ? (
+        <div class="empty">
+          <h2>Nessun articolo ancora pubblicato</h2>
+          <p>La sezione blog di Voto+ è in fase di lancio: torna a trovarci a breve.</p>
+          <a class="btn btn-primary" href="/">Torna alla Home</a>
+        </div>
+      ) : (
+        <>
+          <div class="blog-grid">
+            {articles.map((a) => (
+              <a href={`/blog/${a.slug}`} class="blog-card">
+                {a.featured_image_url && (
+                  <div class="card-image">
+                    <img src={a.featured_image_url} alt={a.featured_image_alt || a.title} loading="lazy" />
+                  </div>
+                )}
+                <div class="card-body">
+                  {a.category_name && <span class="card-cat">{a.category_name}</span>}
+                  <h2 class="card-title">{a.title}</h2>
+                  {a.excerpt && <p class="card-excerpt">{a.excerpt}</p>}
+                  <div class="card-meta">
+                    <span>{formatDate(a.published_at)}</span>
+                    <span class="meta-dot">·</span>
+                    <span>{a.reading_time_minutes} min di lettura</span>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div class="pagination-note">
+              Mostrati {articles.length} di {firstPage.total} articoli · nuovi contenuti in arrivo
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  </section>
+
+  <!-- Schema.org Blog -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Voto+ Blog",
+    "url": "https://votoplus.it/blog",
+    "description": "Guide di studio, metodo e novità di Voto+ per gli studenti italiani",
+    "blogPost": articles.slice(0, 10).map((a) => ({
+      "@type": "BlogPosting",
+      "headline": a.title,
+      "url": `https://votoplus.it/blog/${a.slug}`,
+      "datePublished": a.published_at,
+      "description": a.excerpt || a.meta_description || undefined,
+      "image": a.featured_image_url || undefined,
+      "author": a.author_name ? { "@type": "Person", "name": a.author_name } : undefined,
+    })),
+  })} />
+
   <style>
-    .blog-placeholder {
-      padding: 140px 24px 100px;
+    .blog-hero {
+      padding: 100px 24px 60px;
       text-align: center;
       background:
         radial-gradient(ellipse at 50% 20%, rgba(168, 85, 247, 0.15), transparent 55%),
         radial-gradient(ellipse at 50% 80%, rgba(6, 182, 212, 0.08), transparent 60%);
     }
     .hero-title {
-      font-size: clamp(38px, 6vw, 64px);
+      font-size: clamp(38px, 6vw, 60px);
       font-weight: 900;
       line-height: 1.05;
       letter-spacing: -1.5px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .hero-lead {
       color: var(--text-sub);
       font-size: 18px;
-      line-height: 1.6;
-      margin: 0 auto 32px;
+      max-width: 640px;
+      margin: 0 auto;
     }
-    .cta-buttons {
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(168, 85, 247, 0.12);
+      color: var(--purple);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .categories-bar {
+      padding: 20px 0 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cat-scroller {
       display: flex;
-      gap: 12px;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .cat-scroller::-webkit-scrollbar { display: none; }
+    .cat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .cat-chip:hover { color: var(--text-primary); border-color: var(--border-strong); }
+    .cat-chip-active { color: var(--text-primary); border-color: var(--purple); background: rgba(168, 85, 247, 0.12); }
+    .cat-count {
+      display: inline-flex;
+      align-items: center;
       justify-content: center;
-      flex-wrap: wrap;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .blog-list-section { padding: 60px 24px 100px; }
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .blog-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .blog-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-strong);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    .card-image {
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: var(--bg-glass);
+    }
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-body { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .card-cat {
+      display: inline-block;
+      width: fit-content;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(168, 85, 247, 0.14);
+      color: var(--purple);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.3;
+      color: var(--text-primary);
+      letter-spacing: -0.4px;
+    }
+    .card-excerpt { color: var(--text-sub); font-size: 14px; line-height: 1.55; }
+    .card-meta {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .meta-dot { opacity: 0.5; }
+
+    .empty {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .empty h2 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    .empty p { color: var(--text-sub); margin-bottom: 24px; }
+
+    .pagination-note {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 40px;
     }
   </style>
 </BaseLayout>

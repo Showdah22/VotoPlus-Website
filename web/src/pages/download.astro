@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import DesktopDownloadButton from "@/components/DesktopDownloadButton.tsx";
+import Showcase from "@/components/Showcase.astro";
 
 // Fetch build-time dell'ultima release GitHub. La pagina renderizzata
 // contiene già i link diretti agli installer, così funziona anche senza
@@ -35,6 +36,8 @@ try {
       <DesktopDownloadButton initialRelease={initialRelease} client:load />
     </div>
   </section>
+
+  <Showcase />
 
   <section class="section">
     <div class="container">

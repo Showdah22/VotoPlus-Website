@@ -1,0 +1,28 @@
+---
+// Voto+ website · Admin Blog panel entry (SPA client-only React island).
+//
+// La pagina resta invisibile ai motori di ricerca (`noindex, nofollow`) e
+// filtrata dalla sitemap Astro (vedi astro.config.mjs). L'auth vera avviene
+// nel componente React verso il backend FastAPI.
+
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import AdminPanel from "@/components/AdminPanel";
+---
+
+<BaseLayout
+  title="Voto+ Admin"
+  description="Pannello di amministrazione Voto+"
+  noindex={true}
+>
+  <AdminPanel client:only="react" />
+</BaseLayout>
+
+<style is:global>
+  /* Il pannello admin gestisce il proprio layout; nascondiamo il Nav pubblico
+     e il Footer per massimizzare lo spazio verticale. Sono comunque preservati
+     nell'HTML per accessibilità (screen reader vede l'header/footer). */
+  body > main > astro-island { display: block; }
+  header.navbar { display: none !important; }
+  footer.footer { display: none !important; }
+  main { margin: 0 !important; }
+</style>
