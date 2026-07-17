@@ -77,18 +77,23 @@ export default function AnalyticsDashboard({ onNotify }: { onNotify: (m: string,
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [ov, d, tp, ta] = await Promise.all([
+      const [ov, d, tp, ta] = await Promise.allSettled([
         fetchApi<Overview>(`/admin/analytics/overview?days=${days}`),
         fetchApi<{ days: DailyRow[] }>(`/admin/analytics/daily?days=${days}`),
         fetchApi<{ items: TopRow[] }>(`/admin/analytics/top-pages?days=${days}&limit=10`),
         fetchApi<{ items: TopRow[] }>(`/admin/analytics/top-articles?days=${days}&limit=10`),
       ]);
-      setOverview(ov);
-      setDaily(d.days);
-      setTopPages(tp.items);
-      setTopArticles(ta.items);
-    } catch (err: any) {
-      onNotify(err?.message || "Errore caricamento analytics", "error");
+      if (ov.status === "fulfilled") setOverview(ov.value);
+      if (d.status === "fulfilled") setDaily(d.value.days);
+      if (tp.status === "fulfilled") setTopPages(tp.value.items);
+      if (ta.status === "fulfilled") setTopArticles(ta.value.items);
+      // Se tutte falliscono → backend prod pending redeploy
+      if ([ov, d, tp, ta].every(x => x.status === "rejected")) {
+        onNotify(
+          "⚠️ Endpoint analytics non ancora disponibili in produzione. Fai 'Publish → Deploy' su Emergent.",
+          "error"
+        );
+      }
     } finally {
       setLoading(false);
     }

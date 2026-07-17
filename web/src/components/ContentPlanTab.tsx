@@ -72,14 +72,24 @@ export default function ContentPlanTab({ onNotify }: { onNotify: (m: string, k?:
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [p, s] = await Promise.all([
+      // Fetch parallelo tollerante: se il backend prod non ha ancora gli
+      // endpoint scheduler (es. redeploy pending), mostra empty state invece
+      // di un errore rumoroso.
+      const [pRes, sRes] = await Promise.allSettled([
         api<Plan>(`/admin/blog/content-plan/current?month=${month}`),
         api<SchedulerSettings>("/admin/blog/scheduler/settings"),
       ]);
-      setPlan(p);
-      setSettings(s);
-    } catch (err: any) {
-      onNotify(err?.message || "Errore caricamento", "error");
+      if (pRes.status === "fulfilled") setPlan(pRes.value);
+      else setPlan({ month, theme_of_month: "", status: "not_created", items: [] });
+      if (sRes.status === "fulfilled") setSettings(sRes.value);
+      else setSettings(null);
+      // Se entrambi falliscono probabilmente il backend prod non è ancora aggiornato.
+      if (pRes.status === "rejected" && sRes.status === "rejected") {
+        onNotify(
+          "⚠️ Backend produzione non ancora aggiornato con gli endpoint scheduler. Fai 'Publish → Deploy' su Emergent.",
+          "error"
+        );
+      }
     } finally {
       setLoading(false);
     }
