@@ -157,7 +157,7 @@ function LoginScreen({ onLogin }: { onLogin: (jwt: string, me: Me) => void }) {
     <div style={styles.loginWrap}>
       <form style={styles.loginCard} onSubmit={submit}>
         <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <img src="/favicon.png" width={48} height={48} alt="Voto+" style={{ margin: "0 auto 14px" }} />
+          <img src="/adaptive-icon.png" width={48} height={48} alt="Voto+" style={{ margin: "0 auto 14px" }} />
           <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.5 }}>Voto+ Admin</h1>
           <p style={{ color: "#a1a1aa", fontSize: 14, marginTop: 6 }}>Accesso al pannello di gestione blog</p>
         </div>
@@ -905,7 +905,7 @@ export default function AdminPanel() {
       <header style={styles.appBar}>
         <div style={styles.appBarInner}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <img src="/favicon.png" width={28} height={28} alt="Voto+" />
+            <img src="/adaptive-icon.png" width={28} height={28} alt="Voto+" />
             <div>
               <div style={{ fontWeight: 900, fontSize: 15 }}>Voto+ Admin</div>
               <div style={{ fontSize: 11, color: "#a1a1aa" }}>Pannello blog</div>
